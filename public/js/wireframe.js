@@ -844,6 +844,94 @@
       overlay.style.display = 'block';
 
       return overlay;
+    },
+
+    /**
+     * Panah gradient start->end + 2 handle drag (khusus overlay editor; tak ikut export).
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {{x:number,y:number}} p0 titik awal (koordinat buffer)
+     * @param {{x:number,y:number}} p1 titik akhir (koordinat buffer)
+     * @param {{dprScale?:number,startColor?:string,endColor?:string,active?:string}} options
+     */
+    drawGradientHandles(ctx, p0, p1, options = {}) {
+      if (!ctx || !p0 || !p1) return;
+      let dprScale = options.dprScale || 1;
+      if (!options.dprScale && ctx.canvas && typeof ctx.canvas.getBoundingClientRect === 'function') {
+        try {
+          const rect = ctx.canvas.getBoundingClientRect();
+          if (rect && rect.width > 0) dprScale = ctx.canvas.width / rect.width;
+        } catch (_) {}
+      }
+      const dx = p1.x - p0.x;
+      const dy = p1.y - p0.y;
+      const len = Math.hypot(dx, dy);
+      if (len < 1) return;
+      const ux = dx / len;
+      const uy = dy / len;
+
+      const R = Math.max(9, Math.round(11 * dprScale)); // radius handle (ramah sentuh)
+      const lw = Math.max(1.5, Math.round(2 * dprScale));
+      const startColor = options.startColor || '#ffffff';
+      const endColor = options.endColor || '#ffffff';
+
+      ctx.save();
+      ctx.lineCap = 'round';
+
+      // Garis penghubung putus-putus: putih + bayangan gelap agar terbaca di semua isi
+      ctx.beginPath();
+      if (typeof ctx.setLineDash === 'function') ctx.setLineDash([Math.round(6 * dprScale), Math.round(4 * dprScale)]);
+      ctx.strokeStyle = 'rgba(0,0,0,0.65)';
+      ctx.lineWidth = lw + Math.max(1, Math.round(2 * dprScale));
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.stroke();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = lw;
+      ctx.beginPath();
+      ctx.moveTo(p0.x, p0.y);
+      ctx.lineTo(p1.x, p1.y);
+      ctx.stroke();
+      if (typeof ctx.setLineDash === 'function') ctx.setLineDash([]);
+
+      // Kepala panah di ujung akhir
+      const ah = R * 1.15;
+      const aw = R * 0.72;
+      const tipX = p1.x + ux * (R * 0.4);
+      const tipY = p1.y + uy * (R * 0.4);
+      const bx = tipX - ux * ah;
+      const by = tipY - uy * ah;
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(bx - uy * aw, by + ux * aw);
+      ctx.lineTo(bx + uy * aw, by - ux * aw);
+      ctx.closePath();
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.65)';
+      ctx.lineWidth = Math.max(1, Math.round(1.5 * dprScale));
+      ctx.stroke();
+
+      // Handle: isi warna stop + cincin putih + outline gelap
+      const drawHandle = (p, fill, isActive) => {
+        const r = isActive ? R * 1.2 : R;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r + Math.max(1, Math.round(2 * dprScale)), 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,0,0,0.65)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(2, r - Math.max(2, Math.round(3 * dprScale))), 0, Math.PI * 2);
+        ctx.fillStyle = fill;
+        ctx.fill();
+      };
+      drawHandle(p0, startColor, options.active === 'start');
+      drawHandle(p1, endColor, options.active === 'end');
+
+      ctx.restore();
     }
   };
 

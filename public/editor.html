@@ -2037,6 +2037,7 @@
                               <span class="fill-grad-dir-caption">Arah</span>
                               <span class="fill-grad-dir-val" id="fill-grad-angle-val">90°</span>
                             </div>
+                            <div class="fill-grad-points-readout" id="fill-grad-points-readout" title="Koordinat handle kanvas (drag panah di kanvas untuk mengubah)">S(0%, 50%) → E(100%, 50%)</div>
                             <input type="range" class="fill-grad-angle-slider" id="fill-grad-angle" min="0" max="360" step="1" value="90" aria-label="Sudut arah gradien">
                           </div>
                         </div>
@@ -2046,11 +2047,25 @@
                           <span class="fill-grad-custom-caption">Stop <span id="fill-grad-stop-num">1</span></span>
                           <input type="color" class="fill-grad-custom-color" id="fill-grad-custom-color" value="#000000" aria-label="Warna custom stop aktif">
                           <input type="text" class="fill-grad-custom-hex" id="fill-grad-custom-hex" value="#000000" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Kode hex stop aktif">
+                          <input type="number" class="fill-grad-stop-offset" id="fill-grad-stop-offset" value="0" min="0" max="100" step="0.1" aria-label="Posisi stop persen" title="Posisi stop (%)">
+                          <span class="fill-grad-stop-offset-pct">%</span>
                           <button type="button" class="fill-grad-more-btn" id="fill-grad-more-color" title="Buka pemilih warna lengkap" aria-label="Pemilih warna lengkap">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                               <path d="M12 2s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/>
                             </svg>
                           </button>
+                        </div>
+                        <div class="fill-grad-opacity-row" id="fill-grad-opacity-row">
+                          <span class="fill-grad-custom-caption">Opacity</span>
+                          <input type="range" class="fill-grad-stop-opacity" id="fill-grad-stop-opacity" min="0" max="100" step="1" value="100" aria-label="Opacity stop aktif">
+                          <span class="fill-grad-stop-opacity-val" id="fill-grad-stop-opacity-val">100%</span>
+                        </div>
+                        <div class="fill-grad-presets-row" id="fill-grad-presets-row">
+                          <div class="fill-grad-presets-head">
+                            <span class="fill-grad-custom-caption">Preset</span>
+                            <button type="button" class="fill-grad-preset-save" id="fill-grad-preset-save" title="Simpan gradient saat ini sebagai preset" aria-label="Simpan preset">+ Simpan</button>
+                          </div>
+                          <div class="fill-grad-presets-grid" id="fill-grad-presets-grid"></div>
                         </div>
                       </div>
                     </div>

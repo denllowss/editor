@@ -1437,33 +1437,29 @@
             ];
         const gradType = layer.fillGradType || 'linear';
         const angleDeg = (layer.fillGradAngle !== undefined) ? Number(layer.fillGradAngle) : 90;
+        // Titik start/end ternormalisasi (handle kanvas); fallback sudut untuk layer lama.
+        const gp = (typeof window.gradPointsForRender === 'function')
+          ? window.gradPointsForRender(layer, angleDeg, targetW, targetH)
+          : { sx: 0, sy: 0.5, ex: 1, ey: 0.5 };
 
         let grad = null;
         if (gradType === 'radial') {
-          const cx = targetW / 2;
-          const cy = targetH / 2;
-          const r = Math.max(targetW, targetH) / 2;
+          const cx = gp.sx * targetW;
+          const cy = gp.sy * targetH;
+          const r = Math.max(1, Math.hypot(gp.ex - gp.sx, gp.ey - gp.sy) * Math.max(targetW, targetH));
           grad = fctx.createRadialGradient(cx, cy, 0, cx, cy, r);
         } else if (gradType === 'sweep' && typeof fctx.createConicGradient === 'function') {
-          const cx = targetW / 2;
-          const cy = targetH / 2;
-          const rad = (angleDeg - 90) * (Math.PI / 180);
+          const cx = gp.sx * targetW;
+          const cy = gp.sy * targetH;
+          const rad = Math.atan2(gp.ey - gp.sy, gp.ex - gp.sx);
           grad = fctx.createConicGradient(rad, cx, cy);
         } else {
-          const rad = (angleDeg - 90) * (Math.PI / 180);
-          const cx = targetW / 2;
-          const cy = targetH / 2;
-          const dist = Math.sqrt(targetW * targetW + targetH * targetH) / 2;
-          const x0 = cx - Math.cos(rad) * dist;
-          const y0 = cy - Math.sin(rad) * dist;
-          const x1 = cx + Math.cos(rad) * dist;
-          const y1 = cy + Math.sin(rad) * dist;
-          grad = fctx.createLinearGradient(x0, y0, x1, y1);
+          grad = fctx.createLinearGradient(gp.sx * targetW, gp.sy * targetH, gp.ex * targetW, gp.ey * targetH);
         }
 
         stops.forEach(s => {
           const off = Math.max(0, Math.min(1, Number(s.offset) || 0));
-          grad.addColorStop(off, s.color || '#000000');
+          grad.addColorStop(off, (typeof window.stopToRgba === 'function') ? window.stopToRgba(s) : (s.color || '#000000'));
         });
 
         fctx.fillStyle = grad;
@@ -3544,6 +3540,23 @@
                   showHandles: true,
                   isAnchorMode: isAnchor
                 });
+                // Panah gradient start->end (hanya overlay editor; blok ini sudah !isExport)
+                if (selL.fillType === 'gradient' && typeof window.gradPointsForRender === 'function' &&
+                    window.GradientGeom && typeof window.CanvasWireframe.drawGradientHandles === 'function') {
+                  const gp = window.gradPointsForRender(selL, (selL.fillGradAngle !== undefined) ? selL.fillGradAngle : 90);
+                  const gpos = window.GradientGeom.handlePositions(b, {
+                    start: { x: gp.sx, y: gp.sy }, end: { x: gp.ex, y: gp.ey }
+                  });
+                  if (gpos) {
+                    const gstops = (Array.isArray(selL.fillGradStops) && selL.fillGradStops.length >= 2)
+                      ? [...selL.fillGradStops].sort((p, q) => p.offset - q.offset) : null;
+                    window.CanvasWireframe.drawGradientHandles(ctx, gpos.start, gpos.end, {
+                      startColor: gstops ? gstops[0].color : '#ffffff',
+                      endColor: gstops ? gstops[gstops.length - 1].color : '#ffffff',
+                      active: window.activeGradHandle || null
+                    });
+                  }
+                }
               }
             }
           }
@@ -4009,7 +4022,43 @@
             return;
           }
 
-          // B. Check if clicking inside selected layer bounding box or center anchor (moving)
+        // A0. Gradient handles (start/end): prioritas di bawah scale-handle, di atas move-body
+        if (!isMultiSelect && selectedLayer && selectedLayer.fillType === 'gradient' &&
+            selectedLayer._canvasBounds && window.GradientGeom && typeof window.gradPointsForRender === 'function') {
+          const gb = selectedLayer._canvasBounds;
+          const gp = window.gradPointsForRender(selectedLayer, (selectedLayer.fillGradAngle !== undefined) ? selectedLayer.fillGradAngle : 90);
+          const gpos = window.GradientGeom.handlePositions(gb, {
+            start: { x: gp.sx, y: gp.sy }, end: { x: gp.ex, y: gp.ey }
+          });
+          if (gpos) {
+            const gTol = Math.max(16, Math.round(16 * coords.dprScale));
+            const dS = Math.hypot(coords.x - gpos.start.x, coords.y - gpos.start.y);
+            const dE = Math.hypot(coords.x - gpos.end.x, coords.y - gpos.end.y);
+            const hitG = (dS <= gTol && dS <= dE) ? 'start' : ((dE <= gTol) ? 'end' : null);
+            if (hitG) {
+              if (typeof window.ensureGradPoints === 'function') window.ensureGradPoints(selectedLayer);
+              syncLayerWithEffectiveProps(selectedLayer);
+              window.isTransformInteracting = true;
+              window.activeGradHandle = hitG;
+
+              activeOp = 'gradient';
+              activeHandleType = hitG;
+              targetLayer = selectedLayer;
+              startPointer = { x: coords.x, y: coords.y };
+              startBounds = { ...gb };
+              hasMoved = false;
+              startLayerState = { gradHandle: hitG };
+
+              activeCanvasEl.setPointerCapture(e.pointerId);
+              activeCanvasEl.style.cursor = 'grab';
+              e.preventDefault();
+              e.stopPropagation();
+              return;
+            }
+          }
+        }
+
+        // B. Check if clicking inside selected layer bounding box or center anchor (moving)
           const isAnchorHit = isAnchorMode && (hitH?.type === 'anchor');
           const isBodyHit = selectedLayer.type !== 'camera' &&
                             window.CanvasWireframe.hitTest(b, coords.x, coords.y) &&
@@ -4406,6 +4455,30 @@
           }
           requestTransformUiSync();
           requestCanvasRedraw();
+        } else if (activeOp === 'gradient' && startLayerState) {
+          // Drag handle gradient start/end: buffer -> lokal-normalisasi via invers affine corners
+          const gh = startLayerState.gradHandle;
+          if (targetLayer && (gh === 'start' || gh === 'end') && window.GradientGeom &&
+              startBounds && Array.isArray(startBounds.corners) && startBounds.corners.length >= 4) {
+            hasMoved = true;
+            const m = window.GradientGeom.affineFromCorners(startBounds.corners);
+            const inv = window.GradientGeom.invert(m);
+            if (inv) {
+              const loc = window.GradientGeom.toBuffer(inv, coords.x, coords.y);
+              const pt = (gh === 'start') ? targetLayer.fillGradStart : targetLayer.fillGradEnd;
+              if (pt) {
+                pt.x = Math.round(loc.x * 10000) / 10000;
+                pt.y = Math.round(loc.y * 10000) / 10000;
+              }
+              if (typeof window.gradAngleFromPoints === 'function') {
+                targetLayer.fillGradAngle = window.gradAngleFromPoints(targetLayer);
+              }
+              targetLayer._fillDirty = true;
+              if (typeof invalidatePreviewCacheForLayer === 'function') invalidatePreviewCacheForLayer(targetLayer);
+              if (typeof window.syncGradDirectionUI === 'function') window.syncGradDirectionUI(targetLayer);
+              requestCanvasRedraw();
+            }
+          }
         } else if (activeOp === 'scale' && startLayerState) {
           if (targetLayer && targetLayer.type === 'camera') {
             const initZoom = startLayerState.cameraZoom || 100;
@@ -4602,6 +4675,7 @@
         cachedCanvasRect = null;
         window.activeSnapGuides = null;
         window.isTransformInteracting = false;
+        window.activeGradHandle = null;
         if (finishedLayer && didMove) {
           invalidatePreviewCacheForLayer(finishedLayer);
           if (finishedFollowers) {
@@ -13200,6 +13274,8 @@
       layer.fillGradStops.forEach(s => {
         s.offset = Math.max(0, Math.min(1, Number(s.offset) || 0));
         if (!s.color) s.color = '#000000';
+        if (typeof s.opacity !== 'number' || isNaN(s.opacity)) s.opacity = 1;
+        s.opacity = Math.max(0, Math.min(1, s.opacity));
       });
       layer.fillGradColor1 = layer.fillGradStops[0].color;
       layer.fillGradColor2 = layer.fillGradStops[layer.fillGradStops.length - 1].color;
@@ -13208,9 +13284,112 @@
 
     function getTrackGradientCss(stops) {
       const sorted = [...stops].sort((a, b) => a.offset - b.offset);
-      const stopsStr = sorted.map(s => `${s.color} ${Math.round(s.offset * 100)}%`).join(', ');
+      const stopsStr = sorted.map(s => `${stopToRgba(s)} ${Math.round(s.offset * 100)}%`).join(', ');
       return `linear-gradient(90deg, ${stopsStr})`;
     }
+
+    // ---- Geometri gradient kanvas: titik dinormalisasi 0..1 thd bounds layer ----
+    // Kompatibel mundur: layer lama tanpa fillGradStart/End diturunkan dari fillGradAngle.
+    // Default = geometri lama persis: linear selebar diagonal, radial pusat+½maks, sweep pusat+sudut.
+    function gradDefaultPoints(angleDeg, gradType, aspectW, aspectH) {
+      const rad = ((Number(angleDeg) || 0) - 90) * (Math.PI / 180);
+      const dx = Math.cos(rad), dy = Math.sin(rad);
+      if (gradType === 'radial') {
+        return { start: { x: 0.5, y: 0.5 }, end: { x: 1, y: 0.5 } };
+      }
+      if (gradType === 'sweep') {
+        return { start: { x: 0.5, y: 0.5 }, end: { x: 0.5 + dx * 0.5, y: 0.5 + dy * 0.5 } };
+      }
+      const W = Math.max(1, Number(aspectW) || 1), H = Math.max(1, Number(aspectH) || 1);
+      const ar = H / W;
+      const hx = 0.5 * Math.sqrt(1 + ar * ar);
+      const hy = 0.5 * Math.sqrt(1 + 1 / (ar * ar));
+      return {
+        start: { x: 0.5 - dx * hx, y: 0.5 - dy * hy },
+        end: { x: 0.5 + dx * hx, y: 0.5 + dy * hy }
+      };
+    }
+
+    function layerAspectWH(layer) {
+      const W = Math.abs((layer.shapeProps && layer.shapeProps.sizeX) || layer.mediaWidth || layer.scaleW || 1) || 1;
+      const H = Math.abs((layer.shapeProps && layer.shapeProps.sizeY) || layer.mediaHeight || layer.scaleH || 1) || 1;
+      return { W, H };
+    }
+
+    function ensureGradPoints(layer) {
+      const { W, H } = layerAspectWH(layer);
+      const d = gradDefaultPoints(
+        layer.fillGradAngle !== undefined ? layer.fillGradAngle : 90,
+        layer.fillGradType || 'linear', W, H);
+      if (!layer.fillGradStart || typeof layer.fillGradStart.x !== 'number' || typeof layer.fillGradStart.y !== 'number') {
+        layer.fillGradStart = { x: d.start.x, y: d.start.y };
+      }
+      if (!layer.fillGradEnd || typeof layer.fillGradEnd.x !== 'number' || typeof layer.fillGradEnd.y !== 'number') {
+        layer.fillGradEnd = { x: d.end.x, y: d.end.y };
+      }
+      return { start: layer.fillGradStart, end: layer.fillGradEnd };
+    }
+
+    function gradPointsForRender(layer, angleDeg, targetW, targetH) {
+      if (layer.fillGradStart && layer.fillGradEnd &&
+          typeof layer.fillGradStart.x === 'number' && typeof layer.fillGradEnd.x === 'number') {
+        return { sx: layer.fillGradStart.x, sy: layer.fillGradStart.y, ex: layer.fillGradEnd.x, ey: layer.fillGradEnd.y };
+      }
+      const d = gradDefaultPoints(angleDeg, layer.fillGradType || 'linear', targetW, targetH);
+      return { sx: d.start.x, sy: d.start.y, ex: d.end.x, ey: d.end.y };
+    }
+
+    function gradAngleFromPoints(layer) {
+      const p = gradPointsForRender(layer, layer.fillGradAngle !== undefined ? layer.fillGradAngle : 90);
+      const dx = p.ex - p.sx;
+      const dy = p.ey - p.sy;
+      if (Math.abs(dx) < 1e-6 && Math.abs(dy) < 1e-6) return 90;
+      const deg = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+      return ((Math.round(deg) % 360) + 360) % 360;
+    }
+
+    window.gradPointsForRender = gradPointsForRender;
+    window.ensureGradPoints = ensureGradPoints;
+    window.gradAngleFromPoints = gradAngleFromPoints;
+    window.gradDefaultPoints = gradDefaultPoints;
+    window.syncGradDirectionUI = syncGradDirectionUI;
+
+    function stopToRgba(stop) {
+      const hex = (stop && stop.color) || '#000000';
+      const a = (stop && typeof stop.opacity === 'number') ? Math.max(0, Math.min(1, stop.opacity)) : 1;
+      let c = String(hex).replace('#', '').trim();
+      if (c.length === 3) c = c[0] + c[0] + c[1] + c[1] + c[2] + c[2];
+      const num = parseInt(c.substring(0, 6), 16) || 0;
+      const r = (num >> 16) & 255, g = (num >> 8) & 255, b = num & 255;
+      return `rgba(${r},${g},${b},${Math.round(a * 1000) / 1000})`;
+    }
+    window.stopToRgba = stopToRgba;
+
+    // Affine corners [TL,TR,BR,BL] <-> lokal-normalisasi: ikut move/scale/rot/skew/anchor.
+    const GradientGeom = {
+      affineFromCorners(corners) {
+        const tl = corners[0], tr = corners[1], bl = corners[3];
+        return { a: tr.x - tl.x, b: tr.y - tl.y, c: bl.x - tl.x, d: bl.y - tl.y, e: tl.x, f: tl.y };
+      },
+      toBuffer(m, u, v) { return { x: m.a * u + m.c * v + m.e, y: m.b * u + m.d * v + m.f }; },
+      invert(m) {
+        const det = m.a * m.d - m.b * m.c;
+        if (!det) return null;
+        return {
+          a: m.d / det, b: -m.b / det, c: -m.c / det, d: m.a / det,
+          e: (m.c * m.f - m.d * m.e) / det, f: (m.b * m.e - m.a * m.f) / det
+        };
+      },
+      handlePositions(bounds, points) {
+        if (!bounds || !Array.isArray(bounds.corners) || bounds.corners.length < 4) return null;
+        const m = GradientGeom.affineFromCorners(bounds.corners);
+        return {
+          start: GradientGeom.toBuffer(m, points.start.x, points.start.y),
+          end: GradientGeom.toBuffer(m, points.end.x, points.end.y)
+        };
+      }
+    };
+    window.GradientGeom = GradientGeom;
 
     function renderGradHandles(layer) {
       const container = document.getElementById('fill-grad-handles-container');
@@ -13341,15 +13520,16 @@
             if (isLongPressed) return;
 
             if (!isDragging) {
-              // Clicked 1x without drag: open color picker to change stop color
+              // Clicked 1x without drag: open color picker to change stop color (+opacity)
               openFillColorPicker(handle, stop.color, (hex, alpha, commit) => {
                 stop.color = hex;
+                if (typeof alpha === 'number') stop.opacity = Math.max(0, Math.min(1, alpha));
                 layer._fillDirty = true;
                 if (typeof invalidatePreviewCacheForLayer === 'function') invalidatePreviewCacheForLayer(layer);
                 if (typeof redrawComposition === 'function') redrawComposition('fill-grad-color');
                 if (commit && typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
                 renderGradHandles(layer);
-              });
+              }, (typeof stop.opacity === 'number') ? stop.opacity : 1);
               return;
             }
 
@@ -13390,6 +13570,26 @@
       if (!layer) return;
       const a = ((Math.round(Number(angleDeg)) % 360) + 360) % 360;
       layer.fillGradAngle = a;
+      // Putar vektor start->end; panjang dipertahankan.
+      // Linear: mengelilingi midpoint. Radial/sweep: ujung mengelilingi start (=pusat).
+      if (typeof ensureGradPoints === 'function') {
+        const pts = ensureGradPoints(layer);
+        const rad = (a - 90) * (Math.PI / 180);
+        const r4 = (v) => Math.round(v * 10000) / 10000;
+        if ((layer.fillGradType || 'linear') === 'linear') {
+          const cx = (pts.start.x + pts.end.x) / 2;
+          const cy = (pts.start.y + pts.end.y) / 2;
+          const len = Math.hypot(pts.end.x - pts.start.x, pts.end.y - pts.start.y) || 1;
+          const dx = Math.cos(rad) * len / 2;
+          const dy = Math.sin(rad) * len / 2;
+          pts.start.x = r4(cx - dx); pts.start.y = r4(cy - dy);
+          pts.end.x = r4(cx + dx); pts.end.y = r4(cy + dy);
+        } else {
+          const len = Math.hypot(pts.end.x - pts.start.x, pts.end.y - pts.start.y) || 0.5;
+          pts.end.x = r4(pts.start.x + Math.cos(rad) * len);
+          pts.end.y = r4(pts.start.y + Math.sin(rad) * len);
+        }
+      }
       layer._fillDirty = true;
       if (typeof invalidatePreviewCacheForLayer === 'function') invalidatePreviewCacheForLayer(layer);
       if (typeof redrawComposition === 'function') redrawComposition('fill-grad-angle');
@@ -13415,6 +13615,12 @@
       if (arrow) arrow.style.transform = `rotate(${a - 90}deg)`;
       if (slider && document.activeElement !== slider) slider.value = String(a);
       if (val) val.textContent = `${a}°`;
+      const ptsEl = document.getElementById('fill-grad-points-readout');
+      if (ptsEl && typeof gradPointsForRender === 'function') {
+        const p = gradPointsForRender(layer, a);
+        const f = (v) => `${Math.round(v * 100)}%`;
+        ptsEl.textContent = `S(${f(p.sx)}, ${f(p.sy)}) → E(${f(p.ex)}, ${f(p.ey)})`;
+      }
     }
 
     function applyGradStopColor(layer, hex, commit) {
@@ -13440,6 +13646,9 @@
       const num = document.getElementById('fill-grad-stop-num');
       const colorEl = document.getElementById('fill-grad-custom-color');
       const hexEl = document.getElementById('fill-grad-custom-hex');
+      const opEl = document.getElementById('fill-grad-stop-opacity');
+      const opVal = document.getElementById('fill-grad-stop-opacity-val');
+      const offEl = document.getElementById('fill-grad-stop-offset');
       if (!layer || (!num && !colorEl && !hexEl)) return;
       const stops = ensureLayerGradStops(layer);
       const stop = stops[activeGradStopIndex] || stops[0];
@@ -13447,7 +13656,43 @@
       if (num) num.textContent = String(stops.indexOf(stop) + 1);
       if (colorEl && /^#[0-9a-fA-F]{6}$/.test(hex)) colorEl.value = hex;
       if (hexEl && document.activeElement !== hexEl) hexEl.value = hex;
+      const opPct = Math.round(((stop && typeof stop.opacity === 'number' ? stop.opacity : 1)) * 100);
+      if (opEl && document.activeElement !== opEl) opEl.value = String(opPct);
+      if (opVal) opVal.textContent = `${opPct}%`;
+      const offPct = Math.round(((stop && typeof stop.offset === 'number' ? stop.offset : 0)) * 1000) / 10;
+      if (offEl && document.activeElement !== offEl) offEl.value = String(offPct);
     }
+
+    function applyGradStopOpacity(layer, pct, commit) {
+      const stop = getActiveGradStop(layer);
+      if (!stop) return;
+      stop.opacity = Math.max(0, Math.min(1, Number(pct) / 100));
+      layer._fillDirty = true;
+      if (typeof invalidatePreviewCacheForLayer === 'function') invalidatePreviewCacheForLayer(layer);
+      if (typeof redrawComposition === 'function') redrawComposition('fill-grad-opacity');
+      const trackBar = document.getElementById('fill-grad-track-bar');
+      if (trackBar) trackBar.style.background = getTrackGradientCss(layer.fillGradStops);
+      const opVal = document.getElementById('fill-grad-stop-opacity-val');
+      if (opVal) opVal.textContent = `${Math.round(stop.opacity * 100)}%`;
+      const handles = document.querySelectorAll('#fill-grad-handles-container .fill-grad-handle');
+      if (handles[activeGradStopIndex]) handles[activeGradStopIndex].style.backgroundColor = stopToRgba(stop);
+      if (commit && typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
+    }
+    window.applyGradStopOpacity = applyGradStopOpacity;
+
+    function applyGradStopOffset(layer, pct, commit) {
+      const stop = getActiveGradStop(layer);
+      if (!stop || !isFinite(Number(pct))) return;
+      stop.offset = Math.max(0, Math.min(1, Math.round(Number(pct) * 10) / 1000));
+      layer.fillGradStops.sort((a, b) => a.offset - b.offset);
+      activeGradStopIndex = layer.fillGradStops.indexOf(stop);
+      layer._fillDirty = true;
+      if (typeof invalidatePreviewCacheForLayer === 'function') invalidatePreviewCacheForLayer(layer);
+      if (typeof redrawComposition === 'function') redrawComposition('fill-grad-offset');
+      renderGradHandles(layer);
+      if (commit && typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
+    }
+    window.applyGradStopOffset = applyGradStopOffset;
 
     function initGradDirectionControls() {
       if (initGradDirectionControls._done) return;
@@ -13520,6 +13765,31 @@
           if (layer && !applyGradStopColor(layer, hexEl.value, true)) syncGradCustomColorUI(layer);
         });
       }
+      const opEl = document.getElementById('fill-grad-stop-opacity');
+      if (opEl) {
+        opEl.addEventListener('input', () => {
+          const layer = getSelectedLayerForFill();
+          if (layer) applyGradStopOpacity(layer, opEl.value, false);
+        });
+        opEl.addEventListener('change', () => {
+          if (typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
+        });
+      }
+      const offEl = document.getElementById('fill-grad-stop-offset');
+      if (offEl) {
+        offEl.addEventListener('change', () => {
+          const layer = getSelectedLayerForFill();
+          if (layer) applyGradStopOffset(layer, offEl.value, true);
+          else syncGradCustomColorUI(layer);
+        });
+      }
+      const saveBtn = document.getElementById('fill-grad-preset-save');
+      if (saveBtn) {
+        saveBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          saveGradPreset();
+        });
+      }
       const moreBtn = document.getElementById('fill-grad-more-color');
       if (moreBtn) {
         moreBtn.addEventListener('click', (e) => {
@@ -13529,6 +13799,7 @@
           if (!layer || !stop) return;
           openFillColorPicker(moreBtn, stop.color, (hex, alpha, commit) => {
             stop.color = hex;
+            if (typeof alpha === 'number') stop.opacity = Math.max(0, Math.min(1, alpha));
             const stops = ensureLayerGradStops(layer);
             layer.fillGradColor1 = stops[0].color;
             layer.fillGradColor2 = stops[stops.length - 1].color;
@@ -13537,9 +13808,92 @@
             if (typeof redrawComposition === 'function') redrawComposition('fill-grad-color');
             if (commit && typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
             renderGradHandles(layer);
-          });
+          }, (typeof stop.opacity === 'number') ? stop.opacity : 1);
         });
       }
+    }
+
+    // ---- Preset gradient (bawaan + simpanan lokal, maks 12 custom) ----
+    const GRAD_PRESET_KEY = 'fishtool_grad_presets';
+    function gradBuiltinPresets() {
+      return [
+        { name: 'Senja', type: 'linear', stops: [{ offset: 0, color: '#2B1055' }, { offset: 1, color: '#FF6B6B' }] },
+        { name: 'Samudra', type: 'linear', stops: [{ offset: 0, color: '#0B3D66' }, { offset: 1, color: '#38E1FF' }] },
+        { name: 'Hutan', type: 'linear', stops: [{ offset: 0, color: '#0B3D2E' }, { offset: 1, color: '#7CE38B' }] },
+        { name: 'Api', type: 'linear', stops: [{ offset: 0, color: '#FFD23F' }, { offset: 0.55, color: '#FF5A3C' }, { offset: 1, color: '#7A1F1F' }] },
+        { name: 'Neon', type: 'linear', stops: [{ offset: 0, color: '#00F5FF' }, { offset: 0.5, color: '#B537F2' }, { offset: 1, color: '#FF2E93' }] },
+        { name: 'Mono', type: 'linear', stops: [{ offset: 0, color: '#000000' }, { offset: 1, color: '#FFFFFF' }] }
+      ];
+    }
+    function gradCustomPresets() {
+      try {
+        const raw = window.localStorage ? localStorage.getItem(GRAD_PRESET_KEY) : null;
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr.filter((p) => p && Array.isArray(p.stops) && p.stops.length >= 2).slice(0, 12) : [];
+      } catch (_) { return []; }
+    }
+    function renderGradPresets() {
+      const grid = document.getElementById('fill-grad-presets-grid');
+      if (!grid) return;
+      const all = [
+        ...gradBuiltinPresets().map((p) => ({ ...p, builtin: true })),
+        ...gradCustomPresets().map((p) => ({ ...p, builtin: false }))
+      ];
+      grid.innerHTML = '';
+      all.forEach((p) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'fill-grad-preset' + (p.builtin ? '' : ' is-custom');
+        b.title = (p.builtin ? '' : 'Preset simpanan — tekan-tahan untuk hapus · ') + (p.name || 'Preset');
+        b.setAttribute('aria-label', `Preset ${p.name || ''}`);
+        const cssStops = p.stops.map((s) => ({
+          offset: s.offset, color: s.color,
+          opacity: (typeof s.opacity === 'number' ? s.opacity : 1)
+        }));
+        b.style.background = getTrackGradientCss(cssStops);
+        let lpTimer = null;
+        b.addEventListener('pointerdown', () => {
+          if (p.builtin) return;
+          lpTimer = setTimeout(() => {
+            lpTimer = null;
+            const rest = gradCustomPresets().filter((x) => x.name !== p.name);
+            try { localStorage.setItem(GRAD_PRESET_KEY, JSON.stringify(rest)); } catch (_) {}
+            renderGradPresets();
+          }, 500);
+        });
+        const cancelLp = () => { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } };
+        b.addEventListener('pointerup', cancelLp);
+        b.addEventListener('pointercancel', cancelLp);
+        b.addEventListener('click', () => {
+          const layer = getSelectedLayerForFill();
+          if (!layer) return;
+          layer.fillGradType = p.type || 'linear';
+          layer.fillGradStops = p.stops.map((s) => ({
+            offset: s.offset, color: s.color,
+            opacity: (typeof s.opacity === 'number' ? s.opacity : 1)
+          }));
+          delete layer.fillGradStart;
+          delete layer.fillGradEnd; // kembali ke geometri default tipe
+          layer.fillGradColor1 = layer.fillGradStops[0].color;
+          layer.fillGradColor2 = layer.fillGradStops[layer.fillGradStops.length - 1].color;
+          activeGradStopIndex = 0;
+          layer._fillDirty = true;
+          if (typeof invalidatePreviewCacheForLayer === 'function') invalidatePreviewCacheForLayer(layer);
+          if (typeof redrawComposition === 'function') redrawComposition('fill-grad-preset');
+          if (typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
+          syncFillControllerUI();
+        });
+        grid.appendChild(b);
+      });
+    }
+    function saveGradPreset() {
+      const layer = getSelectedLayerForFill();
+      if (!layer) return;
+      const stops = ensureLayerGradStops(layer).map((s) => ({ offset: s.offset, color: s.color, opacity: s.opacity }));
+      const customs = gradCustomPresets();
+      customs.unshift({ name: `Custom ${customs.length + 1}`, type: layer.fillGradType || 'linear', stops });
+      try { localStorage.setItem(GRAD_PRESET_KEY, JSON.stringify(customs.slice(0, 12))); } catch (_) {}
+      renderGradPresets();
     }
 
     function initGradTrackAdd(trackBar) {
@@ -13645,6 +13999,7 @@
       });
 
       renderGradHandles(layer);
+      renderGradPresets();
     }
     window.syncFillControllerUI = syncFillControllerUI;
 
