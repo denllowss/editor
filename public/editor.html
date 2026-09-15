@@ -6,6 +6,10 @@
   <title>OpenFishTools Studio - Editor</title>
   <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
   
+  <script>
+    /* Mode tema pra-render: cegah kedip (selaras setAppTheme di js/main.js) */
+    try { if (window.localStorage && localStorage.getItem('fishtool_theme') === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (_) {}
+  </script>
   <!-- CSS: Theme (Colors & Variables, Cal Sans Font), Editor Layout, and Modular Modal / Popover / Drawer / Switch -->
   <link rel="stylesheet" href="css/theme.css">
   <link rel="stylesheet" href="css/editor.css">
@@ -2844,42 +2848,6 @@
           </div>
         </section>
       </div>
-
-        <!-- 4b. Editor Layout Style (perangkat tablet & desktop saja; ponsel disembunyikan via CSS) -->
-        <section class="settings-category is-collapsed" id="cat-settings-layout" aria-label="Editor Layout Style Settings">
-          <button type="button" class="settings-category-header" aria-expanded="false" aria-controls="body-settings-layout">
-            <div class="settings-category-title-wrap">
-              <span class="settings-category-title">Tampilan Editor</span>
-            </div>
-            <div class="settings-category-meta">
-              <span class="settings-category-summary" id="summary-settings-layout">After Effects</span>
-              <svg class="settings-category-chevron" viewBox="0 0 24 24">
-                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-              </svg>
-            </div>
-          </button>
-
-          <div class="settings-category-body" id="body-settings-layout">
-            <div class="modal-form-group">
-              <label class="modal-label" for="dropdown-layout-style">GAYA TAMPILAN</label>
-              <div class="custom-dropdown" id="dropdown-layout-style" data-value="after-effects">
-                <button type="button" class="custom-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Select Layout Style">
-                  <span class="custom-dropdown-label">After Effects</span>
-                  <svg class="custom-dropdown-arrow" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7 10l5 5 5-5z"/>
-                  </svg>
-                </button>
-                <div class="custom-dropdown-menu" role="listbox" id="menu-layout-style">
-                  <div class="custom-dropdown-item is-selected" role="option" data-val="after-effects" data-devices="desktop">After Effects</div>
-                  <div class="custom-dropdown-item" role="option" data-val="capcut" data-devices="desktop">CapCut</div>
-                  <div class="custom-dropdown-item" role="option" data-val="capcut-tablet" data-devices="tablet">CapCut Tablet</div>
-                  <div class="custom-dropdown-item" role="option" data-val="klasik">Klasik</div>
-                </div>
-              </div>
-              <p class="layout-style-note">Langsung diterapkan &amp; tersimpan di perangkat ini. Klasik tampil di semua perangkat; pilihan lain mengikuti tipe perangkat.</p>
-            </div>
-          </div>
-        </section>
 
       <!-- 5. Save & Export Buttons (Compact Square Icon for OFTS + Save Settings) -->
       <footer class="modal-footer modal-footer-row">

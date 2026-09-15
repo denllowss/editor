@@ -251,3 +251,72 @@
   --kf-selected-border: #120b02;
   --kf-selected-dot: #ffaa00;
 }
+
+/* Mode Terang (Maroon on Light): permukaan terang, aksen maroon pekat agar kontras */
+[data-theme="light"] {
+  /* Brand & Accents */
+  --color-primary: #a02323;
+  --color-primary-hover: #c23b3b;
+  --color-primary-active: #7d1a1a;
+  --color-accent: #7d1a1a;
+  --color-accent-subtle: #e0a8a8;
+  --color-danger: #e02424;
+  --color-danger-hover: #b91c1c;
+  --color-danger-bg: rgba(224, 36, 36, 0.12);
+  --color-danger-text: #ffffff;
+
+  /* Surfaces & Containers */
+  --bg-canvas: #ece5e5;
+  --bg-dashboard: #f7f2f2;
+  --bg-panel: #ffffff;
+  --bg-panel-hover: #f3e6e6;
+  --bg-panel-active: #ecdcdc;
+  --bg-panel-inner: #f8f3f3;
+  --bg-panel-inner-hover: #f3e6e6;
+
+  /* Badges */
+  --badge-prealpha-bg: #f3e6e6;
+  --badge-prealpha-text: #a02323;
+  --badge-count-bg: #a02323;
+  --badge-count-text: #ffffff;
+
+  /* Timeline Track Tokens */
+  --track-video: #a02323;
+  --track-video-dark: #d9a5a5;
+  --track-image: #c23b3b;
+  --track-image-dark: #d9a5a5;
+  --track-audio: #d64545;
+  --track-audio-dark: #eab0b0;
+  --track-adj: #7d1a1a;
+  --track-adj-dark: #c98f8f;
+  --track-color: #e07a7a;
+  --track-color-dark: #eec3c3;
+  --track-text: #b03030;
+  --track-text-dark: #d9a5a5;
+
+  /* Grid Overlay */
+  --grid-line-thin: rgba(160, 35, 35, 0.16);
+  --grid-line-major: rgba(160, 35, 35, 0.4);
+  --grid-crosshair: #a02323;
+  --grid-dot: rgba(160, 35, 35, 0.5);
+
+  /* Typography */
+  --text-primary: #8f1f1f;
+  --text-secondary: #b03030;
+  --text-muted: #8a6f6f;
+  --text-dim: #bd9898;
+
+  /* Borders */
+  --border-panel: #e2caca;
+  --border-subtle: rgba(160, 35, 35, 0.25);
+  --border-focus: #a02323;
+
+  /* Dedicated Keyframe Theme Tokens */
+  --kf-default-bg: #f7f2f2;
+  --kf-default-border: #8a6f6f;
+  --kf-active-bg: #a02323;
+  --kf-active-border: #4a0f0f;
+  --kf-selected-bg: #ffffff;
+  --kf-selected-border: #4a0f0f;
+  --kf-selected-dot: #a02323;
+}

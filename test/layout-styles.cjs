@@ -14,6 +14,7 @@ const vm = require('vm');
 
 const PUBLIC = path.join(__dirname, '..', 'public');
 const html = fs.readFileSync(path.join(PUBLIC, 'editor.html'), 'utf8');
+const dashHtml = fs.readFileSync(path.join(PUBLIC, 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(PUBLIC, 'css', 'layout-styles.css'), 'utf8');
 const jsCode = fs.readFileSync(path.join(PUBLIC, 'js', 'layout-styles.js'), 'utf8');
 
@@ -127,25 +128,27 @@ console.log('\n[4] Label & paritas snippet pra-render');
 }
 
 // ----------------------------------------------------------
-console.log('\n[5] Setting di editor.html (kondisional per tipe)');
+console.log('\n[5] UI setting pindah ke dasbor (v0.25.0: modal-app-settings)');
 {
-  ok((html.match(/id="cat-settings-layout"/g) || []).length === 1, 'kategori tepat 1x');
-  const iModal = html.indexOf('id="modal-project-settings"');
-  const iCat = html.indexOf('id="cat-settings-layout"');
-  const iFoot = html.indexOf('Save & Export Buttons');
-  ok(iModal > 0 && iModal < iCat && iCat < iFoot, 'di dalam modal setting, sebelum footer');
-  ok((html.match(/id="dropdown-layout-style"/g) || []).length === 1, 'dropdown tepat 1x');
-  ok((html.match(/data-devices="desktop"/g) || []).length === 2, '2 opsi khusus desktop');
-  ok((html.match(/data-devices="tablet"/g) || []).length === 1, '1 opsi khusus tablet');
-  ok(html.includes('data-val="klasik"') && !/data-val="klasik" data-devices/.test(html),
+  ok(!html.includes('id="dropdown-layout-style"'), 'editor tak lagi memuat dropdown');
+  ok(!html.includes('id="cat-settings-layout"'), 'editor tak lagi memuat kategori');
+  ok((dashHtml.match(/id="dropdown-layout-style"/g) || []).length === 1, 'dropdown tepat 1x di dasbor');
+  ok((dashHtml.match(/id="cat-settings-layout"/g) || []).length === 1, 'kategori tepat 1x di dasbor');
+  const iModal = dashHtml.indexOf('id="modal-app-settings"');
+  const iCat = dashHtml.indexOf('id="cat-settings-layout"');
+  ok(iModal > 0 && iModal < iCat, 'kategori di dalam modal setting utama');
+  ok((dashHtml.match(/data-devices="desktop"/g) || []).length === 2, '2 opsi khusus desktop');
+  ok((dashHtml.match(/data-devices="tablet"/g) || []).length === 1, '1 opsi khusus tablet');
+  ok(dashHtml.includes('data-val="klasik"') && !/data-val="klasik" data-devices/.test(dashHtml),
     'klasik universal (tanpa data-devices)');
   for (const v of ['after-effects', 'capcut', 'capcut-tablet', 'klasik']) {
-    ok(html.includes(`data-val="${v}"`), `opsi ${v} ada`);
+    ok(dashHtml.includes(`data-val="${v}"`), `opsi ${v} ada`);
   }
+  ok(dashHtml.includes('js/layout-styles.js'), 'modul JS dimuat di dasbor');
   const iResp = html.indexOf('css/responsive.css');
   const iLay = html.indexOf('css/layout-styles.css');
-  ok(iResp > 0 && iResp < iLay, 'CSS dimuat setelah responsive.css');
-  ok(html.includes('js/layout-styles.js'), 'modul JS dimuat');
+  ok(iResp > 0 && iResp < iLay, 'editor: CSS tetap setelah responsive.css');
+  ok(html.includes('js/layout-styles.js'), 'editor: modul JS tetap dimuat (apply saat buka)');
 }
 
 // ----------------------------------------------------------

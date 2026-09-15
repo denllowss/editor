@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initProjectsFetcher();
   initDashboardSelection();
   initWelcomeModal();
+  syncAppThemeUI();
 
   // Purge all non-essential caches when opening index.html (preserves projects and media)
   if (typeof window.cleanupAllStudioCaches === 'function') {
@@ -1533,7 +1534,56 @@ function toggleQrisDisplay() {
   }
 }
 
+/* ==========================================================================
+   Setting Utama: Mode Tampilan Dark / Light (tersimpan fishtool_theme,
+   berlaku dasbor + editor via snippet pra-render di <head>)
+   ========================================================================== */
+const APP_THEME_KEY = 'fishtool_theme';
+
+function getAppTheme() {
+  try {
+    const v = window.localStorage ? localStorage.getItem(APP_THEME_KEY) : null;
+    return v === 'light' ? 'light' : 'dark';
+  } catch (_) {
+    return 'dark';
+  }
+}
+
+function syncAppThemeUI() {
+  const mode = getAppTheme();
+  document.querySelectorAll('#settings-theme-grid .theme-mode-btn').forEach((btn) => {
+    btn.classList.toggle('is-selected', btn.dataset.themeVal === mode);
+  });
+}
+
+function setAppTheme(mode) {
+  const next = mode === 'light' ? 'light' : 'dark';
+  try {
+    if (window.localStorage) localStorage.setItem(APP_THEME_KEY, next);
+  } catch (_) {}
+  if (next === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  syncAppThemeUI();
+}
+
+function openAppSettingsModal() {
+  syncAppThemeUI();
+  // Sinkronkan dropdown Tampilan Editor dari simpanan (apabila modul ada)
+  try {
+    if (window.LayoutStyles && typeof window.LayoutStyles.apply === 'function') {
+      window.LayoutStyles.apply();
+    }
+  } catch (_) {}
+  if (window.Modal) window.Modal.open('modal-app-settings');
+}
+
 // Global exposes for HTML onclick handlers & module interop
+window.setAppTheme = setAppTheme;
+window.getAppTheme = getAppTheme;
+window.openAppSettingsModal = openAppSettingsModal;
 window.openDeleteModal = openDeleteModal;
 window.confirmDeleteProjectAction = confirmDeleteProjectAction;
 window.exportProjectAction = exportProjectAction;

@@ -6,6 +6,10 @@
   <title>OpenFishTools Studio</title>
   <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
   
+  <script>
+    /* Mode tema pra-render: cegah kedip (selaras setAppTheme di js/main.js) */
+    try { if (window.localStorage && localStorage.getItem('fishtool_theme') === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (_) {}
+  </script>
   <!-- Separated CSS: Theme (Colors & Variables, Cal Sans Font), Layout, and Modular Modal -->
   <link rel="stylesheet" href="css/theme.css">
   <link rel="stylesheet" href="css/layout.css">
@@ -38,17 +42,11 @@
         </div>
       </div>
       <div class="studio-header-actions">
-        <a href="https://www.cutefish.my.id/#contact" target="_blank" rel="noopener noreferrer" class="studio-top-btn" aria-label="Feedback">
+        <button type="button" class="studio-top-btn" aria-label="Settings" onclick="openAppSettingsModal()">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
-            <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/>
+            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
           </svg>
-          <span>Feedback</span>
-        </a>
-        <button type="button" class="studio-top-btn" aria-label="Donate" onclick="Modal.open('modal-donate')">
-          <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-          </svg>
-          <span>Donate</span>
+          <span>Settings</span>
         </button>
         <button type="button" class="studio-top-btn btn-info-top" aria-label="Project Info" onclick="Modal.open('modal-welcome')">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
@@ -425,6 +423,72 @@
       <footer class="modal-footer">
         <button type="button" class="modal-btn-create" onclick="saveProjectSettingsAction()">
           <span>Save Settings</span>
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       MODULAR POP-UP: APP SETTINGS MODAL (Setting Utama)
+       - Mode tampilan: Dark / Light (tersimpan fishtool_theme, berlaku dasbor + editor)
+       - Tampilan Editor: gaya layout (pindahan dari modal Composition editor)
+       ========================================================================== -->
+  <div class="modal-backdrop" id="modal-app-settings" role="dialog" aria-modal="true" aria-label="App Settings Dialog">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <header class="modal-header">
+        <h3 class="modal-title">Settings</h3>
+        <button type="button" class="modal-btn-close" aria-label="Close" onclick="Modal.close('modal-app-settings')">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      </header>
+
+      <div class="modal-body">
+        <!-- 1. Mode Tampilan -->
+        <div class="modal-form-group">
+          <label class="modal-label">MODE TAMPILAN</label>
+          <div class="theme-mode-grid" id="settings-theme-grid">
+            <button type="button" class="theme-mode-btn is-selected" data-theme-val="dark" title="Dark Mode" onclick="setAppTheme('dark')">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+                <path d="M12.1 2.1a10 10 0 1 0 9.8 9.8c0-.34-.02-.68-.06-1.01a7.5 7.5 0 0 1-8.73-8.73c-.33-.04-.67-.06-1.01-.06z"/>
+              </svg>
+              <span>Dark</span>
+            </button>
+            <button type="button" class="theme-mode-btn" data-theme-val="light" title="Light Mode" onclick="setAppTheme('light')">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/>
+                <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/>
+              </svg>
+              <span>Light</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Tampilan Editor (pindahan dari editor; ponsel disembunyikan via CSS) -->
+        <div class="modal-form-group" id="cat-settings-layout">
+          <label class="modal-label" for="dropdown-layout-style">TAMPILAN EDITOR</label>
+          <div class="custom-dropdown" id="dropdown-layout-style" data-value="after-effects">
+            <button type="button" class="custom-dropdown-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="Select Layout Style">
+              <span class="custom-dropdown-label">After Effects</span>
+              <svg class="custom-dropdown-arrow" width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 10l5 5 5-5z"/>
+              </svg>
+            </button>
+            <div class="custom-dropdown-menu" role="listbox" id="menu-layout-style">
+              <div class="custom-dropdown-item is-selected" role="option" data-val="after-effects" data-devices="desktop">After Effects</div>
+              <div class="custom-dropdown-item" role="option" data-val="capcut" data-devices="desktop">CapCut</div>
+              <div class="custom-dropdown-item" role="option" data-val="capcut-tablet" data-devices="tablet">CapCut Tablet</div>
+              <div class="custom-dropdown-item" role="option" data-val="klasik">Klasik</div>
+            </div>
+          </div>
+          <p class="layout-style-note">Langsung diterapkan &amp; tersimpan di perangkat ini. Klasik tampil di semua perangkat; pilihan lain mengikuti tipe perangkat.</p>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="modal-btn-secondary" onclick="Modal.close('modal-app-settings')">
+          <span>Tutup</span>
         </button>
       </footer>
     </div>
@@ -1201,6 +1265,7 @@
   <script src="js/modal.js?v=0.5.14"></script>
   <script src="js/context-menu.js?v=0.5.14"></script>
   <script src="js/custom-aspect.js"></script>
+  <script src="js/layout-styles.js"></script>
   <script src="js/main.js?v=0.5.14"></script>
 </body>
 </html>

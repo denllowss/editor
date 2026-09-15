@@ -23335,10 +23335,7 @@
                   window.selectedLayerIds = selectedLayerIds;
                   if (typeof syncSelectionClassesInPlace === 'function') syncSelectionClassesInPlace();
                   if (typeof updateEditorHeaderMode === 'function') updateEditorHeaderMode();
-                  if (window.Drawer && !window.Drawer.isOpen('timeline-layer-drawer')) {
-                    window.Drawer.open('timeline-layer-drawer');
-                    if (typeof switchLayerDrawerSubview === 'function') switchLayerDrawerSubview('main');
-                  }
+                  // Tahan mata = murni masuk mode pilih; drawer/panel TIDAK dibuka (semua tipe layer)
                   if (navigator.vibrate) { try { navigator.vibrate(25); } catch (_) {} }
                 }, 450);
               });

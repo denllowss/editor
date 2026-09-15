@@ -33,6 +33,8 @@ console.log('\n[1] Tahan tombol mata = mode pilih');
   ok(editorCode.includes('if (eyeHoldFired) { eyeHoldFired = false; return; }'), 'klik setelah tahan tak toggle hide');
   ok(editorCode.includes("addEventListener('pointerleave', eyeHoldCancel)"), 'geser keluar membatalkan timer');
   ok(editorCode.includes('layer.hidden = !layer.hidden'), 'tap biasa tetap toggle hide');
+  const eyeBlock = (editorCode.match(/eyeHoldTimer = setTimeout\(\(\) => \{[\s\S]*?\}, 450\);/) || [''])[0];
+  ok(eyeBlock.length > 100 && !eyeBlock.includes('Drawer.open'), 'tahan mata tak membuka drawer/panel (v0.25.0)');
 }
 
 // ----------------------------------------------------------
