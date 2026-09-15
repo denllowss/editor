@@ -1,3 +1,23 @@
+## v0.14.0 (Node.js port) — 15 Sep 2026
+
+### Fixed
+- **Akar crash init editor**: `CustomFonts.getAll()` tidak ada padahal dipanggil
+  `editor.js` saat init → TypeError menghentikan ~60% script (impor media mati,
+  `state.id` tak ter-set, phantom "New_Project" lahir saat keluar editor).
+  Kini `getAll()` tersedia (built-in + custom berflag).
+- **Phantom project**: id diisi SINKRON dari `?id=` saat state dibuat, save
+  bersamaan memakai SATU `createProject` (kunci in-flight), init tak lagi
+  menimpa id yang sudah terbentuk. Teruji dengan IDB lambat 2,5 detik.
+- **Hapus project**: hasil hapus DIVERIFIKASI ke DB (batas 5 detik), modal
+  ditutup belakangan & terjaga, filter refresh hanya bila terverifikasi,
+  toast jujur saat gagal ("hilang palsu" mustahil).
+- Test `test/bugfix-trio.cjs` (+23 asserts): kontrak API custom-fonts.js ASLI
+  via VM (tanpa mock — menutup celah yang menyembunyikan bug ini) + statis
+  anti-phantom & hapus-terverifikasi. Verifikasi browser sungguhan
+  (Chromium headless, desktop + mobile + race): 20/20 lolos.
+
+---
+
 ## v0.13.1 (Node.js port) — 15 Sep 2026
 
 ### Fixed

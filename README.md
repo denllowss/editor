@@ -123,6 +123,9 @@ curl http://localhost:3000/api/projects
 - **Tanpa notifikasi saat buka web** — auto-popup Welcome dimatikan permanen (tetap bisa dibuka via tombol Info).
 - **Tampilan tablet/desktop** (v0.7.0): `public/css/responsive.css` — dashboard lapang + grid project,
   drawer & galeri efek adaptif, breakpoint 768/1024/1440px (mobile tak tersentuh).
+- **Trio bug tuntas** (v0.14.0): crash init editor (`CustomFonts.getAll` hilang)
+  diperbaiki — impor media HP hidup lagi, phantom project musnah, hapus
+  project terverifikasi DB. Teruji di browser sungguhan (desktop + mobile).
 - **Siap deploy Vercel** (v0.13.0): function `api/index.js` + `vercel.json`, storage
   tahan read-only FS (data → tmp → memori).
 - **Drag & drop langsung di desktop** (v0.12.0): seret file OS ke mana saja di editor,

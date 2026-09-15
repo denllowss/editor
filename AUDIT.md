@@ -255,3 +255,14 @@ Total `npm test`: 557 asserts, 0 gagal.
 Deploy Vercel menolak `includeFiles` array ("should be string"). Diubah ke
 string tunggal "public/**"; bundel data/** dibuang (tak fungsional, seed
 kosong sudah ditangani rantai fallback). Test vercel.cjs disesuaikan.
+
+## 21. Addendum v0.14.0 (Node.js port) — trio bug: hapus, impor HP, phantom
+
+Repro browser (Chromium headless + CDP touch): hapus dashboard OK di semua
+kondisi; editor crash saat init — `window.CustomFonts.getAll is not a
+function` (API tak pernah diekspor sejak v0.9.0; mock test menyembunyikannya).
+Crash mematikan ~60% editor.js: media pool tak init (impor mati), state.id
+kosong → beforeunload save melahirkan phantom "New_Project" (klik+keluar =
+project baru). Fix: getAll() asli, id sinkron dari ?id=, kunci createProject,
+init anti-timpah, hapus terverifikasi + timeout + toast jujur. Suite 580
+asserts 0 gagal; verifikasi browser 20/20 (desktop, mobile, IDB-lambat).

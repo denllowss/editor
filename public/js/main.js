@@ -712,11 +712,9 @@ async function confirmDeleteProjectAction() {
   const idInput = document.getElementById('delete-project-id');
   let projectId = idInput ? idInput.value : '';
 
-  if (window.Modal) {
-    window.Modal.close('modal-delete-project');
-  }
+  // NOTE: modal ditutup BELAKANGAN & terjaga (lihat bawah) — kegagalan modal
+  // tak boleh menggagalkan penghapusan database.
 
-  // Immediately remove card from DOM for instant feedback
   const listContainer = document.getElementById('projects-container');
   const countBadge = document.getElementById('project-count-badge');
 
@@ -739,6 +737,12 @@ async function confirmDeleteProjectAction() {
     }
   }
 
+  if (!projectId) {
+    try { if (window.Modal) window.Modal.close(); } catch (_) {}
+    showDashboardToast('Project tidak ditemukan — batal menghapus');
+    return;
+  }
+
   if (listContainer && projectId) {
     const cards = listContainer.querySelectorAll('.project-swipe-container');
     cards.forEach(card => {
@@ -756,21 +760,36 @@ async function confirmDeleteProjectAction() {
     }
   }
 
-  if (projectId && window.FishDatabase) {
+  // Hapus di database + VERIFIKASI (batas 5 detik). Kartu sudah disingkirkan
+  // dari DOM di atas; bila verifikasi gagal, refresh di bawah memulihkannya
+  // (menangkal "hilang palsu": kartu lenyap tapi project muncul lagi).
+  let deleted = false;
+  if (window.FishDatabase) {
     try {
-      await window.FishDatabase.deleteProject(projectId);
-      showDashboardToast('Project deleted successfully');
+      const attempt = (async () => {
+        await window.FishDatabase.deleteProject(projectId);
+        return !(await window.FishDatabase.getProject(projectId));
+      })();
+      const timeout = new Promise((resolve) => setTimeout(() => resolve('timeout'), 5000));
+      const result = await Promise.race([attempt, timeout]);
+      deleted = result === true;
+      if (result === 'timeout') console.warn('Delete project timed out:', projectId);
     } catch (e) {
       console.warn('Delete project error:', e);
-      showDashboardToast('Failed to delete project');
+      deleted = false;
     }
   }
 
-  // Refresh project list from database
+  // Tutup modal belakangan & terjaga
+  try { if (window.Modal) window.Modal.close(); } catch (_) {}
+
+  showDashboardToast(deleted ? 'Project deleted successfully' : 'Gagal menghapus project — coba lagi');
+
+  // Refresh project list from database (filter id terhapus HANYA bila terverifikasi)
   if (listContainer && window.FishDatabase) {
     try {
       let projects = await window.FishDatabase.getProjects();
-      if (projectId) {
+      if (deleted) {
         projects = projects.filter(p => p && p.id !== projectId && String(p.id).trim() !== String(projectId).trim());
       }
       renderProjects(projects, listContainer, countBadge);

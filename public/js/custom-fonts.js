@@ -257,6 +257,20 @@
     return _customs.map((c) => Object.assign({}, c));
   }
 
+  // Semua font (built-in + custom) untuk render dropdown editor.
+  // WAJIB ADA: editor.js memanggilnya saat init; tanpanya TypeError
+  // menghentikan seluruh evaluasi editor.js (bug: impor media mati,
+  // id project tak ter-set, phantom project tercipta).
+  function getAll() {
+    const list = BUILTINS.map((b) => Object.assign({}, b));
+    for (const c of _customs) {
+      const e = Object.assign({}, c);
+      e.custom = true;
+      list.push(e);
+    }
+    return list;
+  }
+
   function stackForId(id) {
     const b = BUILTINS.find((x) => x.id === id);
     if (b) return b.stack;
@@ -285,6 +299,7 @@
     importFromFile,
     removeFont,
     getCustoms,
+    getAll,
     stackForId,
     nameForId,
     idForStack,

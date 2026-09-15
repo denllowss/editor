@@ -9,8 +9,20 @@
     window.resMap = resMap;
 
     // Active Project Configuration State
+    // id diisi SINKRON dari ?id= agar autosave/init lain yang berjalan
+    // sebelum initEditorParams (async) tidak sempat createProject phantom.
+    function earlyUrlProjectId() {
+      try {
+        const w = typeof window !== 'undefined' ? window : null;
+        const search = w && w.location ? w.location.search : '';
+        const m = /[?&]id=([^&]*)/.exec(search || '');
+        return m && m[1] ? decodeURIComponent(m[1]) : '';
+      } catch (_) {
+        return '';
+      }
+    }
     const currentProjectState = {
-      id: '',
+      id: earlyUrlProjectId(),
       name: 'New_Project',
       aspectRatio: '16:9',
       resolution: '1080p',
@@ -428,6 +440,9 @@
 
 
     let saveLayersDebounceTimer = null;
+    // Kunci pembuatan project: save bersamaan saat id kosong harus memakai
+    // SATU createProject yang sama, bukan melahirkan phantom ganda.
+    let _createProjectPromise = null;
     function saveCurrentProjectLayers(immediate = false) {
       if (saveLayersDebounceTimer) {
         clearTimeout(saveLayersDebounceTimer);
@@ -461,16 +476,22 @@
               console.warn('[Editor] Project ' + currentProjectState.id + ' not found or was deleted. Aborting auto-save.');
               return;
             }
-            prj = await window.FishDatabase.createProject({
-              name: currentProjectState.name || 'New_Project',
-              aspectRatio: currentProjectState.aspectRatio || '16:9',
-              resolution: currentProjectState.resolution || '1080p',
-              fps: String(currentProjectState.fps || 60),
-              defaultDuration: currentProjectState.defaultDuration || 5,
-              bgColor: currentProjectState.bgColor || 'transparent',
-              motionBlur: currentProjectState.motionBlur ? JSON.parse(JSON.stringify(currentProjectState.motionBlur)) : undefined,
-              layers: []
-            });
+            if (!_createProjectPromise) {
+              _createProjectPromise = window.FishDatabase.createProject({
+                name: currentProjectState.name || 'New_Project',
+                aspectRatio: currentProjectState.aspectRatio || '16:9',
+                resolution: currentProjectState.resolution || '1080p',
+                fps: String(currentProjectState.fps || 60),
+                defaultDuration: currentProjectState.defaultDuration || 5,
+                bgColor: currentProjectState.bgColor || 'transparent',
+                motionBlur: currentProjectState.motionBlur ? JSON.parse(JSON.stringify(currentProjectState.motionBlur)) : undefined,
+                layers: []
+              }).then(
+                (created) => { _createProjectPromise = null; return created; },
+                (err) => { _createProjectPromise = null; throw err; }
+              );
+            }
+            prj = await _createProjectPromise;
             if (prj && prj.id) {
               currentProjectState.id = prj.id;
             }
@@ -16077,7 +16098,7 @@
         }
       }
 
-      currentProjectState.id = idParam || (currentProject && currentProject.id) || '';
+      currentProjectState.id = idParam || currentProjectState.id || (currentProject && currentProject.id) || '';
       currentProjectState.source = (currentProject && currentProject.source) || 'local';
       currentProjectState.isTemplate = !!(currentProject && currentProject.isTemplate);
 
