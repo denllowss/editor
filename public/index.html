@@ -169,6 +169,16 @@
                 <span class="aspect-ratio-text">21:9</span>
               </div>
             </button>
+            <button type="button" class="aspect-ratio-frame" data-val="custom" title="Custom ratio">
+              <div class="aspect-frame-box ratio-custom">
+                <span class="aspect-ratio-text">?:?</span>
+              </div>
+            </button>
+          </div>
+          <div class="aspect-custom-row" id="options-aspect-ratio-custom" hidden>
+            <input type="number" id="options-aspect-ratio-custom-w" min="1" max="999" value="16" inputmode="numeric" aria-label="Lebar rasio">
+            <span class="aspect-custom-sep">:</span>
+            <input type="number" id="options-aspect-ratio-custom-h" min="1" max="999" value="9" inputmode="numeric" aria-label="Tinggi rasio">
           </div>
         </div>
 
@@ -321,6 +331,16 @@
                 <span class="aspect-ratio-text">21:9</span>
               </div>
             </button>
+            <button type="button" class="aspect-ratio-frame" data-val="custom" title="Custom ratio">
+              <div class="aspect-frame-box ratio-custom">
+                <span class="aspect-ratio-text">?:?</span>
+              </div>
+            </button>
+          </div>
+          <div class="aspect-custom-row" id="settings-options-aspect-ratio-custom" hidden>
+            <input type="number" id="settings-options-aspect-ratio-custom-w" min="1" max="999" value="16" inputmode="numeric" aria-label="Lebar rasio">
+            <span class="aspect-custom-sep">:</span>
+            <input type="number" id="settings-options-aspect-ratio-custom-h" min="1" max="999" value="9" inputmode="numeric" aria-label="Tinggi rasio">
           </div>
         </div>
 
@@ -1130,6 +1150,7 @@
   <script src="js/db.js?v=0.5.14"></script>
   <script src="js/modal.js?v=0.5.14"></script>
   <script src="js/context-menu.js?v=0.5.14"></script>
+  <script src="js/custom-aspect.js"></script>
   <script src="js/main.js?v=0.5.14"></script>
 </body>
 </html>

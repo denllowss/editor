@@ -3568,10 +3568,16 @@
         const ch = Math.round(Math.abs(currentActivePrecomp.mediaHeight || currentActivePrecomp.scaleH || 1080));
         aspect = (cw && ch) ? (cw / ch) : (16 / 9);
       } else {
-        if (aspectStr === '9:16') aspect = 9 / 16;
-        else if (aspectStr === '1:1') aspect = 1 / 1;
-        else if (aspectStr === '4:3') aspect = 4 / 3;
-        else if (aspectStr === '21:9') aspect = 21 / 9;
+        // Preset maupun custom ("L:T") → angka via CustomAspect; fallback rantai lama bila modul tak ada
+        const _cap = window.CustomAspect ? window.CustomAspect.parse(aspectStr) : null;
+        if (_cap) {
+          aspect = _cap.w / _cap.h;
+        } else {
+          if (aspectStr === '9:16') aspect = 9 / 16;
+          else if (aspectStr === '1:1') aspect = 1 / 1;
+          else if (aspectStr === '4:3') aspect = 4 / 3;
+          else if (aspectStr === '21:9') aspect = 21 / 9;
+        }
       }
 
       const availW = Math.max(0, container.clientWidth - 24);
@@ -3667,10 +3673,15 @@
 
       // 1. Calculate CSS aspect-ratio string & keep on-screen size stable
       let cssRatio = '16 / 9';
-      if (aspect === '9:16') cssRatio = '9 / 16';
-      else if (aspect === '1:1') cssRatio = '1 / 1';
-      else if (aspect === '4:3') cssRatio = '4 / 3';
-      else if (aspect === '21:9') cssRatio = '21 / 9';
+      const _cap2 = window.CustomAspect ? window.CustomAspect.parse(aspect) : null;
+      if (_cap2) {
+        cssRatio = _cap2.w + ' / ' + _cap2.h;
+      } else {
+        if (aspect === '9:16') cssRatio = '9 / 16';
+        else if (aspect === '1:1') cssRatio = '1 / 1';
+        else if (aspect === '4:3') cssRatio = '4 / 3';
+        else if (aspect === '21:9') cssRatio = '21 / 9';
+      }
       box.style.setProperty('--preview-aspect', cssRatio);
       fitPreviewCanvasBox();
 
@@ -12671,6 +12682,15 @@
     async function applyFlexibleMediaReplacement(targetL, item) {
       if (!targetL || !item) return;
 
+      // Klik tile yang SUDAH dipakai dengan URL yang sama = no-op (jangan
+      // terapkan ulang; mencegah korupsi + flicker). URL berbeda (basi/mati)
+      // tetap diteruskan agar re-apply menyembuhkan layer.
+      if (targetL.fillMediaId && item.id && targetL.fillMediaId === item.id
+          && targetL.fillType === 'media' && targetL.fillMediaUrl
+          && targetL.fillMediaUrl === (item.thumbUrl || item.dataUrl || '')) {
+        return;
+      }
+
       targetL.fillType = 'media';
       targetL.fillMediaId = item.id;
       targetL.fillMediaName = item.name || 'Media';
@@ -12697,7 +12717,10 @@
         if (targetL.mediaId) window.layerMediaCache.delete(targetL.mediaId);
       }
 
-      const isShape = (targetL.type === 'shape') || !!targetL.shapeType || !!targetL.shapeProps || (targetL.id && targetL.id.startsWith('layer_shape_')) || (targetL.fillType !== undefined);
+      // NOTE: JANGAN libatkan fillType di sini — setiap layer yang pernah
+      // di-apply fill punya fillType='media'; klausa itu mengubah layer
+      // foto/video menjadi 'shape' saat tile-nya diklik ulang (bug: foto hitam).
+      const isShape = (targetL.type === 'shape') || !!targetL.shapeType || !!targetL.shapeProps || (targetL.id && targetL.id.startsWith('layer_shape_'));
       const isAudio = item.type === 'audio' ||
         (item.dataUrl && (item.dataUrl.startsWith('data:audio') || /\.(mp3|wav|ogg|m4a|aac|flac)(\?.*)?$/i.test(item.dataUrl))) ||
         (item.name && /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(item.name));
@@ -15410,10 +15433,15 @@
         motionBlur: (currentActivePrecomp.motionBlur && typeof currentActivePrecomp.motionBlur === 'object') ? currentActivePrecomp.motionBlur : (currentProjectState.motionBlur || { enabled: false, shutterAngle: 180, shutterPhase: 0, samples: 16 })
       } : currentProjectState;
 
-      // 1. Sync Aspect Ratio Frame selection
-      modal.querySelectorAll('.aspect-ratio-frame').forEach(f => {
-        f.classList.toggle('is-selected', f.dataset.val === targetState.aspectRatio);
-      });
+      // 1. Sync Aspect Ratio Frame selection (preset + custom)
+      const edAspectGrid = modal.querySelector('.modal-aspect-grid');
+      if (window.CustomAspect && edAspectGrid) {
+        window.CustomAspect.syncGrid(edAspectGrid, targetState.aspectRatio);
+      } else {
+        modal.querySelectorAll('.aspect-ratio-frame').forEach(f => {
+          f.classList.toggle('is-selected', f.dataset.val === targetState.aspectRatio);
+        });
+      }
 
       // 2. Sync Resolution Dropdown
       const resDropdown = document.getElementById('dropdown-resolution');
@@ -15548,7 +15576,12 @@
     function updateProjectSettingsSummaries() {
       const modal = document.getElementById('modal-project-settings');
       if (!modal) return;
-      const ratio = modal.querySelector('.aspect-ratio-frame.is-selected')?.dataset.val || '16:9';
+      const sumGrid = modal.querySelector('.modal-aspect-grid');
+      let ratio = modal.querySelector('.aspect-ratio-frame.is-selected')?.dataset.val || '16:9';
+      if (window.CustomAspect && sumGrid) {
+        const rr = window.CustomAspect.resolveGrid(sumGrid);
+        if (!rr.error) ratio = rr.aspect;
+      }
       const res = document.getElementById('dropdown-resolution')?.dataset.value || '1080p';
       const fps = document.getElementById('dropdown-fps')?.dataset.value || '60';
       const summaryCanvas = document.getElementById('summary-settings-canvas');
@@ -15576,7 +15609,17 @@
       const modal = document.getElementById('modal-project-settings');
       if (!modal) return;
 
-      const selectedRatio = modal.querySelector('.modal-aspect-grid .aspect-ratio-frame.is-selected')?.dataset.val || '16:9';
+      const saveAspectGrid = modal.querySelector('.modal-aspect-grid');
+      let selectedRatio = modal.querySelector('.modal-aspect-grid .aspect-ratio-frame.is-selected')?.dataset.val || '16:9';
+      if (window.CustomAspect && saveAspectGrid) {
+        const r = window.CustomAspect.resolveGrid(saveAspectGrid);
+        if (r.error) {
+          window.CustomAspect.flagInvalidRow(saveAspectGrid);
+          return;
+        }
+        selectedRatio = r.aspect;
+        window.CustomAspect.register(selectedRatio);
+      }
       const selectedRes = document.getElementById('dropdown-resolution')?.dataset.value || '1080p';
       const selectedFps = parseInt(document.getElementById('dropdown-fps')?.dataset.value || '60', 10);
       const selectedDur = parseFloat(document.getElementById('dropdown-duration')?.dataset.value || '5');
@@ -16105,6 +16148,8 @@
       currentProjectState.name = (currentProject && currentProject.name) || nameParam || 'New_Project';
       currentProjectState.aspectRatio = (currentProject && currentProject.aspectRatio) || aspectParam || '16:9';
       currentProjectState.resolution = (currentProject && currentProject.resolution) || resParam || '1080p';
+      // Registrasi dimensi custom (resMap) agar project lama ber-aspect custom tidak jatuh ke 16:9
+      if (window.CustomAspect) window.CustomAspect.register(currentProjectState.aspectRatio, window.resMap);
       currentProjectState.fps = parseInt((currentProject && currentProject.fps) || fpsParam || 60, 10);
       currentProjectState.defaultDuration = parseFloat((currentProject && currentProject.defaultDuration) || durParam || 5);
       currentProjectState.bgColor = (currentProject && currentProject.bgColor) || bgParam || 'transparent';
@@ -17880,13 +17925,14 @@
         });
       });
 
-      // 2. Aspect Ratio Visual Frames
+      // 2. Aspect Ratio Visual Frames (+ baris input custom)
       document.querySelectorAll('.modal-aspect-grid').forEach(grid => {
         grid.addEventListener('click', (e) => {
           const frame = e.target.closest('.aspect-ratio-frame');
           if (!frame) return;
           grid.querySelectorAll('.aspect-ratio-frame').forEach(f => f.classList.remove('is-selected'));
           frame.classList.add('is-selected');
+          if (window.CustomAspect) window.CustomAspect.updateCustomRow(grid);
           if (typeof updateProjectSettingsSummaries === 'function') {
             updateProjectSettingsSummaries();
           }
@@ -22036,6 +22082,7 @@
                   : (wVal >= 1920 || hVal >= 1920 || wVal === 1080) ? '1080p'
                   : '720p';
 
+        if (window.CustomAspect) aspect = window.CustomAspect.register(aspect);
         if (typeof updatePreviewCanvas === 'function') {
           updatePreviewCanvas(aspect, res, currentProjectState.fps, currentProjectState.bgColor);
         }

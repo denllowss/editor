@@ -614,13 +614,17 @@ async function openProjectSettingsModal(projectId) {
   if (idInput) idInput.value = projectId;
   if (nameInput) nameInput.value = project.name || '';
 
-  // 1. Aspect Ratio Frame
+  // 1. Aspect Ratio Frame (preset + custom)
   const aspectVal = project.aspectRatio || '16:9';
   const aspectGrid = document.getElementById('settings-options-aspect-ratio');
   if (aspectGrid) {
-    aspectGrid.querySelectorAll('.aspect-ratio-frame').forEach(f => {
-      f.classList.toggle('is-selected', f.dataset.val === aspectVal);
-    });
+    if (window.CustomAspect) {
+      window.CustomAspect.syncGrid(aspectGrid, aspectVal);
+    } else {
+      aspectGrid.querySelectorAll('.aspect-ratio-frame').forEach(f => {
+        f.classList.toggle('is-selected', f.dataset.val === aspectVal);
+      });
+    }
   }
 
   // 2. Resolution Dropdown
@@ -678,7 +682,17 @@ async function saveProjectSettingsAction() {
   if (!projectId || !window.FishDatabase) return;
 
   const newName = nameInput && nameInput.value.trim() ? nameInput.value.trim() : 'Project';
-  const selectedRatio = document.querySelector('#settings-options-aspect-ratio .aspect-ratio-frame.is-selected')?.dataset.val || '16:9';
+  const aspectGridEl = document.getElementById('settings-options-aspect-ratio');
+  let selectedRatio = document.querySelector('#settings-options-aspect-ratio .aspect-ratio-frame.is-selected')?.dataset.val || '16:9';
+  if (window.CustomAspect && aspectGridEl) {
+    const r = window.CustomAspect.resolveGrid(aspectGridEl);
+    if (r.error) {
+      window.CustomAspect.flagInvalidRow(aspectGridEl);
+      showDashboardToast(r.error);
+      return;
+    }
+    selectedRatio = r.aspect;
+  }
   const selectedRes = document.getElementById('settings-dropdown-resolution')?.dataset.value || '1080p';
   const selectedFps = document.getElementById('settings-dropdown-fps')?.dataset.value || '60';
   const selectedBg = document.querySelector('#settings-options-bgcolor .modal-color-swatch.is-selected')?.dataset.val || 'transparent';
@@ -1039,8 +1053,23 @@ async function createNewProjectAction() {
 
   const nameInput = document.getElementById('project-input-name');
   const name = nameInput && nameInput.value.trim() ? nameInput.value.trim() : 'New_Project';
-  
-  const selectedRatio = document.querySelector('#options-aspect-ratio .aspect-ratio-frame.is-selected')?.dataset.val || '16:9';
+
+  const npAspectGrid = document.getElementById('options-aspect-ratio');
+  let selectedRatio = document.querySelector('#options-aspect-ratio .aspect-ratio-frame.is-selected')?.dataset.val || '16:9';
+  if (window.CustomAspect && npAspectGrid) {
+    const r = window.CustomAspect.resolveGrid(npAspectGrid);
+    if (r.error) {
+      window.CustomAspect.flagInvalidRow(npAspectGrid);
+      showDashboardToast(r.error);
+      isCreatingNewProject = false;
+      if (createBtn) {
+        createBtn.style.opacity = '';
+        createBtn.style.pointerEvents = '';
+      }
+      return;
+    }
+    selectedRatio = r.aspect;
+  }
   const selectedRes = document.getElementById('dropdown-resolution')?.dataset.value || '1080p';
   const selectedFps = document.getElementById('dropdown-fps')?.dataset.value || '60';
   const selectedBg = document.querySelector('#options-bgcolor .modal-color-swatch.is-selected')?.dataset.val || 'transparent';
@@ -1123,13 +1152,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Aspect Ratio Visual Frames
+  // Aspect Ratio Visual Frames (+ baris input custom)
   document.querySelectorAll('.modal-aspect-grid').forEach(grid => {
     grid.addEventListener('click', (e) => {
       const frame = e.target.closest('.aspect-ratio-frame');
       if (!frame) return;
       grid.querySelectorAll('.aspect-ratio-frame').forEach(f => f.classList.remove('is-selected'));
       frame.classList.add('is-selected');
+      if (window.CustomAspect) window.CustomAspect.updateCustomRow(grid);
     });
   });
 
