@@ -42,6 +42,13 @@ class ModalManager {
         return;
       }
       if (this.activeModal) {
+        // Abaikan popstate basi yang tiba <250ms usai open: itu history.back()
+        // async milik context menu (tap item menu), BUKAN Back sungguhan.
+        // Tanpa ini, modal yang baru dibuka dari menu (mis. hapus project)
+        // langsung tertutup sendiri (bug: "Remove project tidak bisa").
+        if (this._openedAt && Date.now() - this._openedAt < 250) {
+          return;
+        }
         // User clicked Back button: Close the modal without navigating away
         this.close(false); // don't call history.back again
       }
@@ -62,6 +69,7 @@ class ModalManager {
     }
 
     this.activeModal = el;
+    this._openedAt = Date.now();
     el.classList.add('is-active');
 
     // Push invisible state into history so Back button closes modal without changing URL

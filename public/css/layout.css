@@ -1085,3 +1085,115 @@ html, body {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+/* ============================================================
+   Multi-select daftar project (v0.15.0)
+   ============================================================ */
+.projects-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 2px 4px 8px;
+  flex-shrink: 0;
+}
+.projects-toolbar[hidden] {
+  display: none;
+}
+.projects-count-label {
+  font-size: 12px;
+  opacity: 0.65;
+}
+.projects-select-toggle {
+  min-height: 36px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #2a3321);
+  background: var(--bg-panel-inner);
+  color: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.projects-select-toggle:active {
+  transform: scale(0.96);
+}
+.projects-selectbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px 8px;
+  flex-shrink: 0;
+}
+.projects-selectbar[hidden] {
+  display: none;
+}
+.selectbar-count {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+.selectbar-btn {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #2a3321);
+  background: var(--bg-panel-inner);
+  color: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.selectbar-btn:active {
+  transform: scale(0.96);
+}
+.selectbar-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.selectbar-btn-danger {
+  background: var(--color-danger, #ef4444);
+  border-color: var(--color-danger, #ef4444);
+  color: #fff;
+}
+/* Lingkaran cek di kartu (hanya tampil saat mode pilih) */
+.select-check {
+  display: none;
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--color-primary, #98ce7b);
+  background: var(--bg-panel-inner);
+  z-index: 3;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.select-check svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0;
+}
+#panel-local-projects.is-selecting .select-check {
+  display: flex;
+}
+#panel-local-projects.is-selecting .project-item {
+  padding-left: 38px;
+  cursor: default;
+}
+.project-swipe-container.is-selected .project-item {
+  border-color: var(--color-primary, #98ce7b);
+}
+.project-swipe-container.is-selected .select-check {
+  background: var(--color-primary, #98ce7b);
+  border-color: var(--color-primary, #98ce7b);
+}
+.project-swipe-container.is-selected .select-check svg {
+  opacity: 1;
+  color: #0d1109;
+}

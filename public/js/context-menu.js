@@ -154,9 +154,18 @@ window.ContextMenu = (function () {
 
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        close();
+        // Tutup TANPA history.back() dulu: back() yang async tiba belakangan
+        // sebagai popstate "tanpa modalOpen" dan akan membunuh modal yang baru
+        // dibuka oleh action (bug: Remove project dari tahan-lama tak bisa).
+        close(false);
         if (typeof item.action === 'function') {
           item.action(options.target);
+        }
+        // Bersihkan entry history milik menu HANYA bila action tidak membuka
+        // modal baru (kasus async ditangani guard _openedAt di modal.js).
+        const modalOpened = !!document.querySelector('.modal-backdrop.is-active');
+        if (!modalOpened && window.history.state && window.history.state.contextMenuOpen) {
+          window.history.back();
         }
       });
 

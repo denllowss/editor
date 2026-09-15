@@ -266,3 +266,13 @@ kosong → beforeunload save melahirkan phantom "New_Project" (klik+keluar =
 project baru). Fix: getAll() asli, id sinkron dari ?id=, kunci createProject,
 init anti-timpah, hapus terverifikasi + timeout + toast jujur. Suite 580
 asserts 0 gagal; verifikasi browser 20/20 (desktop, mobile, IDB-lambat).
+
+## 22. Addendum v0.15.0 (Node.js port) — fix Remove tahan-lama + multi-select
+
+Repro mobile membuktikan: tap "Remove project" membuka modal lalu 0ms-nya
+dibunuh popstate basi dari history.back() async milik context menu. Fix dua
+lapis: close(false)+back() kondisional di context-menu.js, guard _openedAt
+250ms di modal.js; Back tetap menutup modal (state modalOpen benar). Tambah
+multi-select dashboard (Pilih, centang, Semua/Kosongkan, hapus borongan
+sekuensial terverifikasi, auto-exit, Escape). Suite 607 asserts 0 gagal;
+browser: ctx-hapus 8/8 + multiselect 23/23.

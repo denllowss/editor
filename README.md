@@ -123,6 +123,9 @@ curl http://localhost:3000/api/projects
 - **Tanpa notifikasi saat buka web** — auto-popup Welcome dimatikan permanen (tetap bisa dibuka via tombol Info).
 - **Tampilan tablet/desktop** (v0.7.0): `public/css/responsive.css` — dashboard lapang + grid project,
   drawer & galeri efek adaptif, breakpoint 768/1024/1440px (mobile tak tersentuh).
+- **Multi-select project + fix Remove tahan-lama** (v0.15.0): mode "Pilih" dengan
+  centang, pilih semua, dan hapus borongan; menu tahan-lama → Remove project
+  kini membuka modal dengan benar (bukan tertutup popstate basi).
 - **Trio bug tuntas** (v0.14.0): crash init editor (`CustomFonts.getAll` hilang)
   diperbaiki — impor media HP hidup lagi, phantom project musnah, hapus
   project terverifikasi DB. Teruji di browser sungguhan (desktop + mobile).

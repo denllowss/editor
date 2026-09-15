@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initUIProtections();
   initVersionFetcher();
   initProjectsFetcher();
+  initDashboardSelection();
   initWelcomeModal();
 
   // Purge all non-essential caches when opening index.html (preserves projects and media)
@@ -29,6 +30,25 @@ document.addEventListener('DOMContentLoaded', () => {
     history.replaceState(null, '', window.location.pathname);
   }
 });
+
+/**
+ * Wires multi-select toolbar buttons + Escape-to-exit selection mode
+ */
+function initDashboardSelection() {
+  const toggleBtn = document.getElementById('btn-toggle-select');
+  if (toggleBtn) toggleBtn.addEventListener('click', () => setSelectionMode(true));
+  const cancelBtn = document.getElementById('btn-select-cancel');
+  if (cancelBtn) cancelBtn.addEventListener('click', () => setSelectionMode(false));
+  const allBtn = document.getElementById('btn-select-all');
+  if (allBtn) allBtn.addEventListener('click', () => selectAllProjects());
+  const delBtn = document.getElementById('btn-select-delete');
+  if (delBtn) delBtn.addEventListener('click', () => openDeleteModalMulti([...selectedProjectIds]));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && selectionMode && !document.querySelector('.modal-backdrop.is-active')) {
+      setSelectionMode(false);
+    }
+  });
+}
 
 /**
  * Disables browser context menu (right click), zoom, and text selection
@@ -220,12 +240,17 @@ async function initProjectsFetcher() {
 
   // Project item left-click navigation (delegated)
   listContainer.addEventListener('click', (e) => {
+    const item = e.target.closest('.project-item');
+    if (!item) return;
+    // Mode pilih: tap = centang, bukan navigasi
+    if (selectionMode) {
+      if (item.dataset.id) toggleProjectSelected(item.dataset.id);
+      return;
+    }
     const swipeBox = e.target.closest('.project-swipe-container');
     if (swipeBox && swipeBox._hasSwiped) {
       return;
     }
-    const item = e.target.closest('.project-item');
-    if (!item) return;
     const projectId = item.dataset.id;
     if (projectId) {
       window.location.href = `editor.html?id=${encodeURIComponent(projectId)}`;
@@ -235,6 +260,7 @@ async function initProjectsFetcher() {
   // Attach Right-Click & Press-Hold ContextMenu
   if (window.ContextMenu && typeof window.ContextMenu.bindTrigger === 'function') {
     window.ContextMenu.bindTrigger(listContainer, '.project-item', (target) => {
+      if (selectionMode) return []; // menu tahan-lama mati saat mode pilih
       const projectId = target.dataset.id;
       const projectName = target.querySelector('.project-name')?.textContent || 'Project';
       return [
@@ -294,6 +320,7 @@ function renderProjects(projects, container, countBadge) {
         <span>No projects found in database</span>
       </div>
     `;
+    updateProjectsToolbar([]);
     return;
   }
 
@@ -323,6 +350,7 @@ function renderProjects(projects, container, countBadge) {
 
         <!-- Top Layer Project Item Card -->
         <article class="project-item" data-id="${escapeHtml(project.id)}" tabindex="0" role="button" aria-label="Project: ${escapeHtml(name)}">
+          <span class="select-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
           <div class="project-row-main">
             <span class="project-name">${escapeHtml(name)}</span>
             <span class="project-size" data-project-size-id="${escapeHtml(project.id)}">${escapeHtml(size)}</span>
@@ -337,6 +365,10 @@ function renderProjects(projects, container, countBadge) {
   }).join('');
 
   bindProjectSwipeGestures(container);
+
+  // Multi-select: terapkan status centang + sinkron toolbar hitungan
+  applySelectionToCards(container);
+  updateProjectsToolbar(projects);
 
   // Asynchronously compute and hydrate true total project size (JSON + Media + Frame Caches)
   if (window.FishDatabase && typeof window.FishDatabase.getProjectTotalSize === 'function') {
@@ -393,6 +425,7 @@ function bindProjectSwipeGestures(container) {
 
     const onPointerDown = (e) => {
       if (e.button !== undefined && e.button !== 0) return;
+      if (selectionMode) return; // swipe mati saat mode pilih
 
       startX = e.clientX;
       startY = e.clientY;
@@ -683,7 +716,105 @@ async function saveRenameProjectAction() {
 }
 
 /**
- * Opens the Delete Project Confirmation Modal
+ * Multi-select daftar project (v0.15.0): mode pilih + Set id terpilih.
+ * Selama aktif: tap kartu = centang (bukan navigasi), swipe & menu
+ * tahan-lama dimatikan, hapus berjalan borongan dengan konfirmasi.
+ */
+const selectedProjectIds = new Set();
+let selectionMode = false;
+let pendingMultiDeleteIds = null;
+
+function isSelectionMode() {
+  return selectionMode;
+}
+
+function setSelectionMode(on) {
+  selectionMode = !!on;
+  if (!selectionMode) {
+    selectedProjectIds.clear();
+    pendingMultiDeleteIds = null;
+  }
+  const panel = document.getElementById('panel-local-projects');
+  if (panel) panel.classList.toggle('is-selecting', selectionMode);
+  const toolbar = document.getElementById('projects-toolbar');
+  if (toolbar) toolbar.hidden = selectionMode;
+  const selectbar = document.getElementById('projects-selectbar');
+  if (selectbar) selectbar.hidden = !selectionMode;
+  const listContainer = document.getElementById('projects-container');
+  if (listContainer) applySelectionToCards(listContainer);
+  updateSelectBar();
+}
+
+function applySelectionToCards(container) {
+  if (!container) return;
+  container.querySelectorAll('.project-swipe-container').forEach((card) => {
+    card.classList.toggle('is-selected', selectedProjectIds.has(card.dataset.id));
+  });
+}
+
+function toggleProjectSelected(projectId) {
+  if (!projectId) return;
+  if (selectedProjectIds.has(projectId)) {
+    selectedProjectIds.delete(projectId);
+  } else {
+    selectedProjectIds.add(projectId);
+  }
+  const listContainer = document.getElementById('projects-container');
+  if (listContainer) {
+    listContainer.querySelectorAll('.project-swipe-container').forEach((card) => {
+      if (card.dataset.id === projectId) {
+        card.classList.toggle('is-selected', selectedProjectIds.has(projectId));
+      }
+    });
+  }
+  updateSelectBar();
+}
+
+function selectAllProjects() {
+  const listContainer = document.getElementById('projects-container');
+  if (!listContainer) return;
+  const cards = listContainer.querySelectorAll('.project-swipe-container');
+  const allSelected = cards.length > 0 && Array.from(cards).every((c) => selectedProjectIds.has(c.dataset.id));
+  if (allSelected) {
+    selectedProjectIds.clear();
+  } else {
+    cards.forEach((c) => { if (c.dataset.id) selectedProjectIds.add(c.dataset.id); });
+  }
+  applySelectionToCards(listContainer);
+  updateSelectBar();
+}
+
+function updateSelectBar() {
+  const countEl = document.getElementById('selectbar-count');
+  const deleteBtn = document.getElementById('btn-select-delete');
+  const allBtn = document.getElementById('btn-select-all');
+  const n = selectedProjectIds.size;
+  if (countEl) countEl.textContent = `${n} dipilih`;
+  if (deleteBtn) deleteBtn.disabled = n === 0;
+  if (allBtn) {
+    const listContainer = document.getElementById('projects-container');
+    const total = listContainer ? listContainer.querySelectorAll('.project-swipe-container').length : 0;
+    allBtn.textContent = total > 0 && n >= total ? 'Kosongkan' : 'Semua';
+  }
+}
+
+function updateProjectsToolbar(projects) {
+  const label = document.getElementById('projects-count-label');
+  const toggleBtn = document.getElementById('btn-toggle-select');
+  const n = projects ? projects.length : 0;
+  if (label) label.textContent = n === 0 ? '' : `${n} project`;
+  if (toggleBtn) toggleBtn.style.display = n === 0 ? 'none' : '';
+  if (selectionMode) {
+    if (n === 0) {
+      setSelectionMode(false);
+    } else {
+      updateSelectBar();
+    }
+  }
+}
+
+/**
+ * Opens the Delete Project Confirmation Modal (single project)
  */
 function openDeleteModal(projectId, currentName) {
   const modal = document.getElementById('modal-delete-project');
@@ -706,9 +837,60 @@ function openDeleteModal(projectId, currentName) {
 }
 
 /**
+ * Opens the Delete Confirmation Modal for MULTI-select (bulk delete).
+ * Reuses the single modal; confirm branch detects pendingMultiDeleteIds first.
+ */
+function openDeleteModalMulti(ids) {
+  pendingMultiDeleteIds = (ids || []).filter(Boolean);
+  if (!pendingMultiDeleteIds.length) return;
+  openDeleteModal('', `${pendingMultiDeleteIds.length} project terpilih`);
+}
+
+async function confirmMultiDeleteProjects(ids) {
+  const listContainer = document.getElementById('projects-container');
+  const countBadge = document.getElementById('project-count-badge');
+  let okCount = 0;
+  if (window.FishDatabase) {
+    // Sekuensial (bukan paralel): transaksi IndexedDB ke store yang sama
+    for (const pid of ids) {
+      try {
+        await window.FishDatabase.deleteProject(pid);
+        const stillThere = await window.FishDatabase.getProject(pid);
+        if (!stillThere) okCount++;
+      } catch (e) {
+        console.warn('Bulk delete error:', pid, e);
+      }
+    }
+  }
+  try { if (window.Modal) window.Modal.close(); } catch (_) {}
+  if (okCount === ids.length) {
+    showDashboardToast(`${okCount} project dihapus`);
+  } else if (okCount > 0) {
+    showDashboardToast(`${okCount} dari ${ids.length} project dihapus`);
+  } else {
+    showDashboardToast('Gagal menghapus project — coba lagi');
+  }
+  setSelectionMode(false);
+  if (listContainer && window.FishDatabase) {
+    try {
+      const projects = await window.FishDatabase.getProjects();
+      renderProjects(projects, listContainer, countBadge);
+    } catch (_) {}
+  }
+}
+
+/**
  * Confirms deletion of project from modal
  */
 async function confirmDeleteProjectAction() {
+  // Jalur MULTI-select (borongan) didahulukan
+  if (pendingMultiDeleteIds && pendingMultiDeleteIds.length) {
+    const ids = pendingMultiDeleteIds;
+    pendingMultiDeleteIds = null;
+    await confirmMultiDeleteProjects(ids);
+    return;
+  }
+
   const idInput = document.getElementById('delete-project-id');
   let projectId = idInput ? idInput.value : '';
 
@@ -1168,3 +1350,11 @@ window.createNewProjectAction = createNewProjectAction;
 window.closeWelcomeModal = closeWelcomeModal;
 window.openDonateFromWelcome = openDonateFromWelcome;
 window.toggleQrisDisplay = toggleQrisDisplay;
+window.DashboardSelection = {
+  isActive: isSelectionMode,
+  enter: () => setSelectionMode(true),
+  exit: () => setSelectionMode(false),
+  toggle: toggleProjectSelected,
+  selectAll: selectAllProjects,
+  selected: () => [...selectedProjectIds]
+};

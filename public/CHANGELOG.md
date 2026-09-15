@@ -1,3 +1,26 @@
+## v0.15.0 (Node.js port) — 16 Sep 2026
+
+### Fixed
+- **"Remove project" dari tahan-lama akhirnya bisa**: tap item menu memicu
+  `history.back()` async milik context menu yang tiba sebagai popstate basi
+  dan langsung membunuh modal hapus yang baru dibuka. Kini menu tutup tanpa
+  `back()` dulu (+ lewati `back()` bila modal baru terbuka) dan Modal
+  mengabaikan popstate <250ms usai `open()`. Tombol Back tetap menutup modal
+  dengan benar.
+
+### Added
+- **Multi-select daftar project**: tombol "Pilih" → tap kartu untuk centang
+  (navigasi/swipe/menu tahan-lama nonaktif), bilah aksi "N dipilih" +
+  Semua/Kosongkan + Hapus borongan (konfirmasi + toast jujur
+  "N project dihapus"), keluar otomatis usai hapus, Batal/Escape untuk keluar.
+
+### Tests
+- `test/dashboard-select.cjs` (+27 asserts). Verifikasi browser sungguhan
+  (mobile + sentuhan): tahan-lama→Remove→modal bertahan→Back menutup (8 cek),
+  alur multi-select penuh 23/23 lolos.
+
+---
+
 ## v0.14.0 (Node.js port) — 15 Sep 2026
 
 ### Fixed

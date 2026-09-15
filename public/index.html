@@ -106,6 +106,18 @@
       <section class="projects-panel" aria-label="Projects Management">
         <!-- Local Projects Tab Pane -->
         <div class="projects-tab-content is-active" id="panel-local-projects" role="tabpanel">
+          <!-- Toolbar daftar project: hitungan + tombol mode pilih (multi-select) -->
+          <div class="projects-toolbar" id="projects-toolbar">
+            <span class="projects-count-label" id="projects-count-label"></span>
+            <button type="button" class="projects-select-toggle" id="btn-toggle-select">Pilih</button>
+          </div>
+          <!-- Bilah aksi mode pilih (multi-select): batal, hitungan, semua, hapus -->
+          <div class="projects-selectbar" id="projects-selectbar" hidden>
+            <button type="button" class="selectbar-btn" id="btn-select-cancel">✕ Batal</button>
+            <span class="selectbar-count" id="selectbar-count">0 dipilih</span>
+            <button type="button" class="selectbar-btn" id="btn-select-all">Semua</button>
+            <button type="button" class="selectbar-btn selectbar-btn-danger" id="btn-select-delete" disabled>Hapus</button>
+          </div>
           <div class="projects-list" id="projects-container"></div>
         </div>
       </section>
