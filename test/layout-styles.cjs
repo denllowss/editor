@@ -96,6 +96,8 @@ console.log('\n[3] Persistensi & validasi pilihan');
   ok(t.LS.setLayout('capcut-tablet') === false, 'opsi tablet ditolak di desktop');
   ok(t.LS.setLayout('ngawur') === false, 'nilai asing ditolak');
   ok(t.mem.fishtool_layout_desktop === 'capcut', 'penolakan tak menimpa simpanan');
+  ok(t.LS.setLayout('klasik') === true, 'desktop pilih klasik');
+  ok(t.mem.fishtool_layout_desktop === 'klasik', 'klasik desktop tersimpan');
 
   const p = makeSandbox(390);
   ok(p.LS.setLayout('capcut') === false, 'phone tak bisa pilih');
@@ -113,7 +115,9 @@ console.log('\n[4] Label & paritas snippet pra-render');
   const { LS } = makeSandbox(1280);
   ok(LS.labelFor('after-effects') === 'After Effects', 'label AE');
   ok(LS.labelFor('capcut-tablet') === 'CapCut Tablet', 'label tablet');
+  ok(LS.labelFor('klasik') === 'Klasik', 'label klasik');
   ok(LS.labelFor('ngawur') === '', 'label asing kosong');
+  ok(html.includes("'after-effects', 'capcut', 'klasik'"), 'snippet kenal klasik desktop');
   for (const k of [LS.KEYS.desktop, LS.KEYS.tablet]) {
     ok(html.includes(k), `snippet HTML kenal kunci ${k}`);
   }
@@ -131,8 +135,10 @@ console.log('\n[5] Setting di editor.html (kondisional per tipe)');
   const iFoot = html.indexOf('Save & Export Buttons');
   ok(iModal > 0 && iModal < iCat && iCat < iFoot, 'di dalam modal setting, sebelum footer');
   ok((html.match(/id="dropdown-layout-style"/g) || []).length === 1, 'dropdown tepat 1x');
-  ok((html.match(/data-devices="desktop"/g) || []).length === 2, '2 opsi desktop');
-  ok((html.match(/data-devices="tablet"/g) || []).length === 2, '2 opsi tablet');
+  ok((html.match(/data-devices="desktop"/g) || []).length === 2, '2 opsi khusus desktop');
+  ok((html.match(/data-devices="tablet"/g) || []).length === 1, '1 opsi khusus tablet');
+  ok(html.includes('data-val="klasik"') && !/data-val="klasik" data-devices/.test(html),
+    'klasik universal (tanpa data-devices)');
   for (const v of ['after-effects', 'capcut', 'capcut-tablet', 'klasik']) {
     ok(html.includes(`data-val="${v}"`), `opsi ${v} ada`);
   }
@@ -145,10 +151,13 @@ console.log('\n[5] Setting di editor.html (kondisional per tipe)');
 // ----------------------------------------------------------
 console.log('\n[6] Cakupan layout-styles.css');
 {
-  for (const l of ['after-effects', 'capcut', 'capcut-tablet']) {
+  for (const l of ['after-effects', 'capcut', 'capcut-tablet', 'klasik']) {
     ok(css.includes(`html[data-layout="${l}"]`), `aturan ${l} ada`);
   }
-  ok(!/html\[data-layout="klasik"/.test(css), 'klasik tanpa aturan (ikut bawaan)');
+  ok(css.includes('(orientation: portrait)'), 'klasik bedakan potret/lanskap tablet');
+  const klasikLines = css.split('\n').filter((ln) => ln.includes('data-layout="klasik"'));
+  ok(klasikLines.length >= 10 && klasikLines.every((ln) => ln.trim().startsWith('html[')),
+    `klasik terkungkup penuh (${klasikLines.length} aturan)`);
   ok(!/html\[data-layout="mobile"/.test(css), 'mobile tanpa aturan (tak tersentuh)');
   const cols = (css.match(/flex-direction: column/g) || []).length;
   ok(cols >= 3, `susunan kolom di 3 gaya (${cols})`);

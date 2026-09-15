@@ -4,7 +4,7 @@
  * - Deteksi kelas perangkat dari lebar viewport: phone (<600) / tablet
  *   (600-1023) / desktop (>=1024). Ponsel: tanpa pilihan (tampilan bawaan).
  * - Pilihan gaya tersimpan per kelas di localStorage:
- *     desktop -> after-effects (default) | capcut
+ *     desktop -> after-effects (default) | capcut | klasik
  *     tablet  -> capcut-tablet (default) | klasik
  * - Menerapkan html[data-device] + html[data-layout] yang dibaca
  *   css/layout-styles.css. Sinkron dengan snippet pra-render di <head>
@@ -22,7 +22,8 @@
   var OPTIONS = {
     desktop: [
       { id: 'after-effects', label: 'After Effects' },
-      { id: 'capcut', label: 'CapCut' }
+      { id: 'capcut', label: 'CapCut' },
+      { id: 'klasik', label: 'Klasik' }
     ],
     tablet: [
       { id: 'capcut-tablet', label: 'CapCut Tablet' },

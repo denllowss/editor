@@ -30,7 +30,7 @@
         root.setAttribute('data-device', cls);
         if (cls === 'phone') { root.setAttribute('data-layout', 'mobile'); return; }
         var key = cls === 'desktop' ? 'fishtool_layout_desktop' : 'fishtool_layout_tablet';
-        var ok = cls === 'desktop' ? ['after-effects', 'capcut'] : ['capcut-tablet', 'klasik'];
+        var ok = cls === 'desktop' ? ['after-effects', 'capcut', 'klasik'] : ['capcut-tablet', 'klasik'];
         var v = window.localStorage ? window.localStorage.getItem(key) : null;
         root.setAttribute('data-layout', ok.indexOf(v) >= 0 ? v : (cls === 'desktop' ? 'after-effects' : 'capcut-tablet'));
       } catch (_) {}
@@ -181,7 +181,7 @@
               <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/>
               <line x1="12" y1="2.5" x2="12" y2="5.5"/>
               <line x1="12" y1="18.5" x2="12" y2="21.5"/>
-              <line x1="2.5" y1="12" x2="5.5" y2="12"/>
+              <line x1"12" x2="5.5" y2="12"/>
               <line x1="18.5" y1="12" x2="21.5" y2="12"/>
               <line x1="5.28" y1="5.28" x2="7.4" y2="7.4"/>
               <line x1="16.6" y1="16.6" x2="18.72" y2="18.72"/>
@@ -243,7 +243,7 @@
                 </div>
                 <div class="media-dropzone-title">Import Media</div>
                 <div class="media-dropzone-desc">Add video, photo, or audio to timeline</div>
-                <span class="media-dropzone-badge">Media</span>
+                <span class="media-dropzone-badopzone-badge">Media</span>
               </div>
             </div>
           </div>
@@ -2867,10 +2867,10 @@
                   <div class="custom-dropdown-item is-selected" role="option" data-val="after-effects" data-devices="desktop">After Effects</div>
                   <div class="custom-dropdown-item" role="option" data-val="capcut" data-devices="desktop">CapCut</div>
                   <div class="custom-dropdown-item" role="option" data-val="capcut-tablet" data-devices="tablet">CapCut Tablet</div>
-                  <div class="custom-dropdown-item" role="option" data-val="klasik" data-devices="tablet">Klasik</div>
+                  <div class="custom-dropdown-item" role="option" data-val="klasik">Klasik</div>
                 </div>
               </div>
-              <p class="layout-style-note">Langsung diterapkan &amp; tersimpan di perangkat ini. Pilihan desktop hanya tampil di desktop; pilihan tablet hanya di tablet.</p>
+              <p class="layout-style-note">Langsung diterapkan &amp; tersimpan di perangkat ini. Klasik tampil di semua perangkat; pilihan lain mengikuti tipe perangkat.</p>
             </div>
           </div>
         </section>

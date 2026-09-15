@@ -182,7 +182,7 @@
 
 /* ==========================================================================
    TABLET: CAPCUT (default) — kolom ala editor tablet (preview 52% + timeline),
-   target sentuh lega. Mode "klasik" tanpa aturan (ikut bawaan/responsive.css).
+   target sentuh lega.
    ========================================================================== */
 @media (min-width: 600px) and (max-width: 1023px) {
   html[data-layout="capcut-tablet"] .editor-main-body {
@@ -230,6 +230,161 @@
 
   html[data-layout="capcut-tablet"] #timeline-layer-drawer .drawer-card {
     max-width: none;
+  }
+}
+
+/* ==========================================================================
+   TABLET: KLASIK (v0.21.0) — susunan bawaan yang dilapangkan: kartu
+   beradius + celah lega, panel sentuh tinggi, drawer & galeri lebar.
+   Potret = kolom (preview 44% + timeline); lanskap = baris 50/50.
+   ========================================================================== */
+@media (min-width: 600px) and (max-width: 1023px) {
+  html[data-layout="klasik"] .editor-main-body {
+    gap: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  html[data-layout="klasik"] .editor-left-pane {
+    min-width: 0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  html[data-layout="klasik"] .editor-timeline-wrapper {
+    width: auto;
+    max-width: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  html[data-layout="klasik"] .editor-controller {
+    min-height: 52px;
+  }
+
+  html[data-layout="klasik"] #timeline-layer-drawer .drawer-card {
+    max-width: none;
+  }
+
+  html[data-layout="klasik"] .effects-category-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  html[data-layout="klasik"] .effects-items-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  html[data-layout="klasik"] .drawer-media-grid {
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1023px) and (orientation: portrait) {
+  html[data-layout="klasik"] .editor-main-body {
+    flex-direction: column;
+  }
+
+  html[data-layout="klasik"] .editor-left-pane {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    flex: 0 0 44%;
+    min-height: 260px;
+  }
+
+  html[data-layout="klasik"] .editor-timeline-wrapper {
+    width: 100%;
+    height: auto;
+  }
+
+  html[data-layout="klasik"] .editor-timeline {
+    border-top-left-radius: 0;
+  }
+
+  html[data-layout="klasik"] .editor-controller {
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+  }
+
+  /* Splitter vertikal tak relevan di susunan kolom */
+  html[data-layout="klasik"] .timeline-split-handle {
+    display: none;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1023px) and (orientation: landscape) {
+  html[data-layout="klasik"] .editor-main-body {
+    flex-direction: row;
+    --left-pane-width: 50%;
+  }
+
+  html[data-layout="klasik"] .editor-left-pane {
+    height: 100%;
+    min-height: 0;
+  }
+
+  html[data-layout="klasik"] .editor-timeline-wrapper {
+    height: 100%;
+  }
+}
+
+/* ==========================================================================
+   DESKTOP: KLASIK (v0.21.0) — baris klasik dilapangkan: preview 54%,
+   celah & padding lega, drawer full-bleed, galeri 6 kolom.
+   ========================================================================== */
+@media (min-width: 1024px) {
+  html[data-layout="klasik"] .editor-main-body {
+    flex-direction: row;
+    gap: 12px;
+    padding: 12px;
+    box-sizing: border-box;
+    --left-pane-width: 54%;
+  }
+
+  html[data-layout="klasik"] .editor-left-pane {
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  html[data-layout="klasik"] .editor-timeline-wrapper {
+    width: auto;
+    max-width: none;
+    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+    min-width: 340px;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  html[data-layout="klasik"] .editor-controller {
+    min-height: 56px;
+  }
+
+  html[data-layout="klasik"] #timeline-layer-drawer .drawer-card {
+    max-width: none;
+  }
+
+  html[data-layout="klasik"] .effects-category-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  html[data-layout="klasik"] .effects-items-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  html[data-layout="klasik"] .drawer-media-grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  }
+
+  html[data-layout="klasik"] .effects-gallery-item-card {
+    max-width: 104px;
   }
 }
 
