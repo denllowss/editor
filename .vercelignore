@@ -1,0 +1,3 @@
+# Tak perlu diunggah ke deployment Vercel (function di-trace dari api/,
+# aset statis dibundel via includeFiles di vercel.json).
+test/

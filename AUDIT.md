@@ -241,3 +241,11 @@ browser membuka file (navigasi pergi). Penambahan: `js/desktop-drop.js` (catcher
 jendela >=1024px + veil + ringkasan + impor via handleDropFilesWithAction yang
 kini diekspos; diam di zona khusus) + veil di editor.html + CSS. Tablet/ponsel
 tak tersentuh. Test 37 asserts. Total `npm test`: 535 asserts, 0 gagal.
+
+## 19. Addendum v0.13.0 (Node.js port) — siap deploy Vercel
+
+Express listen-penuh tak jalan sebagai serverless + FS read-only mematikan API
+tulis. Penambahan: `api/index.js` (ekspor app), `vercel.json` (rewrite total +
+includeFiles public/data), guard listen + rantai tulis data->tmp->memori +
+seed bundel di server.js, engines node>=18, `.vercelignore`. Test 22 asserts.
+Total `npm test`: 557 asserts, 0 gagal.

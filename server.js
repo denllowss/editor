@@ -23,6 +23,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
 
@@ -35,19 +36,64 @@ const PROJECTS_FILE = path.join(DATA_DIR, 'projects.json');
 
 // ----------------------------------------------------------
 // Helpers: penyimpanan project sisi-server (file JSON)
+// Rantai fallback tulis (Vercel = filesystem read-only):
+//   1) ./data/projects.json (lokal/VPS — persisten)
+//   2) $TMPDIR/fishtool-projects.json (serverless — semi-persisten antar
+//      invocasi hangat; hilang saat cold start / redeploy)
+//   3) memori proses (darurat — hilang saat proses mati)
+// Bacaan pertama di (2) di-seed dari file bundel bila ada.
 // ----------------------------------------------------------
-function ensureDataFile() {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (!fs.existsSync(PROJECTS_FILE)) {
-    fs.writeFileSync(PROJECTS_FILE, '[]', 'utf8');
+let _memProjects = null;
+
+function writableDir() {
+  for (const dir of [DATA_DIR, os.tmpdir()]) {
+    try {
+      fs.mkdirSync(dir, { recursive: true });
+      fs.accessSync(dir, fs.constants.W_OK);
+      return dir;
+    } catch {
+      // coba direktori berikutnya
+    }
   }
+  return null;
+}
+
+function activeProjectsFile() {
+  const dir = writableDir();
+  if (!dir) return null;
+  return path.join(dir, 'projects.json');
+}
+
+function ensureDataFile() {
+  const file = activeProjectsFile();
+  if (!file) return null;
+  try {
+    if (!fs.existsSync(file)) {
+      fs.writeFileSync(file, '[]', 'utf8');
+    }
+  } catch {
+    return null;
+  }
+  return file;
 }
 
 function readProjects() {
-  ensureDataFile();
+  if (_memProjects) return _memProjects;
+  const file = activeProjectsFile();
+  if (!file) {
+    _memProjects = [];
+    return _memProjects;
+  }
   try {
-    const raw = fs.readFileSync(PROJECTS_FILE, 'utf8');
-    const data = JSON.parse(raw);
+    if (!fs.existsSync(file)) {
+      // Seed dari bundel read-only bila tersedia (kasus Vercel)
+      if (file !== PROJECTS_FILE && fs.existsSync(PROJECTS_FILE)) {
+        const seed = JSON.parse(fs.readFileSync(PROJECTS_FILE, 'utf8'));
+        return Array.isArray(seed) ? seed : [];
+      }
+      return [];
+    }
+    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
     return Array.isArray(data) ? data : [];
   } catch {
     return [];
@@ -55,8 +101,12 @@ function readProjects() {
 }
 
 function writeProjects(list) {
-  ensureDataFile();
-  fs.writeFileSync(PROJECTS_FILE, JSON.stringify(list, null, 2), 'utf8');
+  const file = ensureDataFile();
+  if (!file) {
+    _memProjects = list;
+    return;
+  }
+  fs.writeFileSync(file, JSON.stringify(list, null, 2), 'utf8');
 }
 
 function newId() {
@@ -220,10 +270,17 @@ app.use((err, req, res, next) => {
 });
 
 // ----------------------------------------------------------
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n  🐟 OpenFishTools Studio (Node.js port) berjalan di:`);
-  console.log(`     → http://localhost:${PORT}/`);
-  console.log(`     → http://localhost:${PORT}/editor`);
-  console.log(`     → http://localhost:${PORT}/demo`);
-  console.log(`     → http://localhost:${PORT}/api/health\n`);
-});
+// Jalankan server bila dieksekusi langsung (node server.js).
+// Diimpor TANPA listen oleh api/index.js (Vercel serverless).
+// ----------------------------------------------------------
+if (require.main === module) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`\n  🐟 OpenFishTools Studio (Node.js port) berjalan di:`);
+    console.log(`     → http://localhost:${PORT}/`);
+    console.log(`     → http://localhost:${PORT}/editor`);
+    console.log(`     → http://localhost:${PORT}/demo`);
+    console.log(`     → http://localhost:${PORT}/api/health\n`);
+  });
+}
+
+module.exports = app;

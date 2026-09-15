@@ -1,3 +1,16 @@
+## v0.13.0 (Node.js port) — 15 Sep 2026
+
+### Added
+- Siap deploy Vercel: `api/index.js` mengekspor app Express utuh, `vercel.json`
+  me-rewrite semua request ke function + bundel `public/**` & `data/**`,
+  `server.js` hanya listen saat dijalankan langsung (guard require.main).
+- Penyimpanan project tahan read-only FS: tulis ke `./data`, fallback `$TMPDIR`
+  (semi-persisten antar invocasi hangat), fallback terakhir memori + seed bundel.
+- Test `test/vercel.cjs` (+22 asserts): config, entry, guard, fallback storage,
+  dan smoke runtime tanpa port.
+
+---
+
 ## v0.12.0 (Node.js port) — 15 Sep 2026
 
 ### Added

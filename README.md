@@ -41,6 +41,23 @@ Lalu buka:
 | Dashboard | http://localhost:3000/ |
 | Editor | http://localhost:3000/editor |
 | Showcase | http://localhost:3000/demo |
+
+## Deploy ke Vercel (v0.13.0)
+
+```bash
+vercel --prod   # atau: hubungkan repo GitHub di vercel.com → Deploy
+```
+
+Tanpa konfigurasi tambahan (`vercel.json` + `api/index.js` sudah disiapkan;
+seluruh request ditangani app Express yang sama persis seperti lokal).
+Catatan serverless:
+
+- **API project (`/api/projects`) tidak persisten permanen** — tulis jatuh ke
+  `$TMPDIR` (hilang saat cold start/redeploy). Project editor sendiri aman
+  (tersimpan di IndexedDB browser + file `.ofts`). Untuk persistensi penuh,
+  sambungkan database eksternal (mis. Vercel Postgres/KV) di kemudian hari.
+- Payload request dibatasi platform (±4,5 MB di paket Hobby) — simpan `.ofts`
+  besar sebagai file lokal, bukan via API.
 | Health check | http://localhost:3000/api/health |
 
 Mode development (auto-restart saat `server.js` berubah):
@@ -106,6 +123,8 @@ curl http://localhost:3000/api/projects
 - **Tanpa notifikasi saat buka web** — auto-popup Welcome dimatikan permanen (tetap bisa dibuka via tombol Info).
 - **Tampilan tablet/desktop** (v0.7.0): `public/css/responsive.css` — dashboard lapang + grid project,
   drawer & galeri efek adaptif, breakpoint 768/1024/1440px (mobile tak tersentuh).
+- **Siap deploy Vercel** (v0.13.0): function `api/index.js` + `vercel.json`, storage
+  tahan read-only FS (data → tmp → memori).
 - **Drag & drop langsung di desktop** (v0.12.0): seret file OS ke mana saja di editor,
   veil panduan tampil, file langsung masuk timeline (anti-impor-ganda zona).
 - **Gaya tampilan ala AE/CapCut** (v0.11.0): pilih After Effects atau CapCut di desktop,
