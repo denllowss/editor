@@ -1,3 +1,28 @@
+## v0.28.0 — 16 Sep 2026
+
+### Changed
+- **Rebrand Denji Motion**: seluruh brand user-visible (judul, header,
+  about, donasi, changelog, tooltip, loader, splash extension, teks
+  default layer) memakai nama Denji Motion; kredit MIT + URL aset hulu
+  dipertahankan; identifier internal utuh (localStorage, id, class, src,
+  format .fishtool).
+
+## v0.27.0 — 16 Sep 2026
+
+### Added
+- **Efek Outline (stroke universal)**: mode alpha mengikuti kontur
+  transparansi PNG via dilasi multi-sampel (fast 8 / smooth 16) + tint
+  source-in; mode box untuk stroke bounds murah; param width/color/
+  opacity; berlaku ke semua tipe visual di pratinjau + ekspor.
+
+## v0.26.0 — 16 Sep 2026
+
+### Added
+- **Gradient Fase 1**: handle kanvas start/end yang bisa di-drag (panah
+  overlay khusus editor), titik ternormalisasi per layer, opacity per
+  stop, offset numerik, readout koordinat S/E, 6 preset bawaan + maks
+  12 preset simpanan; gradient & proyek lama pixel-identik.
+
 ## v0.15.0 (Node.js port) — 16 Sep 2026
 
 ### Fixed

@@ -20,6 +20,7 @@ const editorCode = fs.readFileSync(path.join(PUBLIC, 'js', 'editor.js'), 'utf8')
 const textEngine = fs.readFileSync(path.join(PUBLIC, 'js', 'text-engine.js'), 'utf8');
 const demoCode = fs.readFileSync(path.join(PUBLIC, 'js', 'demo.js'), 'utf8');
 const themeCss = fs.readFileSync(path.join(PUBLIC, 'css', 'theme.css'), 'utf8');
+const serverCode = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
 
 let passed = 0;
 let failed = 0;
@@ -47,6 +48,7 @@ ok(extHtml.includes('DENJI MOTION'), 'splash extension');
 });
 ok(editorHtml.includes('title="Denji Motion Panel"'), 'tooltip panel');
 ok(editorHtml.includes('Loading Denji Motion...'), 'loader panel');
+ok(serverCode.includes('Denji Motion (Node.js port) berjalan di:'), 'log startup server');
 
 // [2] Atribusi hulu
 console.log('[2] Atribusi MIT');

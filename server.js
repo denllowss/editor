@@ -275,7 +275,7 @@ app.use((err, req, res, next) => {
 // ----------------------------------------------------------
 if (require.main === module) {
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`\n  🐟 OpenFishTools Studio (Node.js port) berjalan di:`);
+    console.log(`\n  🐟 Denji Motion (Node.js port) berjalan di:`);
     console.log(`     → http://localhost:${PORT}/`);
     console.log(`     → http://localhost:${PORT}/editor`);
     console.log(`     → http://localhost:${PORT}/demo`);
