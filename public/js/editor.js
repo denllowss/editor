@@ -1320,12 +1320,12 @@
         const pctx = _unreadyPlaceholderCanvas.getContext('2d');
         if (pctx) {
           const rootStyle = (typeof window !== 'undefined' && window.getComputedStyle) ? window.getComputedStyle(document.documentElement) : null;
-          const bgPanel = (rootStyle && rootStyle.getPropertyValue('--bg-panel').trim()) || '#141814';
-          const bgPanelInner = (rootStyle && rootStyle.getPropertyValue('--bg-panel-inner').trim()) || '#1c221c';
-          const borderSubtle = (rootStyle && rootStyle.getPropertyValue('--border-subtle').trim()) || '#222c22';
-          const colorPrimary = (rootStyle && rootStyle.getPropertyValue('--color-primary').trim()) || '#98ce7b';
-          const textSec = (rootStyle && rootStyle.getPropertyValue('--text-secondary').trim()) || '#c5d2c0';
-          const textMuted = (rootStyle && rootStyle.getPropertyValue('--text-muted').trim()) || '#788874';
+          const bgPanel = (rootStyle && rootStyle.getPropertyValue('--bg-panel').trim()) || '#1a1212';
+          const bgPanelInner = (rootStyle && rootStyle.getPropertyValue('--bg-panel-inner').trim()) || '#1f1515';
+          const borderSubtle = (rootStyle && rootStyle.getPropertyValue('--border-subtle').trim()) || '#2b1d1d';
+          const colorPrimary = (rootStyle && rootStyle.getPropertyValue('--color-primary').trim()) || '#c23b3b';
+          const textSec = (rootStyle && rootStyle.getPropertyValue('--text-secondary').trim()) || '#e8b0b0';
+          const textMuted = (rootStyle && rootStyle.getPropertyValue('--text-muted').trim()) || '#a08080';
 
           // Flat background surface (CSS token: var(--bg-panel))
           pctx.fillStyle = bgPanel;
@@ -1426,7 +1426,7 @@
 
       const fillType = layer.fillType || 'none';
       if (fillType === 'color') {
-        fctx.fillStyle = layer.fillColor || '#98ce7b';
+        fctx.fillStyle = layer.fillColor || '#c23b3b';
         fctx.fillRect(0, 0, targetW, targetH);
       } else if (fillType === 'gradient') {
         const stops = (Array.isArray(layer.fillGradStops) && layer.fillGradStops.length >= 2)
@@ -2317,7 +2317,7 @@
           ctx.fillRect(0, 0, w, h);
         } else if (!isExport) {
           // Flat dark background for transparent preview
-          ctx.fillStyle = '#0a0d07';
+          ctx.fillStyle = '#0d0808';
           ctx.fillRect(0, 0, w, h);
         }
 
@@ -3384,7 +3384,7 @@
 
         // 1. Symmetrical Quarter Grid Lines (Clean 4x4 layout, 1 garis di kiri/kanan & atas/bawah)
         ctx.lineWidth = baseLineWidth;
-        ctx.strokeStyle = 'rgba(152, 206, 123, 0.2)';
+        ctx.strokeStyle = 'rgba(194, 59, 59, 0.2)';
 
         ctx.beginPath();
         // Quarter vertical lines (25% & 75%)
@@ -3402,7 +3402,7 @@
 
         // 2. Primary Center Axes Lines (Garis tengah horizontal & vertikal utama)
         ctx.lineWidth = Math.max(1.5, baseLineWidth * 1.6);
-        ctx.strokeStyle = 'rgba(152, 206, 123, 0.6)';
+        ctx.strokeStyle = 'rgba(194, 59, 59, 0.6)';
 
         ctx.beginPath();
         // Sumbu tengah vertikal (X = w/2)
@@ -3414,7 +3414,7 @@
         // 3. Center Origin Crosshair (Titik temu poros tengah)
         const crossSize = Math.max(12, Math.round(Math.min(w, h) * 0.035));
         ctx.lineWidth = Math.max(2, baseLineWidth * 2.2);
-        ctx.strokeStyle = 'rgba(152, 206, 123, 0.95)';
+        ctx.strokeStyle = 'rgba(194, 59, 59, 0.95)';
 
         ctx.beginPath();
         ctx.moveTo(cx - crossSize, cy); ctx.lineTo(cx + crossSize, cy);
@@ -3423,7 +3423,7 @@
 
         // 4. Dynamic Magnetic Snap Indicator Guides
         if (window.activeSnapGuides) {
-          const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#98ce7b';
+          const themePrimary = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#c23b3b';
           ctx.strokeStyle = themePrimary;
           ctx.setLineDash([8, 4]);
 
@@ -4496,6 +4496,22 @@
             const chosenRatio = Math.max(ratioW, ratioH);
             newW = Math.max(10, startLayerState.scaleW * chosenRatio);
             newH = Math.max(10, startLayerState.scaleH * chosenRatio);
+          }
+
+          // Stretch Element OFF: kunci proporsional (sudut ikut rasio dominan, tepi ikut sumbu tetangga)
+          if (targetLayer.stretchElement === false && Math.abs(startLayerState.scaleW) > 0 && Math.abs(startLayerState.scaleH) > 0) {
+            const lockAspect = Math.abs(startLayerState.scaleW / startLayerState.scaleH);
+            if (factorX !== 0 && factorY !== 0) {
+              const ratioW = newW / Math.abs(startLayerState.scaleW);
+              const ratioH = newH / Math.abs(startLayerState.scaleH);
+              const chosenRatio = Math.max(ratioW, ratioH);
+              newW = Math.max(10, Math.abs(startLayerState.scaleW) * chosenRatio);
+              newH = Math.max(10, Math.abs(startLayerState.scaleH) * chosenRatio);
+            } else if (factorX !== 0) {
+              newH = Math.max(10, newW / lockAspect);
+            } else if (factorY !== 0) {
+              newW = Math.max(10, newH * lockAspect);
+            }
           }
 
           // Compute new center anchor position in world/base coordinates
@@ -10389,12 +10405,12 @@
         if (tp.longShadow) {
           previewStyle += ` text-shadow: 2px 2px 0px ${tp.longShadowColor || 'rgba(0,0,0,0.4)'};`;
         } else if (tp.neonGlow) {
-          previewStyle += ` text-shadow: 0 0 8px ${tp.neonGlowColor || '#98ce7b'};`;
+          previewStyle += ` text-shadow: 0 0 8px ${tp.neonGlowColor || '#c23b3b'};`;
         }
         let badgeWrapStart = '';
         let badgeWrapEnd = '';
         if (tp.badgeEnabled) {
-          badgeWrapStart = `<span style="background: ${tp.badgeColor || '#98ce7b'}; color: ${tp.fillColor || '#000'}; padding: 2px 8px; border-radius: 999px;">`;
+          badgeWrapStart = `<span style="background: ${tp.badgeColor || '#c23b3b'}; color: ${tp.fillColor || '#000'}; padding: 2px 8px; border-radius: 999px;">`;
           badgeWrapEnd = `</span>`;
         }
         return `
@@ -11066,7 +11082,7 @@
         shapeType: shapeType,
         shapeProps: shapeProps,
         fillType: 'color',
-        fillColor: '#98ce7b',
+        fillColor: '#c23b3b',
         strokeColor: '#ffffff',
         strokeWidth: 0,
         startPx: startPx,
@@ -11269,7 +11285,7 @@
       // Apply Fill
       const fillType = layer.fillType || 'color';
       if (fillType === 'color') {
-        sctx.fillStyle = layer.fillColor || '#98ce7b';
+        sctx.fillStyle = layer.fillColor || '#c23b3b';
         sctx.fill();
       } else if (fillType === 'gradient' || fillType === 'media') {
         const fillCanvas = getOrUpdateLayerFillCanvas(layer, targetW, targetH);
@@ -12224,9 +12240,9 @@
         const midY = h / 2;
 
         const computedStyle = getComputedStyle(canvas);
-        const primaryColor = computedStyle.getPropertyValue('--color-primary').trim() || '#98ce7b';
+        const primaryColor = computedStyle.getPropertyValue('--color-primary').trim() || '#c23b3b';
         const playedColor = computedStyle.getPropertyValue('--track-audio').trim() || primaryColor;
-        const unplayedColor = computedStyle.getPropertyValue('--track-audio-dark').trim() || '#648250';
+        const unplayedColor = computedStyle.getPropertyValue('--track-audio-dark').trim() || '#7d4444';
 
         const currentSec = getTimelineCurrentSec();
         const layerStart = layer && layer.startSec !== undefined ? layer.startSec : 0;
@@ -13151,7 +13167,7 @@
         b = parseInt(hex.substring(5, 7), 16) || 0;
       }
       const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-      return (yiq >= 150) ? '#141814' : '#ffffff';
+      return (yiq >= 150) ? '#1a1212' : '#ffffff';
     }
 
     // Color interpolation for adding gradient stops
@@ -20535,6 +20551,15 @@
         const timelineEl = document.getElementById('main-editor-timeline');
         const tlBottom = timelineEl ? timelineEl.getBoundingClientRect().bottom : vpRect.bottom;
         const cardRect = drawerCard ? drawerCard.getBoundingClientRect() : null;
+        // Drawer docked di samping (tak memotong viewport) harus diabaikan: bukan overlay bawah
+        const cardIntersectsVp = !!(cardRect && cardRect.width > 0 && cardRect.height > 0 &&
+          cardRect.left < vpRect.right && cardRect.right > vpRect.left &&
+          cardRect.top < vpRect.bottom && cardRect.bottom > vpRect.top);
+        // Overlay bawah hanya relevan bila menutup kolom slot (pill di kiri); drawer kanan tak dihitung
+        const slotRectProbe = slot ? slot.getBoundingClientRect() : null;
+        const cardCoversSlotX = !slotRectProbe || !!(cardRect &&
+          cardRect.left < slotRectProbe.right && cardRect.right > slotRectProbe.left);
+        const drawerCoversTimeline = isDrawerOpen && !!drawerCard && cardIntersectsVp && cardCoversSlotX;
         let cardHeight = 260;
         if (drawerCard) {
           if (drawerCard._targetHeight && drawerCard.style.transition) {
@@ -20544,15 +20569,19 @@
           }
         }
         const cardRestingTop = tlBottom - cardHeight;
-        const drawerTop = (isDrawerOpen && drawerCard) ? cardRestingTop : vpRect.bottom;
+        const drawerTop = drawerCoversTimeline ? cardRestingTop : vpRect.bottom;
 
-        const drawerH = isDrawerOpen ? Math.max(0, Math.round(tlBottom - drawerTop)) : 0;
-        if (timelineEl && drawerH > 0) {
-          timelineEl.style.setProperty('--timeline-drawer-height', `${drawerH}px`);
+        const drawerH = drawerCoversTimeline ? Math.max(0, Math.round(tlBottom - drawerTop)) : 0;
+        if (timelineEl) {
+          if (drawerH > 0) {
+            timelineEl.style.setProperty('--timeline-drawer-height', `${drawerH}px`);
+          } else {
+            timelineEl.style.removeProperty('--timeline-drawer-height');
+          }
         }
 
         const visibleTop = vpRect.top;
-        const visibleBottom = isDrawerOpen ? drawerTop : vpRect.bottom;
+        const visibleBottom = drawerCoversTimeline ? drawerTop : vpRect.bottom;
         const visibleHeight = visibleBottom - visibleTop;
         const targetCenterY = visibleTop + (visibleHeight / 2);
 
@@ -20560,8 +20589,10 @@
         const maxScrollY = Math.max(0, viewport.scrollHeight - viewport.clientHeight);
         if (slot) {
           const slotRect = slot.getBoundingClientRect();
-          // On desktop, if slot is already fully visible in viewport, do NOT shift/scroll timeline
-          if (isDesktop && slotRect.top >= vpRect.top && slotRect.bottom <= vpRect.bottom) {
+          // Slot sudah terlihat penuh di area tampak (di luar drawer) → jangan geser/scroll
+          // (berlaku semua layout; overlay bawah asli tetap memicu centering karena slotRect di bawah drawerTop)
+          const visibleSpan = visibleBottom - visibleTop;
+          if (visibleSpan > slotRect.height && slotRect.top >= visibleTop && slotRect.bottom <= visibleBottom) {
             return;
           }
           const slotCenterY = slotRect.top + (slotRect.height / 2);
@@ -21322,6 +21353,30 @@
           });
         }
 
+        // Stretch Element: ON = resize bebas melar, OFF = kunci proporsional (per layer)
+        function toggleStretchElement() {
+          if (Array.isArray(window.selectedKeyframes) && window.selectedKeyframes.length > 0) return;
+          const layers = currentProjectState.layers || [];
+          const ids = new Set();
+          if (selectedLayerId) ids.add(selectedLayerId);
+          if (selectedLayerIds) selectedLayerIds.forEach((id) => ids.add(id));
+          const targets = layers.filter((l) => l && ids.has(l.id));
+          if (targets.length === 0) return;
+          const turnOn = !targets.every((l) => l.stretchElement !== false);
+          targets.forEach((l) => { l.stretchElement = turnOn; });
+          saveCurrentProjectLayers();
+          if (typeof updateLayerActionsPopoverState === 'function') updateLayerActionsPopoverState();
+        }
+        window.toggleStretchElement = toggleStretchElement;
+
+        const btnStretch = document.getElementById('popover-btn-stretch');
+        if (btnStretch) {
+          btnStretch.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleStretchElement();
+          });
+        }
+
         const btnExtractAudio = document.getElementById('popover-btn-extract-audio');
         if (btnExtractAudio) {
           btnExtractAudio.addEventListener('click', (e) => {
@@ -21602,6 +21657,27 @@
             precomposeBtn.setAttribute('disabled', 'true');
             precomposeBtn.style.display = 'none';
             if (precomposeLabel) precomposeLabel.textContent = 'Group';
+          }
+        }
+
+        // 3c. Stretch Element State (centang = ON/bebas melar, per layer terpilih)
+        const stretchBtn = document.getElementById('popover-btn-stretch');
+        const stretchLabel = document.getElementById('popover-label-stretch');
+        if (stretchBtn) {
+          const stretchIds = new Set();
+          if (selectedLayerIds) selectedLayerIds.forEach((id) => stretchIds.add(id));
+          if (selectedLayerId) stretchIds.add(selectedLayerId);
+          const stretchTargets = layers.filter((l) => l && stretchIds.has(l.id));
+          if (!hasKeyframesSelected && stretchTargets.length > 0 && !isFromEmptyTimeline) {
+            stretchBtn.removeAttribute('disabled');
+            stretchBtn.classList.toggle('is-on', stretchTargets.every((l) => l.stretchElement !== false));
+            if (stretchLabel) {
+              stretchLabel.textContent = stretchTargets.length > 1 ? `Stretch Element (${stretchTargets.length})` : 'Stretch Element';
+            }
+          } else {
+            stretchBtn.setAttribute('disabled', 'true');
+            stretchBtn.classList.remove('is-on');
+            if (stretchLabel) stretchLabel.textContent = 'Stretch Element';
           }
         }
 

@@ -446,7 +446,7 @@
       if (totalDur <= 0 || this.frames.size === 0 || window.isPreviewCacheEnabled === false) return;
 
       if (!this._cachedPrimaryColor || (Date.now() - (this._lastColorQuery || 0) > 3000)) {
-        this._cachedPrimaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#98ce7b';
+        this._cachedPrimaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim() || '#c23b3b';
         this._lastColorQuery = Date.now();
       }
       this.rulerCtx.fillStyle = this._cachedPrimaryColor;

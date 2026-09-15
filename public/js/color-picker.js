@@ -515,7 +515,7 @@
       badge.setAttribute('role', 'status');
       badge.style.cssText = 'position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;' +
         'background:rgba(20,26,14,.92);color:#EAF3DF;font:600 13px/1.4 system-ui,sans-serif;' +
-        'padding:9px 16px;border-radius:999px;border:1px solid #98ce7b;pointer-events:none;' +
+        'padding:9px 16px;border-radius:999px;border:1px solid #c23b3b;pointer-events:none;' +
         'box-shadow:0 4px 18px rgba(0,0,0,.45);white-space:nowrap;';
       document.body.appendChild(badge);
 

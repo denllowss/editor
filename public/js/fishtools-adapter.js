@@ -1657,23 +1657,23 @@ window.FishToolsAdapter = (function () {
           color-scheme: dark;
         }
         :root, [data-theme="dark"], [data-theme="matcha"] {
-          --bg: #0d1109 !important;
-          --surface: #151a0f !important;
-          --surface2: #1d2415 !important;
-          --border: #2a3321 !important;
-          --border2: #3d4a2f !important;
-          --accent: #98ce7b !important;
-          --accent-h: #abdd90 !important;
-          --accent-rgb: 152, 206, 123 !important;
+          --bg: #0f0b0b !important;
+          --surface: #170f0f !important;
+          --surface2: #201313 !important;
+          --border: #332121 !important;
+          --border2: #4a2b2b !important;
+          --accent: #c23b3b !important;
+          --accent-h: #e05a5a !important;
+          --accent-rgb: 194, 59, 59 !important;
           --accent-fg: #000000 !important;
-          --text: #98ce7b !important;
-          --text-dim: #98ce7b !important;
-          --text-mut: #7fb862 !important;
+          --text: #c23b3b !important;
+          --text-dim: #c23b3b !important;
+          --text-mut: #962424 !important;
         }
         html, body {
-          background-color: var(--bg, #0d1109) !important;
-          background: var(--bg, #0d1109) !important;
-          color: var(--accent, #98ce7b) !important;
+          background-color: var(--bg, #0f0b0b) !important;
+          background: var(--bg, #0f0b0b) !important;
+          color: var(--accent, #c23b3b) !important;
           width: 100%;
           height: 100% !important;
           margin: 0;
@@ -1684,23 +1684,23 @@ window.FishToolsAdapter = (function () {
           height: 100% !important;
           padding: 8px 8px 48px !important;
           box-sizing: border-box !important;
-          background-color: var(--bg, #0d1109) !important;
-          background: var(--bg, #0d1109) !important;
+          background-color: var(--bg, #0f0b0b) !important;
+          background: var(--bg, #0f0b0b) !important;
           overflow-y: auto !important;
           -webkit-overflow-scrolling: touch !important;
         }
         .tab-content {
-          background-color: var(--bg, #0d1109) !important;
-          background: var(--bg, #0d1109) !important;
+          background-color: var(--bg, #0f0b0b) !important;
+          background: var(--bg, #0f0b0b) !important;
         }
         .bottom-nav, nav, .nav-bar {
-          background-color: var(--surface, #151a0f) !important;
-          background: var(--surface, #151a0f) !important;
-          border-top-color: var(--border, #2a3321) !important;
+          background-color: var(--surface, #170f0f) !important;
+          background: var(--surface, #170f0f) !important;
+          border-top-color: var(--border, #332121) !important;
           height: 42px !important;
         }
         .tab-btn {
-          color: var(--text-mut, #7fb862) !important;
+          color: var(--text-mut, #962424) !important;
         }
         .tab-btn .tab-label,
         .tab-btn .material-icons {
@@ -1709,7 +1709,7 @@ window.FishToolsAdapter = (function () {
         .tab-btn.active,
         .style-material-you .tab-btn.active,
         .style-simple .tab-btn.active {
-          background-color: var(--accent, #98ce7b) !important;
+          background-color: var(--accent, #c23b3b) !important;
           color: #000000 !important;
         }
         .tab-btn.active .tab-label,
@@ -1720,15 +1720,15 @@ window.FishToolsAdapter = (function () {
           background: transparent !important;
         }
         .card {
-          background-color: var(--surface, #151a0f) !important;
-          background: var(--surface, #151a0f) !important;
-          border-color: var(--border, #2a3321) !important;
+          background-color: var(--surface, #170f0f) !important;
+          background: var(--surface, #170f0f) !important;
+          border-color: var(--border, #332121) !important;
           padding: 8px 10px !important;
           margin-bottom: 8px !important;
           border-radius: 10px !important;
         }
         .card h3, .card-header h3 {
-          color: var(--accent, #98ce7b) !important;
+          color: var(--accent, #c23b3b) !important;
           font-size: 11px !important;
           margin: 0 0 6px 0 !important;
           letter-spacing: 0.5px !important;
@@ -1745,16 +1745,16 @@ window.FishToolsAdapter = (function () {
         .tool-btn,
         .style-simple .tool-btn,
         .style-material-you .tool-btn {
-          color: var(--accent, #98ce7b) !important;
-          border-color: var(--border, #2a3321) !important;
-          background-color: var(--surface2, #1d2415);
+          color: var(--accent, #c23b3b) !important;
+          border-color: var(--border, #332121) !important;
+          background-color: var(--surface2, #201313);
           min-height: 32px !important;
           padding: 4px 6px !important;
           border-radius: 8px !important;
           font-size: 11px !important;
         }
         .tool-label {
-          color: var(--accent, #98ce7b) !important;
+          color: var(--accent, #c23b3b) !important;
           font-size: 9px !important;
           margin-top: 2px !important;
         }
@@ -1771,14 +1771,14 @@ window.FishToolsAdapter = (function () {
         .tool-btn .material-icons,
         .tool-btn span,
         .tool-btn div > span {
-          color: var(--accent, #98ce7b) !important;
+          color: var(--accent, #c23b3b) !important;
         }
         .tool-btn:hover,
         .style-simple .tool-btn:hover,
         .style-material-you .tool-btn:hover {
-          background-color: var(--accent, #98ce7b) !important;
+          background-color: var(--accent, #c23b3b) !important;
           color: #000000 !important;
-          border-color: var(--accent, #98ce7b) !important;
+          border-color: var(--accent, #c23b3b) !important;
         }
         .tool-btn:hover .tool-label,
         .tool-btn:hover .material-icons,
@@ -1791,9 +1791,9 @@ window.FishToolsAdapter = (function () {
         .tool-btn--active,
         .style-simple .tool-btn--active,
         .style-material-you .tool-btn--active {
-          background-color: var(--accent, #98ce7b) !important;
+          background-color: var(--accent, #c23b3b) !important;
           color: #000000 !important;
-          border-color: var(--accent, #98ce7b) !important;
+          border-color: var(--accent, #c23b3b) !important;
         }
         .tool-btn--active .tool-label,
         .tool-btn--active .material-icons,
@@ -1803,49 +1803,49 @@ window.FishToolsAdapter = (function () {
         }
         /* SHKE enabled on web (Node.js port) */
         .anchor-cell {
-          border-color: var(--border, #2a3321) !important;
-          background-color: var(--surface2, #1d2415) !important;
+          border-color: var(--border, #332121) !important;
+          background-color: var(--surface2, #201313) !important;
         }
         .anchor-cell.active {
-          background-color: var(--accent, #98ce7b) !important;
-          border-color: var(--accent, #98ce7b) !important;
+          background-color: var(--accent, #c23b3b) !important;
+          border-color: var(--accent, #c23b3b) !important;
         }
         .status-box {
-          background-color: var(--surface2, #1d2415) !important;
-          border-color: var(--border, #2a3321) !important;
+          background-color: var(--surface2, #201313) !important;
+          border-color: var(--border, #332121) !important;
         }
         .status-box .status-value {
-          color: var(--accent, #98ce7b) !important;
+          color: var(--accent, #c23b3b) !important;
         }
         .status-box .status-label {
-          color: var(--text-mut, #7fb862) !important;
+          color: var(--text-mut, #962424) !important;
         }
         .settings-label,
         .settings-row label,
         .settings-row span,
         .form-row label,
         .form-row span {
-          color: var(--accent, #98ce7b) !important;
+          color: var(--accent, #c23b3b) !important;
         }
         .custom-select-trigger,
         .custom-select-trigger span {
-          color: var(--accent, #98ce7b) !important;
+          color: var(--accent, #c23b3b) !important;
         }
         .custom-select-option {
-          color: var(--accent, #98ce7b) !important;
-          background-color: var(--surface, #151a0f) !important;
+          color: var(--accent, #c23b3b) !important;
+          background-color: var(--surface, #170f0f) !important;
         }
         .custom-select-option:hover,
         .custom-select-option.selected {
-          background-color: var(--accent, #98ce7b) !important;
+          background-color: var(--accent, #c23b3b) !important;
           color: #000000 !important;
         }
         button, input, select, textarea {
-          color: var(--accent, #98ce7b) !important;
+          color: var(--accent, #c23b3b) !important;
         }
         #splash-screen {
-          background-color: var(--bg, #0d1109) !important;
-          background: var(--bg, #0d1109) !important;
+          background-color: var(--bg, #0f0b0b) !important;
+          background: var(--bg, #0f0b0b) !important;
         }
         #container-theme-select,
         #container-style-select,
@@ -1866,17 +1866,17 @@ window.FishToolsAdapter = (function () {
           background: rgba(13, 17, 9, 0.85) !important;
         }
         .custom-modal {
-          background-color: var(--surface, #151a0f) !important;
-          border: 1px solid var(--border, #2a3321) !important;
+          background-color: var(--surface, #170f0f) !important;
+          border: 1px solid var(--border, #332121) !important;
           border-radius: 10px !important;
-          color: var(--accent, #98ce7b) !important;
+          color: var(--accent, #c23b3b) !important;
           box-shadow: none !important;
         }
         .custom-modal h3 {
-          color: var(--accent, #98ce7b) !important;
+          color: var(--accent, #c23b3b) !important;
         }
         .custom-modal .modal-body {
-          color: var(--text-mut, #7fb862) !important;
+          color: var(--text-mut, #962424) !important;
         }
         .custom-modal-footer .btn-modal {
           border-radius: 6px !important;
@@ -1884,14 +1884,14 @@ window.FishToolsAdapter = (function () {
           box-shadow: none !important;
         }
         .custom-modal-footer .primary-btn {
-          background: var(--accent, #98ce7b) !important;
+          background: var(--accent, #c23b3b) !important;
           color: #000000 !important;
-          border: 1px solid var(--accent, #98ce7b) !important;
+          border: 1px solid var(--accent, #c23b3b) !important;
         }
         .custom-modal-footer .secondary-btn {
-          background: var(--surface2, #1d2415) !important;
-          color: var(--accent, #98ce7b) !important;
-          border: 1px solid var(--border, #2a3321) !important;
+          background: var(--surface2, #201313) !important;
+          color: var(--accent, #c23b3b) !important;
+          border: 1px solid var(--border, #332121) !important;
         }
       `;
       doc.head.appendChild(styleEl);

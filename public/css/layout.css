@@ -1108,7 +1108,7 @@ html, body {
   min-height: 36px;
   padding: 0 16px;
   border-radius: 8px;
-  border: 1px solid var(--border-color, #2a3321);
+  border: 1px solid var(--border-color, #332121);
   background: var(--bg-panel-inner);
   color: inherit;
   font-size: 13px;
@@ -1138,7 +1138,7 @@ html, body {
   min-height: 36px;
   padding: 0 14px;
   border-radius: 8px;
-  border: 1px solid var(--border-color, #2a3321);
+  border: 1px solid var(--border-color, #332121);
   background: var(--bg-panel-inner);
   color: inherit;
   font-size: 13px;
@@ -1167,7 +1167,7 @@ html, body {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  border: 2px solid var(--color-primary, #98ce7b);
+  border: 2px solid var(--color-primary, #c23b3b);
   background: var(--bg-panel-inner);
   z-index: 3;
   align-items: center;
@@ -1187,13 +1187,13 @@ html, body {
   cursor: default;
 }
 .project-swipe-container.is-selected .project-item {
-  border-color: var(--color-primary, #98ce7b);
+  border-color: var(--color-primary, #c23b3b);
 }
 .project-swipe-container.is-selected .select-check {
-  background: var(--color-primary, #98ce7b);
-  border-color: var(--color-primary, #98ce7b);
+  background: var(--color-primary, #c23b3b);
+  border-color: var(--color-primary, #c23b3b);
 }
 .project-swipe-container.is-selected .select-check svg {
   opacity: 1;
-  color: #0d1109;
+  color: #0f0b0b;
 }

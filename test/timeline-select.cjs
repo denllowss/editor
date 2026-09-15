@@ -73,5 +73,14 @@ console.log('\n[4] Batch multi-pilih: delete panel + multi-move + batch cut');
   ok((editorCode.match(/executeCutForSelection\(execute/g) || []).length === 7, '7 tombol cut lewat wrapper');
 }
 
+// ----------------------------------------------------------
+console.log('\n[5] Centering tak mengubur lane (v0.24.0)');
+{
+  ok(editorCode.includes('drawerCoversTimeline'), 'drawer dock-samping diabaikan saat centering');
+  ok(editorCode.includes('cardCoversSlotX'), 'overlay hanya bila menutup kolom slot');
+  ok(/visibleSpan > slotRect\.height && slotRect\.top >= visibleTop && slotRect\.bottom <= visibleBottom/.test(editorCode),
+    'slot terlihat-penuh tak di-scroll (semua layout)');
+}
+
 console.log(`\nHasil: ${passed} lulus, ${failed} gagal\n`);
 process.exit(failed ? 1 : 0);

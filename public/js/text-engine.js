@@ -33,10 +33,10 @@
     longShadowLength: 24,
     longShadowAngle: 45,        // in degrees
     neonGlow: false,
-    neonGlowColor: '#98ce7b',
+    neonGlowColor: '#c23b3b',
     neonGlowBlur: 16,
     badgeEnabled: false,
-    badgeColor: '#1a2215',
+    badgeColor: '#221414',
     badgePaddingX: 20,
     badgePaddingY: 10,
     animation: 'bounce_1',      // legacy alias for animIn
@@ -311,7 +311,7 @@
         const by = cy - boxH / 2;
         const rad = Math.min(p.badgeRadius, boxH / 2);
 
-        ctx.fillStyle = p.badgeColor || '#1a2215';
+        ctx.fillStyle = p.badgeColor || '#221414';
         ctx.beginPath();
         if (typeof ctx.roundRect === 'function') {
           ctx.roundRect(bx, by, boxW, boxH, rad);
@@ -576,7 +576,7 @@
           // B. Draw Drop Shadow / Neon Glow
           if (p.neonGlow) {
             ctx.save();
-            ctx.shadowColor = p.neonGlowColor || '#98ce7b';
+            ctx.shadowColor = p.neonGlowColor || '#c23b3b';
             ctx.shadowBlur = p.neonGlowBlur || 16;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
@@ -618,7 +618,7 @@
           const blink = Math.floor(localSec * 4) % 2 === 0;
           if (blink && lineIdx === lines.length - 1) {
             ctx.save();
-            ctx.fillStyle = p.fillColor || '#98ce7b';
+            ctx.fillStyle = p.fillColor || '#c23b3b';
             ctx.fillRect(curX + 4, curY - p.fontSize * 0.4, 4, p.fontSize * 0.8);
             ctx.restore();
           }

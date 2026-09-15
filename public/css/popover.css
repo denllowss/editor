@@ -187,6 +187,18 @@
   color: var(--color-danger-text);
 }
 
+/* Tanda centang item toggle (mis. Stretch Element): stabil, tak menggeser label */
+.popover-menu-item .popover-menu-check {
+  width: 14px;
+  flex-shrink: 0;
+  font-weight: 700;
+  visibility: hidden;
+}
+
+.popover-menu-item.is-on .popover-menu-check {
+  visibility: visible;
+}
+
 .popover-menu-divider {
   height: 1px;
   background-color: var(--bg-panel-hover);

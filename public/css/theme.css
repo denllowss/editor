@@ -1,7 +1,7 @@
 /* ==========================================================================
    THEME.CSS - Color Tokens, Theming Variables, and Typography
-   Default Palette: OpenFishTools Matcha Tea (1:1 Matched Tokens)
-   bg: #0d1109 | surface: #151a0f | surface2: #1d2415 | border: #2a3321 | accent: #98ce7b
+   Default Palette: Maroon Red (1:1 Matched Tokens)
+   bg: #0f0b0b | surface: #170f0f | surface2: #201313 | border: #332121 | accent: #c23b3b
    ========================================================================== */
 
 /* --- Cal Sans Regular / SemiBold Web Font --- */
@@ -41,74 +41,74 @@
 }
 
 :root {
-  /* --- Brand & Primary Accent Colors (Matcha Tea: #98ce7b, #7fb862) --- */
-  --color-primary: #98ce7b;             /* Fresh Matcha Tea Vibrant Green */
-  --color-primary-hover: #abdd90;       /* Soft Light Matcha Hover */
-  --color-primary-active: #7fb862;      /* Deep Leaf Matcha Active */
-  --color-accent: #7fb862;              /* Secondary Matcha Accent */
-  --color-accent-subtle: #5c6e4e;       /* Earthy Herbal Green */
+  /* --- Brand & Primary Accent Colors (Maroon Red: #c23b3b, #962424) --- */
+  --color-primary: #c23b3b;             /* Deep Maroon Red */
+  --color-primary-hover: #e05a5a;       /* Soft Light Maroon Hover */
+  --color-primary-active: #962424;      /* Dark Wine Maroon Active */
+  --color-accent: #962424;              /* Secondary Maroon Accent */
+  --color-accent-subtle: #5e2c2c;       /* Muted Brick Maroon */
   --color-danger: #ef4444;              /* Destructive Red Token */
   --color-danger-hover: #dc2626;        /* Destructive Red Hover */
   --color-danger-bg: rgba(239, 68, 68, 0.15);
   --color-danger-text: #ffffff;         /* Crisp High-Contrast Text on Danger */
 
-  /* --- Surface & Background Colors (Matcha Canvas & Surfaces) --- */
-  --bg-canvas: #0d1109;                 /* Deep Herbal Tea Dark Canvas (#0d1109) */
-  --bg-dashboard: #151a0f;              /* Dark Matcha Surface 1 (#151a0f) */
-  --bg-panel: #1d2415;                  /* Elevated Matcha Panel Surface 2 (#1d2415) */
-  --bg-panel-hover: #26301c;            /* Panel Hover Background */
-  --bg-panel-active: #151a0f;           /* Panel Active Background */
-  --bg-panel-inner: #151a0f;            /* Inner Item Background */
-  --bg-panel-inner-hover: #26301c;      /* Inner Item Hover (Distinct from #1d2415 panel) */
-  
+  /* --- Surface & Background Colors (Maroon Canvas & Surfaces) --- */
+  --bg-canvas: #0f0b0b;                 /* Deep Wine Dark Canvas (#0f0b0b) */
+  --bg-dashboard: #170f0f;              /* Dark Maroon Surface 1 (#170f0f) */
+  --bg-panel: #201313;                  /* Elevated Maroon Panel Surface 2 (#201313) */
+  --bg-panel-hover: #2b1a1a;            /* Panel Hover Background */
+  --bg-panel-active: #170f0f;           /* Panel Active Background */
+  --bg-panel-inner: #170f0f;            /* Inner Item Background */
+  --bg-panel-inner-hover: #2b1a1a;      /* Inner Item Hover (Distinct from #201313 panel) */
+
   /* --- Badge & Tag Colors --- */
-  --badge-prealpha-bg: #2a3321;         /* Muted Matcha Olive Pill */
-  --badge-prealpha-text: #98ce7b;       /* Bright Matcha Pill Text */
-  --badge-count-bg: #98ce7b;           /* Solid Matcha Fill Badge */
-  --badge-count-text: #0d1109;         /* Dark Text on Matcha Badge */
+  --badge-prealpha-bg: #2b1a1a;         /* Muted Brick Pill */
+  --badge-prealpha-text: #e05a5a;       /* Bright Maroon Pill Text */
+  --badge-count-bg: #c23b3b;           /* Solid Maroon Fill Badge */
+  --badge-count-text: #0f0b0b;         /* Dark Text on Maroon Badge */
 
   /* --- Timeline Track Accent Tokens --- */
-  --track-video: #98ce7b;               /* Video Track Bright Matcha */
-  --track-video-dark: #5c6e4e;          /* Video Track Hidden Shade */
-  --track-image: #abdd90;               /* Image Track Light Matcha */
-  --track-image-dark: #5c6e4e;          /* Image Track Hidden Shade */
-  --track-audio: #bbf29b;               /* Audio Track Vibrant Luminous Matcha (Bright & Clear) */
-  --track-audio-dark: #648250;          /* Audio Track Hidden Shade (Readable, Not Too Dark) */
-  --track-adj: #7fb862;                 /* Adjustment Track Leaf Matcha */
-  --track-adj-dark: #3f5233;            /* Adjustment Track Hidden Shade */
-  --track-color: #d4f8a8;               /* Color / Solid Track Pale Lime Matcha */
-  --track-color-dark: #6e8454;          /* Color Track Hidden Shade */
-  --track-text: #c8ff8c;                /* Text Track Bright Luminous Lime-Matcha (High Contrast) */
-  --track-text-dark: #5c6e4e;           /* Text Track Hidden Shade */
+  --track-video: #c23b3b;               /* Video Track Deep Maroon */
+  --track-video-dark: #5e2c2c;          /* Video Track Hidden Shade */
+  --track-image: #e05a5a;               /* Image Track Light Maroon */
+  --track-image-dark: #5e2c2c;          /* Image Track Hidden Shade */
+  --track-audio: #f09292;               /* Audio Track Vibrant Luminous Rose (Bright & Clear) */
+  --track-audio-dark: #7d4444;          /* Audio Track Hidden Shade (Readable, Not Too Dark) */
+  --track-adj: #962424;                 /* Adjustment Track Wine Maroon */
+  --track-adj-dark: #3d2222;            /* Adjustment Track Hidden Shade */
+  --track-color: #f5b8b8;               /* Color / Solid Track Pale Rose */
+  --track-color-dark: #6e4a4a;          /* Color Track Hidden Shade */
+  --track-text: #ffc9c9;                /* Text Track Bright Luminous Rose (High Contrast) */
+  --track-text-dark: #5e2c2c;           /* Text Track Hidden Shade */
 
   /* --- Tech Grid Overlay Colors --- */
-  --grid-line-thin: rgba(152, 206, 123, 0.18);
-  --grid-line-major: rgba(152, 206, 123, 0.45);
-  --grid-crosshair: #98ce7b;
-  --grid-dot: rgba(152, 206, 123, 0.55);
+  --grid-line-thin: rgba(194, 59, 59, 0.18);
+  --grid-line-major: rgba(194, 59, 59, 0.45);
+  --grid-crosshair: #e05a5a;
+  --grid-dot: rgba(194, 59, 59, 0.55);
 
   /* --- Typography Colors --- */
-  --text-primary: #98ce7b;              /* Main Matcha Brand Header/Accent */
-  --text-secondary: #98ce7b;            /* Fresh Matcha Brand Secondary Text */
-  --text-muted: #a5b39a;                /* Soft Herbal Sage Secondary Text */
-  --text-dim: #5c6e4e;                  /* Earthy Muted Indicator */
+  --text-primary: #c23b3b;              /* Main Maroon Brand Header/Accent */
+  --text-secondary: #e05a5a;            /* Light Maroon Brand Secondary Text */
+  --text-muted: #b39a9a;                /* Soft Dusty Rose Secondary Text */
+  --text-dim: #6e4e4e;                  /* Muted Clay Indicator */
 
   /* --- Flat Styling (No blur, no glow, no drop shadow) --- */
-  --border-panel: #2a3321;              /* Solid Panel & Divider Border */
-  --border-subtle: rgba(152, 206, 123, 0.22);
-  --border-focus: #98ce7b;
+  --border-panel: #332121;              /* Solid Panel & Divider Border */
+  --border-subtle: rgba(194, 59, 59, 0.22);
+  --border-focus: #c23b3b;
   --shadow-panel: none;
   --shadow-button-glow: none;
   --shadow-active: none;
 
   /* --- Dedicated Keyframe Theme Tokens (100% Theme-Native & High-Contrast) --- */
-  --kf-default-bg: #151a0f;            /* Dark surface core */
-  --kf-default-border: #a5b39a;        /* Soft sage outline */
-  --kf-active-bg: #98ce7b;             /* Fresh matcha solid diamond */
-  --kf-active-border: #0d1109;         /* Sharp dark perimeter outline */
+  --kf-default-bg: #170f0f;            /* Dark surface core */
+  --kf-default-border: #b39a9a;        /* Soft dusty-rose outline */
+  --kf-active-bg: #c23b3b;             /* Deep maroon solid diamond */
+  --kf-active-border: #0f0b0b;         /* Sharp dark perimeter outline */
   --kf-selected-bg: #ffffff;           /* Luminous clean white diamond - 100% pops without foreign colors */
-  --kf-selected-border: #0d1109;       /* Solid dark border for needle-sharp definition */
-  --kf-selected-dot: #98ce7b;          /* Vibrant matcha green center anchor dot */
+  --kf-selected-border: #0f0b0b;       /* Solid dark border for needle-sharp definition */
+  --kf-selected-dot: #c23b3b;          /* Deep maroon center anchor dot */
 
   /* --- Font Families --- */
   --font-brand: 'Cal Sans', sans-serif;

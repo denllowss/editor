@@ -2374,7 +2374,7 @@
   width: 76px;
   min-height: 38px;
   border-radius: 8px;
-  border: 1px solid var(--border-color, #2a3321);
+  border: 1px solid var(--border-color, #332121);
   background: var(--bg-panel-inner);
   color: inherit;
   font-size: 15px;
@@ -2390,7 +2390,7 @@
   margin: 0;
 }
 .aspect-custom-row input:focus {
-  border-color: var(--color-primary, #98ce7b);
+  border-color: var(--color-primary, #c23b3b);
 }
 .aspect-custom-sep {
   font-size: 18px;

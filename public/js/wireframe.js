@@ -106,8 +106,8 @@
       if (w <= 0 || h <= 0) return;
 
       const style = getComputedStyle(document.documentElement);
-      const primaryColor = options.color || style.getPropertyValue('--color-primary').trim() || '#98ce7b';
-      const canvasBg = options.bgColor || style.getPropertyValue('--bg-canvas').trim() || '#0d1109';
+      const primaryColor = options.color || style.getPropertyValue('--color-primary').trim() || '#c23b3b';
+      const canvasBg = options.bgColor || style.getPropertyValue('--bg-canvas').trim() || '#0f0b0b';
 
       let dprScale = 1;
       if (ctx.canvas) {
@@ -407,8 +407,8 @@
 
       // Theme tokens
       const style = getComputedStyle(document.documentElement);
-      const primaryColor = options.color || style.getPropertyValue('--color-primary').trim() || '#98ce7b';
-      const canvasBg = options.bgColor || style.getPropertyValue('--bg-canvas').trim() || '#0d1109';
+      const primaryColor = options.color || style.getPropertyValue('--color-primary').trim() || '#c23b3b';
+      const canvasBg = options.bgColor || style.getPropertyValue('--bg-canvas').trim() || '#0f0b0b';
 
       let dprScale = options.dprScale || 1;
       if (!options.dprScale && ctx.canvas && typeof ctx.canvas.getBoundingClientRect === 'function') {
@@ -676,8 +676,8 @@
       if (w <= 0 || h <= 0) return;
 
       const style = getComputedStyle(document.documentElement);
-      const primaryColor = options.primaryColor || options.color || style.getPropertyValue('--color-primary').trim() || '#98ce7b';
-      const canvasBg = options.canvasBg || options.bgColor || style.getPropertyValue('--bg-canvas').trim() || '#0d1109';
+      const primaryColor = options.primaryColor || options.color || style.getPropertyValue('--color-primary').trim() || '#c23b3b';
+      const canvasBg = options.canvasBg || options.bgColor || style.getPropertyValue('--bg-canvas').trim() || '#0f0b0b';
       const panelBg = style.getPropertyValue('--bg-panel').trim() || '#1a2214';
 
       let dprScale = options.dprScale || 1;
