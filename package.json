@@ -1,6 +1,6 @@
 {
   "name": "fishtool-studio-nodejs",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "OpenFishTools Studio — port Node.js (Express) dari https://fishtoolstudio.vercel.app/",
   "main": "server.js",
   "type": "commonjs",
@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node test/effects-smoke.cjs && node test/fishtools-bridge.cjs && node test/ui-buttons.cjs && node test/responsive.cjs && node test/custom-fonts.cjs && node test/video-audio-fit.cjs && node test/layout-styles.cjs && node test/desktop-drop.cjs && node test/vercel.cjs && node test/bugfix-trio.cjs && node test/dashboard-select.cjs && node test/custom-aspect.cjs"
+    "test": "node test/effects-smoke.cjs && node test/fishtools-bridge.cjs && node test/ui-buttons.cjs && node test/responsive.cjs && node test/custom-fonts.cjs && node test/video-audio-fit.cjs && node test/layout-styles.cjs && node test/desktop-drop.cjs && node test/vercel.cjs && node test/bugfix-trio.cjs && node test/dashboard-select.cjs && node test/custom-aspect.cjs && node test/touch-drag.cjs"
   },
   "keywords": [
     "motion-graphics",

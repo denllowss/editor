@@ -3714,9 +3714,12 @@
       let startBounds = { x: 0, y: 0, w: 0, h: 0 };
       let startLayerState = null;
       let hasMoved = false;
+      // Cache rect kanvas selama SATU gestur drag (hindari getBoundingClientRect
+      // = forced reflow — tiap pointermove; biang patah-patah di HP).
+      let cachedCanvasRect = null;
 
       function getCanvasBufferCoords(e) {
-        const rect = activeCanvasEl.getBoundingClientRect();
+        const rect = (activeOp && cachedCanvasRect) ? cachedCanvasRect : activeCanvasEl.getBoundingClientRect();
         if (!rect.width || !rect.height) return { x: 0, y: 0, dprScale: 1 };
         const scaleX = activeCanvasEl.width / rect.width;
         const scaleY = activeCanvasEl.height / rect.height;
@@ -3868,6 +3871,8 @@
       activeCanvasEl.addEventListener('pointerdown', (e) => {
         if (window.isTimelinePlaying) return;
         if (e.button !== 0) return; // Primary click only
+        // Bekukan rect kanvas untuk seluruh gestur (kanvas tak pindah saat drag).
+        try { cachedCanvasRect = activeCanvasEl.getBoundingClientRect(); } catch (_) { cachedCanvasRect = null; }
 
         const coords = getCanvasBufferCoords(e);
         const layers = currentProjectState.layers || [];
@@ -4129,10 +4134,42 @@
         redrawComposition();
       }
 
+      // Sinkron panel Transform (puluhan tulis DOM) digabung maks 1×/frame
+      // selama drag; extraFn opsional (mis. UI shape/kamera) ikut digabung.
+      let transformUiSyncRaf = null;
+      const pendingTransformUiSync = new Set();
+      function requestTransformUiSync(extraFn) {
+        if (typeof extraFn === 'function') pendingTransformUiSync.add(extraFn);
+        if (transformUiSyncRaf) return;
+        transformUiSyncRaf = requestAnimationFrame(() => {
+          transformUiSyncRaf = null;
+          pendingTransformUiSync.forEach((fn) => { try { fn(); } catch (_) {} });
+          pendingTransformUiSync.clear();
+          if (typeof syncTransformControllerValues === 'function') {
+            try { syncTransformControllerValues(); } catch (_) {}
+          }
+        });
+      }
+      function flushTransformUiSync() {
+        if (transformUiSyncRaf) {
+          cancelAnimationFrame(transformUiSyncRaf);
+          transformUiSyncRaf = null;
+        }
+        pendingTransformUiSync.forEach((fn) => { try { fn(); } catch (_) {} });
+        pendingTransformUiSync.clear();
+        if (typeof syncTransformControllerValues === 'function') {
+          try { syncTransformControllerValues(); } catch (_) {}
+        }
+      }
+
       // Pointermove: Execute Live Drag / Scale with requestAnimationFrame Throttling
       window.addEventListener('pointermove', (e) => {
         if (!activeOp || !targetLayer) return;
-        const coords = getCanvasBufferCoords(e);
+        // Pakai sampel sentuh TERBARU (coalesced) agar posisi tidak tertinggal
+        // di layar 90/120Hz — gratis di semua browser modern.
+        const moveEvts = (typeof e.getCoalescedEvents === 'function') ? e.getCoalescedEvents() : null;
+        const pe = (moveEvts && moveEvts.length > 0) ? moveEvts[moveEvts.length - 1] : e;
+        const coords = getCanvasBufferCoords(pe);
         const deltaX = coords.x - startPointer.x;
         const deltaY = coords.y - startPointer.y;
 
@@ -4220,7 +4257,7 @@
           targetLayer.anchorY = Number(newAnchorY.toFixed(2));
 
           if (typeof recordLayerPropertyChange === 'function') recordLayerPropertyChange(targetLayer, 'move');
-          if (typeof syncTransformControllerValues === 'function') syncTransformControllerValues();
+          requestTransformUiSync();
           requestCanvasRedraw();
         } else if (activeOp === 'move' && targetLayer) {
           const deltaCanvasX = coords.x - startPointer.x;
@@ -4240,7 +4277,7 @@
             targetLayer.posY = Number(newPosY.toFixed(2));
 
             if (typeof recordLayerPropertyChange === 'function') recordLayerPropertyChange(targetLayer, 'move');
-            if (typeof syncTransformControllerValues === 'function') syncTransformControllerValues();
+            requestTransformUiSync();
             requestCanvasRedraw();
             return;
           }
@@ -4322,7 +4359,7 @@
           targetLayer.normY = (targetLayer.posY - halfH) / baseH;
 
           if (typeof recordLayerPropertyChange === 'function') recordLayerPropertyChange(targetLayer, 'move');
-          if (typeof syncTransformControllerValues === 'function') syncTransformControllerValues();
+          requestTransformUiSync();
           requestCanvasRedraw();
         } else if (activeOp === 'scale' && startLayerState) {
           if (targetLayer && targetLayer.type === 'camera') {
@@ -4333,7 +4370,7 @@
             const newZoom = Math.max(10, Math.min(400, Math.round(initZoom * zoomFactor)));
             targetLayer.cameraZoom = newZoom;
             if (typeof recordLayerPropertyChange === 'function') recordLayerPropertyChange(targetLayer, 'cameraZoom');
-            if (typeof syncCameraSettingsUI === 'function') syncCameraSettingsUI();
+            requestTransformUiSync(typeof syncCameraSettingsUI === 'function' ? syncCameraSettingsUI : null);
             requestCanvasRedraw();
             return;
           }
@@ -4475,7 +4512,7 @@
             targetLayer.mediaWidth = targetLayer.shapeProps.sizeX;
             targetLayer.mediaHeight = targetLayer.shapeProps.sizeY;
             if (typeof syncShapeControllerUI === 'function') {
-              syncShapeControllerUI();
+              requestTransformUiSync(syncShapeControllerUI);
             }
           }
 
@@ -4483,7 +4520,7 @@
             recordLayerPropertyChange(targetLayer, 'scale');
             recordLayerPropertyChange(targetLayer, 'move');
           }
-          if (typeof syncTransformControllerValues === 'function') syncTransformControllerValues();
+          requestTransformUiSync();
           requestCanvasRedraw();
         }
       });
@@ -4499,12 +4536,14 @@
         targetLayer = null;
         startLayerState = null;
         hasMoved = false;
+        cachedCanvasRect = null;
         window.activeSnapGuides = null;
         window.isTransformInteracting = false;
         if (finishedLayer && didMove) {
           invalidatePreviewCacheForLayer(finishedLayer);
         }
         flushCanvasRedraw();
+        if (didMove) flushTransformUiSync();
 
         // Save immediately upon releasing movement
         if (didMove) {
@@ -5574,9 +5613,31 @@
     // Automatic Keyframing on Property Value Change
     // STRICT RULE: ONLY creates/records keyframes if keyframes already exist for this property on this layer!
     // If no keyframes exist yet, strictly does NOT auto-create keyframes.
+    // Refresh timeline+graph digabung maks 1×/frame (dipanggil tiap gerak
+    // saat keyframe dibuat — render penuh tiap event = patah-patah di HP).
+    let _recordUiRaf = 0;
+    function requestDeferredRecordUi() {
+      if (_recordUiRaf) return;
+      _recordUiRaf = requestAnimationFrame(() => {
+        _recordUiRaf = 0;
+        if (typeof renderTimelineLayers === 'function') {
+          try { renderTimelineLayers(); } catch (_) {}
+        }
+        if (typeof updateTimelineKeyframeMarkersHighlight === 'function') {
+          try { updateTimelineKeyframeMarkersHighlight(); } catch (_) {}
+        }
+        if (typeof updateGraphEditorUI === 'function') {
+          try { updateGraphEditorUI(); } catch (_) {}
+        }
+      });
+    }
+
     function recordLayerPropertyChange(layer, prop) {
       if (!layer || !prop) return false;
-      if (typeof invalidatePreviewCacheForLayer === 'function') {
+      // Selama gestur drag: tunda invalidate cache (sudah di-flush tiap
+      // pointerup semua situs gestur) agar tiap move tetap ringan.
+      const _inGesture = !!window.isTransformInteracting;
+      if (!_inGesture && typeof invalidatePreviewCacheForLayer === 'function') {
         invalidatePreviewCacheForLayer(layer);
       }
       if (!layer.keyframes || !layer.keyframes[prop] || !Array.isArray(layer.keyframes[prop]) || layer.keyframes[prop].length === 0) {
@@ -5606,10 +5667,9 @@
         if (typeof updateVolumeKeyframeBtnState === 'function') updateVolumeKeyframeBtnState();
         if (typeof updateSpeedKeyframeBtnState === 'function') updateSpeedKeyframeBtnState();
         if (typeof syncEffectsKeyframeState === 'function') syncEffectsKeyframeState(layer);
-        if (typeof renderTimelineLayers === 'function') renderTimelineLayers();
-        if (typeof updateGraphEditorUI === 'function') updateGraphEditorUI();
+        requestDeferredRecordUi();
       }
-      if (typeof invalidatePreviewCacheForLayer === 'function') {
+      if (!_inGesture && typeof invalidatePreviewCacheForLayer === 'function') {
         invalidatePreviewCacheForLayer(layer);
       }
       return true;
@@ -7615,6 +7675,8 @@
         let bW = 1920;
         let bH = 1080;
         let movePadRaf = null;
+        let padSensX = 1;
+        let padSensY = 1;
 
         function requestMovePadRedraw() {
           if (movePadRaf) return;
@@ -7641,6 +7703,15 @@
           bW = info.baseW;
           bH = info.baseH;
 
+          // Bekukan sensitivitas swipe sekali per gestur (hindari
+          // getBoundingClientRect = reflow — di tiap pointermove).
+          const _padCanvas = document.getElementById('editor-active-canvas');
+          const _padRect = _padCanvas ? _padCanvas.getBoundingClientRect() : null;
+          const _srX = (_padRect && _padRect.width > 0) ? (bW / _padRect.width) : 1.0;
+          const _srY = (_padRect && _padRect.height > 0) ? (bH / _padRect.height) : 1.0;
+          padSensX = Math.max(0.5, Math.min(1.2, _srX * 0.35));
+          padSensY = Math.max(0.5, Math.min(1.2, _srY * 0.35));
+
           syncLayerWithEffectiveProps(targetL);
           window.isTransformInteracting = true;
           invalidatePreviewCacheForLayer(targetL);
@@ -7666,13 +7737,9 @@
           const rawDeltaX = e.clientX - startPointer.x;
           const rawDeltaY = e.clientY - startPointer.y;
 
-          const activeCanvasEl = document.getElementById('editor-active-canvas');
-          const canvasRect = activeCanvasEl ? activeCanvasEl.getBoundingClientRect() : null;
-          const scaleRatioX = (canvasRect && canvasRect.width > 0) ? (bW / canvasRect.width) : 1.0;
-          const scaleRatioY = (canvasRect && canvasRect.height > 0) ? (bH / canvasRect.height) : 1.0;
-          // Calibrated touchpad swipe sensitivity: smooth precision control without jumpiness
-          const baseSensX = Math.max(0.5, Math.min(1.2, scaleRatioX * 0.35));
-          const baseSensY = Math.max(0.5, Math.min(1.2, scaleRatioY * 0.35));
+          // Sensitivitas sudah dibekukan saat pointerdown (tanpa reflow).
+          const baseSensX = padSensX;
+          const baseSensY = padSensY;
           const sensMod = e.shiftKey ? 0.25 : (e.altKey ? 2.0 : 1.0);
 
           const deltaX = rawDeltaX * baseSensX * sensMod;
@@ -7890,6 +7957,23 @@
         let currentRot = 0;
         let targetL = null;
         let dialCenter = { x: 0, y: 0 };
+        let rotateRaf = null;
+
+        function requestRotateRedraw() {
+          if (rotateRaf) return;
+          rotateRaf = requestAnimationFrame(() => {
+            rotateRaf = null;
+            redrawComposition();
+          });
+        }
+
+        function flushRotateRedraw() {
+          if (rotateRaf) {
+            cancelAnimationFrame(rotateRaf);
+            rotateRaf = null;
+          }
+          redrawComposition();
+        }
 
         rotateDial.addEventListener('pointerdown', (e) => {
           if (e.button !== 0) return;
@@ -7958,7 +8042,7 @@
           recordLayerPropertyChange(targetL, 'rotate');
 
           updateRotateKnob(val);
-          redrawComposition();
+          requestRotateRedraw();
         });
 
         const onRotEnd = (e) => {
@@ -7971,7 +8055,7 @@
           if (finishedLayer) {
             invalidatePreviewCacheForLayer(finishedLayer);
           }
-          redrawComposition();
+          flushRotateRedraw();
           renderTimelineLayers();
           saveCurrentProjectLayers();
         };
