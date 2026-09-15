@@ -306,6 +306,12 @@
         if (this.isOpen) {
           if (window.Popover && window.Popover.activePopover && window.Popover.activePopover.id === 'popover-template-next') {
             window.Popover.close(false);
+          } else if (this._autoOpened) {
+            // Overlay terbuka OTOMATIS (hasil impor template): user tak pernah
+            // meminta masuk editor — tombol back harus ke halaman Projects.
+            this._autoOpened = false;
+            this.pause();
+            window.location.href = 'index.html';
           } else {
             this.close(true);
           }
@@ -313,7 +319,8 @@
       });
     },
 
-    async open() {
+    async open(autoOpened = false) {
+      this._autoOpened = !!autoOpened;
       this.init();
       const el = this._elements;
       if (!el.overlay) return;
@@ -350,6 +357,7 @@
 
     close(fromPopstate = false) {
       if (!this.isOpen) return;
+      this._autoOpened = false;
       this.pause();
       window.isTimelinePlaying = false;
       if (window.Popover && window.Popover.activePopover && window.Popover.activePopover.id === 'popover-template-next') {

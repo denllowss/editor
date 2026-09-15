@@ -13196,6 +13196,7 @@
           container.querySelectorAll('.fill-grad-handle').forEach((h, hIdx) => {
             h.classList.toggle('is-active', hIdx === idx);
           });
+          syncGradCustomColorUI(layer);
 
           isDragging = false;
           isLongPressed = false;
@@ -13305,6 +13306,172 @@
 
         container.appendChild(handle);
       });
+
+      syncGradDirectionUI(layer);
+      syncGradCustomColorUI(layer);
+    }
+
+    function getActiveGradStop(layer) {
+      if (!layer) return null;
+      const stops = ensureLayerGradStops(layer);
+      if (activeGradStopIndex < 0 || activeGradStopIndex >= stops.length) activeGradStopIndex = 0;
+      return stops[activeGradStopIndex] || null;
+    }
+
+    function applyGradAngle(layer, angleDeg, commit) {
+      if (!layer) return;
+      const a = ((Math.round(Number(angleDeg)) % 360) + 360) % 360;
+      layer.fillGradAngle = a;
+      layer._fillDirty = true;
+      if (typeof invalidatePreviewCacheForLayer === 'function') invalidatePreviewCacheForLayer(layer);
+      if (typeof redrawComposition === 'function') redrawComposition('fill-grad-angle');
+      syncGradDirectionUI(layer);
+      if (commit && typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
+    }
+
+    function syncGradDirectionUI(layer) {
+      const pad = document.getElementById('fill-grad-dir-pad');
+      const arrow = document.getElementById('fill-grad-dir-arrow');
+      const slider = document.getElementById('fill-grad-angle');
+      const val = document.getElementById('fill-grad-angle-val');
+      if (!layer || (!pad && !slider && !val)) return;
+      const a = (layer.fillGradAngle !== undefined) ? Number(layer.fillGradAngle) : 90;
+      const stops = (Array.isArray(layer.fillGradStops) && layer.fillGradStops.length >= 2)
+        ? [...layer.fillGradStops].sort((x, y) => x.offset - y.offset) : null;
+      const c1 = stops ? stops[0].color : (layer.fillGradColor1 || '#000000');
+      const c2 = stops ? stops[stops.length - 1].color : (layer.fillGradColor2 || '#ffffff');
+      if (pad) {
+        pad.style.background = `linear-gradient(${a}deg, ${c1}, ${c2})`;
+        pad.setAttribute('aria-valuenow', String(a));
+      }
+      if (arrow) arrow.style.transform = `rotate(${a - 90}deg)`;
+      if (slider && document.activeElement !== slider) slider.value = String(a);
+      if (val) val.textContent = `${a}°`;
+    }
+
+    function applyGradStopColor(layer, hex, commit) {
+      const stop = getActiveGradStop(layer);
+      if (!stop) return false;
+      let h = String(hex || '').trim();
+      if (/^[0-9a-fA-F]{6}$/.test(h)) h = '#' + h;
+      if (/^#[0-9a-fA-F]{3}$/.test(h)) h = '#' + h.slice(1).split('').map(c => c + c).join('');
+      if (!/^#[0-9a-fA-F]{6}$/.test(h)) return false;
+      stop.color = h.toUpperCase();
+      const stops = ensureLayerGradStops(layer);
+      layer.fillGradColor1 = stops[0].color;
+      layer.fillGradColor2 = stops[stops.length - 1].color;
+      layer._fillDirty = true;
+      if (typeof invalidatePreviewCacheForLayer === 'function') invalidatePreviewCacheForLayer(layer);
+      if (typeof redrawComposition === 'function') redrawComposition('fill-grad-custom');
+      renderGradHandles(layer);
+      if (commit && typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
+      return true;
+    }
+
+    function syncGradCustomColorUI(layer) {
+      const num = document.getElementById('fill-grad-stop-num');
+      const colorEl = document.getElementById('fill-grad-custom-color');
+      const hexEl = document.getElementById('fill-grad-custom-hex');
+      if (!layer || (!num && !colorEl && !hexEl)) return;
+      const stops = ensureLayerGradStops(layer);
+      const stop = stops[activeGradStopIndex] || stops[0];
+      const hex = (stop && stop.color) ? stop.color : '#000000';
+      if (num) num.textContent = String(stops.indexOf(stop) + 1);
+      if (colorEl && /^#[0-9a-fA-F]{6}$/.test(hex)) colorEl.value = hex;
+      if (hexEl && document.activeElement !== hexEl) hexEl.value = hex;
+    }
+
+    function initGradDirectionControls() {
+      if (initGradDirectionControls._done) return;
+      initGradDirectionControls._done = true;
+      const slider = document.getElementById('fill-grad-angle');
+      if (slider) {
+        slider.addEventListener('input', () => {
+          const layer = getSelectedLayerForFill();
+          if (layer) applyGradAngle(layer, slider.value, false);
+        });
+        slider.addEventListener('change', () => {
+          if (typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
+        });
+      }
+      const pad = document.getElementById('fill-grad-dir-pad');
+      if (pad) {
+        let dragging = false;
+        const angleFromEvent = (e) => {
+          const r = pad.getBoundingClientRect();
+          const dx = e.clientX - (r.left + r.width / 2);
+          const dy = e.clientY - (r.top + r.height / 2);
+          if (Math.hypot(dx, dy) < 4) return null;
+          return Math.round(((Math.atan2(dx, -dy) * 180 / Math.PI) + 360) % 360);
+        };
+        pad.addEventListener('pointerdown', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          try { pad.setPointerCapture(e.pointerId); } catch (_) {}
+          dragging = true;
+          const a = angleFromEvent(e);
+          const layer = getSelectedLayerForFill();
+          if (a !== null && layer) applyGradAngle(layer, a, false);
+        });
+        pad.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          e.stopPropagation();
+          const a = angleFromEvent(e);
+          const layer = getSelectedLayerForFill();
+          if (a !== null && layer) applyGradAngle(layer, a, false);
+        });
+        const endPad = () => {
+          if (!dragging) return;
+          dragging = false;
+          if (typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
+        };
+        pad.addEventListener('pointerup', endPad);
+        pad.addEventListener('pointercancel', endPad);
+        pad.addEventListener('keydown', (e) => {
+          const layer = getSelectedLayerForFill();
+          if (!layer) return;
+          const cur = (layer.fillGradAngle !== undefined) ? Number(layer.fillGradAngle) : 90;
+          if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); applyGradAngle(layer, cur + 1, true); }
+          else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); applyGradAngle(layer, cur - 1, true); }
+        });
+      }
+      const colorEl = document.getElementById('fill-grad-custom-color');
+      if (colorEl) {
+        colorEl.addEventListener('input', () => {
+          const layer = getSelectedLayerForFill();
+          if (layer) applyGradStopColor(layer, colorEl.value, false);
+        });
+        colorEl.addEventListener('change', () => {
+          if (typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
+        });
+      }
+      const hexEl = document.getElementById('fill-grad-custom-hex');
+      if (hexEl) {
+        hexEl.addEventListener('change', () => {
+          const layer = getSelectedLayerForFill();
+          if (layer && !applyGradStopColor(layer, hexEl.value, true)) syncGradCustomColorUI(layer);
+        });
+      }
+      const moreBtn = document.getElementById('fill-grad-more-color');
+      if (moreBtn) {
+        moreBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const layer = getSelectedLayerForFill();
+          const stop = getActiveGradStop(layer);
+          if (!layer || !stop) return;
+          openFillColorPicker(moreBtn, stop.color, (hex, alpha, commit) => {
+            stop.color = hex;
+            const stops = ensureLayerGradStops(layer);
+            layer.fillGradColor1 = stops[0].color;
+            layer.fillGradColor2 = stops[stops.length - 1].color;
+            layer._fillDirty = true;
+            if (typeof invalidatePreviewCacheForLayer === 'function') invalidatePreviewCacheForLayer(layer);
+            if (typeof redrawComposition === 'function') redrawComposition('fill-grad-color');
+            if (commit && typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers(true);
+            renderGradHandles(layer);
+          });
+        });
+      }
     }
 
     function initGradTrackAdd(trackBar) {
@@ -13434,6 +13601,7 @@
     }
 
     (function initFillController() {
+      initGradDirectionControls();
       // 1. Layer Action Grid Fill Button
       const btnLayerFill = document.getElementById('btn-layer-fill');
       if (btnLayerFill) {
@@ -16527,7 +16695,7 @@
       if (isTemplateProject) {
         const tryOpenTemplate = (attempts = 0) => {
           if (window.FishTemplateEditor && typeof window.FishTemplateEditor.open === 'function') {
-            window.FishTemplateEditor.open();
+            window.FishTemplateEditor.open(true); // auto-open hasil impor template
           } else if (attempts < 20) {
             setTimeout(() => tryOpenTemplate(attempts + 1), 100);
           }

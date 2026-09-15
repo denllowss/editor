@@ -2007,6 +2007,35 @@
                             </div>
                           </div>
                         </div>
+
+                        <!-- Gradient Direction: drag pad + slider -->
+                        <div class="fill-grad-dir-row" id="fill-grad-dir-row">
+                          <div class="fill-grad-dir-pad" id="fill-grad-dir-pad" title="Tarik untuk menentukan arah gradien" role="slider" aria-label="Arah gradien" aria-valuemin="0" aria-valuemax="360" aria-valuenow="90" tabindex="0">
+                            <svg class="fill-grad-dir-arrow" id="fill-grad-dir-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <line x1="4" y1="12" x2="18" y2="12"/>
+                              <polyline points="12 6 18 12 12 18"/>
+                            </svg>
+                          </div>
+                          <div class="fill-grad-dir-controls">
+                            <div class="fill-grad-dir-head">
+                              <span class="fill-grad-dir-caption">Arah</span>
+                              <span class="fill-grad-dir-val" id="fill-grad-angle-val">90°</span>
+                            </div>
+                            <input type="range" class="fill-grad-angle-slider" id="fill-grad-angle" min="0" max="360" step="1" value="90" aria-label="Sudut arah gradien">
+                          </div>
+                        </div>
+
+                        <!-- Active stop custom color -->
+                        <div class="fill-grad-custom-row" id="fill-grad-custom-row">
+                          <span class="fill-grad-custom-caption">Stop <span id="fill-grad-stop-num">1</span></span>
+                          <input type="color" class="fill-grad-custom-color" id="fill-grad-custom-color" value="#000000" aria-label="Warna custom stop aktif">
+                          <input type="text" class="fill-grad-custom-hex" id="fill-grad-custom-hex" value="#000000" maxlength="7" spellcheck="false" autocomplete="off" aria-label="Kode hex stop aktif">
+                          <button type="button" class="fill-grad-more-btn" id="fill-grad-more-color" title="Buka pemilih warna lengkap" aria-label="Pemilih warna lengkap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                              <path d="M12 2s6 6.6 6 11a6 6 0 0 1-12 0c0-4.4 6-11 6-11z"/>
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                     </div>
 

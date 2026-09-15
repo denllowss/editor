@@ -288,7 +288,9 @@
 
     _bindEvents() {
       // 1. Sidebar Tab Switching & Eyedropper
-      this.el.querySelectorAll('[data-tab="eyedropper"], .color-picker-eyedropper-btn').forEach(btn => {
+      // (Hanya tombol NON-tab: tombol tab[data-tab="eyedropper"] sudah
+      // ditangani handler tab di bawah — dobel-bind = pick 2x/klik.)
+      this.el.querySelectorAll('[data-tab="eyedropper"]:not(.color-picker-tab-btn), .color-picker-eyedropper-btn:not(.color-picker-tab-btn)').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           this.pickFromScreen();
@@ -492,8 +494,73 @@
           }
         }).catch(() => {});
       } else {
-        alert('Eyedropper API requires Chromium browser (Chrome / Edge).');
+        this._pickFromCanvasFallback();
       }
+    }
+
+    // Fallback lintas-platform (Firefox/Safari/HP): ambil warna dengan
+    // mengetuk kanvas komposisi. Tanpa API khusus — murni getImageData.
+    _pickFromCanvasFallback() {
+      const cls = ColorPickerComponent;
+      if (cls._armedPick && cls._armedPick.picker === this) {
+        cls._disarmCanvasPick();
+        return;
+      }
+      cls._disarmCanvasPick();
+      const canvas = document.getElementById('editor-active-canvas');
+      if (!canvas) return;
+
+      const badge = document.createElement('div');
+      badge.textContent = 'Ketuk kanvas untuk ambil warna • ESC batal';
+      badge.setAttribute('role', 'status');
+      badge.style.cssText = 'position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;' +
+        'background:rgba(20,26,14,.92);color:#EAF3DF;font:600 13px/1.4 system-ui,sans-serif;' +
+        'padding:9px 16px;border-radius:999px;border:1px solid #98ce7b;pointer-events:none;' +
+        'box-shadow:0 4px 18px rgba(0,0,0,.45);white-space:nowrap;';
+      document.body.appendChild(badge);
+
+      const prevCursor = canvas.style.cursor;
+      canvas.style.cursor = 'crosshair';
+
+      const onDown = (e) => {
+        if (e.target !== canvas && !(e.target && e.target.closest && e.target.closest('#editor-active-canvas'))) return;
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+          const rect = canvas.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+          const px = Math.min(canvas.width - 1, Math.max(0, Math.floor(((e.clientX - rect.left) / rect.width) * canvas.width)));
+          const py = Math.min(canvas.height - 1, Math.max(0, Math.floor(((e.clientY - rect.top) / rect.height) * canvas.height)));
+          const ctx = canvas.getContext('2d');
+          const d = ctx.getImageData(px, py, 1, 1).data;
+          this.setColor(rgbToHex(d[0], d[1], d[2]), true);
+        } catch (_) {
+          badge.textContent = 'Tidak bisa membaca kanvas (konten eksternal)';
+          setTimeout(() => cls._disarmCanvasPick(), 1400);
+          return;
+        }
+        cls._disarmCanvasPick();
+      };
+      const onKey = (e) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          cls._disarmCanvasPick();
+        }
+      };
+      // Capture di window agar jalan SEBELUM handler drag layer di kanvas.
+      window.addEventListener('pointerdown', onDown, true);
+      window.addEventListener('keydown', onKey, true);
+      cls._armedPick = { picker: this, canvas, badge, prevCursor, onDown, onKey };
+    }
+
+    static _disarmCanvasPick() {
+      const armed = ColorPickerComponent._armedPick;
+      if (!armed) return;
+      ColorPickerComponent._armedPick = null;
+      try { window.removeEventListener('pointerdown', armed.onDown, true); } catch (_) {}
+      try { window.removeEventListener('keydown', armed.onKey, true); } catch (_) {}
+      try { if (armed.canvas) armed.canvas.style.cursor = armed.prevCursor || ''; } catch (_) {}
+      try { if (armed.badge && armed.badge.parentNode) armed.badge.parentNode.removeChild(armed.badge); } catch (_) {}
     }
 
     setColor(colorStr, triggerChange = false, alphaOverride = null) {
