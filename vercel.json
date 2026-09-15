@@ -3,7 +3,7 @@
   "rewrites": [{ "source": "/:path*", "destination": "/api/index.js" }],
   "functions": {
     "api/index.js": {
-      "includeFiles": ["public/**", "data/**"]
+      "includeFiles": "public/**"
     }
   }
 }

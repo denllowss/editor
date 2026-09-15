@@ -249,3 +249,9 @@ tulis. Penambahan: `api/index.js` (ekspor app), `vercel.json` (rewrite total +
 includeFiles public/data), guard listen + rantai tulis data->tmp->memori +
 seed bundel di server.js, engines node>=18, `.vercelignore`. Test 22 asserts.
 Total `npm test`: 557 asserts, 0 gagal.
+
+## 20. Addendum v0.13.1 (Node.js port) — fix validasi vercel.json
+
+Deploy Vercel menolak `includeFiles` array ("should be string"). Diubah ke
+string tunggal "public/**"; bundel data/** dibuang (tak fungsional, seed
+kosong sudah ditangani rantai fallback). Test vercel.cjs disesuaikan.

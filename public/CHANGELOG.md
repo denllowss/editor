@@ -1,3 +1,12 @@
+## v0.13.1 (Node.js port) — 15 Sep 2026
+
+### Fixed
+- `vercel.json`: `functions.api/index.js.includeFiles` wajib string tunggal
+  (`"public/**"`) — array ditolak validasi Vercel. `data/**` tak perlu dibundel
+  (seed kosong ditangani fallback storage).
+
+---
+
 ## v0.13.0 (Node.js port) — 15 Sep 2026
 
 ### Added

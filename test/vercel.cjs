@@ -1,7 +1,7 @@
 /**
  * Test kesiapan deploy Vercel (v0.13.0).
  *
- * - vercel.json valid: rewrite semua -> function, bundel public/** + data/**.
+ * - vercel.json valid: rewrite semua -> function, bundel public/** (string).
  * - api/index.js mengekspor app Express tanpa listen.
  * - server.js: guard require.main, path __dirname, fallback tulis /tmp+memori.
  * - Smoke runtime: require server.js tidak membuka port & mengembalikan app.
@@ -33,9 +33,9 @@ console.log('\n[1] vercel.json');
   const rw = (cfg && cfg.rewrites) || [];
   ok(rw.some((r) => r.destination === '/api/index.js'), 'rewrite -> /api/index.js ada');
   ok(rw.some((r) => r.source === '/:path*' || r.source === '/(.*)'), 'rewrite mencakup semua path');
-  const inc = (((cfg.functions || {})['api/index.js'] || {}).includeFiles) || [];
-  ok(inc.includes('public/**'), 'bundel public/**');
-  ok(inc.includes('data/**'), 'bundel data/**');
+  const inc = (((cfg.functions || {})['api/index.js'] || {}).includeFiles);
+  ok(typeof inc === 'string', 'includeFiles berupa string (syarat Vercel)');
+  ok(typeof inc === 'string' && inc.includes('public/**'), 'bundel public/**');
 }
 
 // ----------------------------------------------------------
