@@ -23159,12 +23159,48 @@
               </div>
             `;
 
-            // Toggle Hide / Show on eye button click (Normal Mode)
+            // Eye: tap = Hide/Show, tahan 450ms = masuk mode pilih multi-layer
             const eyeBtn = pillSlot.querySelector('.timeline-layer-eye-btn');
             if (eyeBtn) {
+              let eyeHoldTimer = null;
+              let eyeHoldFired = false;
+              let eyeStartX = 0;
+              let eyeStartY = 0;
+              eyeBtn.addEventListener('pointerdown', (e) => {
+                if (e.button !== undefined && e.button !== 0) return;
+                eyeHoldFired = false;
+                eyeStartX = e.clientX;
+                eyeStartY = e.clientY;
+                if (eyeHoldTimer) clearTimeout(eyeHoldTimer);
+                eyeHoldTimer = setTimeout(() => {
+                  eyeHoldTimer = null;
+                  eyeHoldFired = true;
+                  isSelectorMode = true;
+                  selectedLayerIds.add(layer.id);
+                  selectedLayerId = layer.id;
+                  window.selectedLayerId = selectedLayerId;
+                  window.selectedLayerIds = selectedLayerIds;
+                  if (typeof syncSelectionClassesInPlace === 'function') syncSelectionClassesInPlace();
+                  if (typeof updateEditorHeaderMode === 'function') updateEditorHeaderMode();
+                  if (navigator.vibrate) { try { navigator.vibrate(25); } catch (_) {} }
+                }, 450);
+              });
+              eyeBtn.addEventListener('pointermove', (e) => {
+                if (eyeHoldTimer && Math.hypot(e.clientX - eyeStartX, e.clientY - eyeStartY) > 10) {
+                  clearTimeout(eyeHoldTimer);
+                  eyeHoldTimer = null;
+                }
+              });
+              const eyeHoldCancel = () => {
+                if (eyeHoldTimer) { clearTimeout(eyeHoldTimer); eyeHoldTimer = null; }
+              };
+              eyeBtn.addEventListener('pointerup', eyeHoldCancel);
+              eyeBtn.addEventListener('pointercancel', eyeHoldCancel);
+              eyeBtn.addEventListener('pointerleave', eyeHoldCancel);
               eyeBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 e.preventDefault();
+                if (eyeHoldFired) { eyeHoldFired = false; return; } // tahan lama: jangan toggle hide
                 if (typeof invalidatePreviewCacheForLayer === 'function') {
                   invalidatePreviewCacheForLayer(layer);
                 }
