@@ -1,6 +1,6 @@
 /**
  * SHAPES: Triangle (Segitiga)
- * Modular plugin for OpenFishTools Studio
+ * Modular plugin for DenjiMotion Studio
  */
 
 (function() {

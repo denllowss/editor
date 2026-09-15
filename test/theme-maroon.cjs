@@ -13,7 +13,7 @@ const PUBLIC = path.join(__dirname, '..', 'public');
 const themeCss = fs.readFileSync(path.join(PUBLIC, 'css', 'theme.css'), 'utf8');
 const editorCode = fs.readFileSync(path.join(PUBLIC, 'js', 'editor.js'), 'utf8');
 const wireframeCode = fs.readFileSync(path.join(PUBLIC, 'js', 'wireframe.js'), 'utf8');
-const adapterCode = fs.readFileSync(path.join(PUBLIC, 'js', 'fishtools-adapter.js'), 'utf8');
+const adapterCode = fs.readFileSync(path.join(PUBLIC, 'js', 'denjimotion-adapter.js'), 'utf8');
 const layoutCss = fs.readFileSync(path.join(PUBLIC, 'css', 'layout.css'), 'utf8');
 
 let passed = 0;

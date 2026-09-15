@@ -1,7 +1,7 @@
 /**
  * TEXT PRESET: Default
  * Basic clean white bold text — foundational starting point.
- * Modular plugin for OpenFishTools Studio.
+ * Modular plugin for DenjiMotion Studio.
  *
  * Add more presets by creating text/[name].js and calling
  * FishTextEngine.registerPreset({ id, name, desc, props }).

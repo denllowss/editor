@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-    var NS = "FishTools";
+    var NS = "DenjiMotion";
 
     window.BubbleTextModule = {
         csInterface: null,

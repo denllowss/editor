@@ -1,5 +1,5 @@
 /**
- * OpenFishTools Studio - FishTextEngine
+ * DenjiMotion Studio - FishTextEngine
  * High-performance, modular canvas text rendering and animation engine.
  * Supports typography, outlines, long shadows, drop shadows, neon glow,
  * background badge pills, and deterministic character-level animations.

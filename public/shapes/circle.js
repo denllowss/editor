@@ -1,6 +1,6 @@
 /**
  * SHAPES: Circle (Lingkaran)
- * Modular plugin for OpenFishTools Studio
+ * Modular plugin for DenjiMotion Studio
  */
 
 (function() {

@@ -1,7 +1,7 @@
 /**
  * EFFECTS.JS - Modular Layer Effects Engine & Plugin Registry
  * Pure flat styling, zero blurs/gradients, 100% theme token binding.
- * Decoupled effect pipeline for FishTool Studio.
+ * Decoupled effect pipeline for DenjiMotion Studio.
  * Loads and coordinates modular effects plugins from effects/*.js
  */
 

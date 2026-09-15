@@ -200,7 +200,7 @@ SettingsModule.prototype.backupSettings = function () {
         return;
     }
 
-    var initialPath = (store.getDataDir() || '') + '/fishtools_backup.json';
+    var initialPath = (store.getDataDir() || '') + '/denjimotion_backup.json';
     var saveFunc = window.cep.fs.showSaveDialogEx || window.cep.fs.showSaveDialog;
     var result;
 
@@ -209,7 +209,7 @@ SettingsModule.prototype.backupSettings = function () {
             'Backup Settings',
             initialPath,
             ['json'],
-            'fishtools_backup.json',
+            'denjimotion_backup.json',
             '', 
             '', 
             ''  
@@ -219,7 +219,7 @@ SettingsModule.prototype.backupSettings = function () {
             'Backup Settings',
             initialPath,
             ['json'],
-            'fishtools_backup.json'
+            'denjimotion_backup.json'
         );
     }
 

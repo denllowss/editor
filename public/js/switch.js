@@ -1,5 +1,5 @@
 /**
- * OpenFishTools Studio - Modular Segmented Switch Controller (SwitchManager)
+ * DenjiMotion Studio - Modular Segmented Switch Controller (SwitchManager)
  * 
  * Features:
  * 1. Modular Segment Switching: Instant, tactile switching across pill segments.

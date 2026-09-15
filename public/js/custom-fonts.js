@@ -13,7 +13,8 @@
 (function (global) {
   'use strict';
 
-  const DB_NAME = 'fishtool-custom-fonts';
+  const DB_NAME = 'denjimotion-custom-fonts';
+  const DB_NAME_LEGACY = 'fishtool-custom-fonts'; // migrasi sekali (era FishTool)
   const DB_VERSION = 1;
   const STORE = 'fonts';
   const MAX_BYTES = 15 * 1024 * 1024; // 15 MB per font
@@ -166,6 +167,41 @@
     });
   }
 
+  // Salin font dari DB era FishTool ke DB baru (sekali, lalu hapus DB lama).
+  async function migrateFromLegacyDB() {
+    const api = idb();
+    if (!api || !_db) return;
+    try {
+      const oldDb = await new Promise((resolve) => {
+        let req;
+        try { req = api.open(DB_NAME_LEGACY, DB_VERSION); } catch (_) { return resolve(null); }
+        req.onsuccess = (ev) => resolve(ev.target.result || null);
+        req.onerror = () => resolve(null);
+        req.onblocked = () => resolve(null);
+      });
+      if (!oldDb) return;
+      let rows = [];
+      try {
+        rows = await new Promise((resolve) => {
+          try {
+            const t = oldDb.transaction([STORE], 'readonly');
+            const rq = t.objectStore(STORE).getAll();
+            rq.onsuccess = (ev) => resolve(ev.target.result || []);
+            rq.onerror = () => resolve([]);
+          } catch (_) { resolve([]); }
+        });
+      } catch (_) {}
+      try { if (typeof oldDb.close === 'function') oldDb.close(); } catch (_) {}
+      if (Array.isArray(rows) && rows.length > 0) {
+        for (const row of rows) {
+          if (!row || !row.id) continue;
+          await tx('readwrite', (st) => { try { return st.put(row); } catch (_) { return null; } });
+        }
+      }
+      try { if (typeof api.deleteDatabase === 'function') api.deleteDatabase(DB_NAME_LEGACY); } catch (_) {}
+    } catch (_) {}
+  }
+
   // ------------------------------------------------------------- API ---
   async function registerFace(entry, buffer) {
     const FF = (typeof FontFace !== 'undefined') ? FontFace : (global && global.FontFace);
@@ -185,6 +221,10 @@
     let rows = [];
     if (_db) {
       rows = (await tx('readonly', (st) => st.getAll())) || [];
+      if (rows.length === 0) {
+        await migrateFromLegacyDB();
+        rows = (await tx('readonly', (st) => st.getAll())) || [];
+      }
     }
     _customs = [];
     _faces = new Map();

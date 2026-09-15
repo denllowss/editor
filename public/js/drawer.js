@@ -1,5 +1,5 @@
 /**
- * OpenFishTools Studio - Modular Drawer Controller (DrawerManager)
+ * DenjiMotion Studio - Modular Drawer Controller (DrawerManager)
  * 
  * Features:
  * 1. Bottom Sheet Drawer: Slides up from bottom with 60fps GPU acceleration.

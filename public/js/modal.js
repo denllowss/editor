@@ -1,5 +1,5 @@
 /**
- * OpenFishTools Studio - Modular Modal System (ModalManager)
+ * DenjiMotion Studio - Modular Modal System (ModalManager)
  * 
  * Features:
  * 1. Modular: Open/Close any modal by ID or custom HTML content.

@@ -1,5 +1,5 @@
 /**
- * FishTools Studio - Procedural 3D Generators Engine
+ * DenjiMotion Studio - Procedural 3D Generators Engine
  * Full procedural generation for 3D Cube, 18 3D Objects, 2-Split, 3-Split, 3D Tunnel, and 3D Minecraft Character.
  * Built for 3D Collapse Transformations and hierarchical null parenting.
  */
@@ -7,7 +7,7 @@
 'use strict';
 
 (function (root) {
-  const FishTools3D = {};
+  const DenjiMotion3D = {};
 
   // --- Color & Math Utilities ---
   function rgbaToHex(rgba, mult = 1.0) {
@@ -273,7 +273,7 @@
 
     if (root.FishDatabase && typeof root.FishDatabase.saveMedia === 'function' && state.id) {
       root.FishDatabase.saveMedia(precompMediaItem).catch(err => {
-        console.warn('[FishTools3D] saveMedia error:', err);
+        console.warn('[DenjiMotion3D] saveMedia error:', err);
       });
     }
 
@@ -327,7 +327,7 @@
   // =========================================================================
   // 1. CUBE GENERATOR
   // =========================================================================
-  FishTools3D.createProceduralCube = function (w, h, d, useLayer = false) {
+  DenjiMotion3D.createProceduralCube = function (w, h, d, useLayer = false) {
     const state = root.currentProjectState || {};
     const layers = state.layers || [];
     const selId = root.selectedLayerId;
@@ -483,7 +483,7 @@
   // =========================================================================
   // 2. PROCEDURAL 3D OBJECTS (BOX, CABINET, TABLE, PHONE, LAPTOP, etc.)
   // =========================================================================
-  FishTools3D.createProcedural3D = function (type) {
+  DenjiMotion3D.createProcedural3D = function (type) {
     const typeUpper = (type || 'BOX').toUpperCase().replace('GEN_3D_', '');
 
     const typeNames = {
@@ -1042,7 +1042,7 @@
   // =========================================================================
   // 3. MINECRAFT 3D CHARACTER (GEN_3D_MC)
   // =========================================================================
-  FishTools3D.createProceduralMC = function () {
+  DenjiMotion3D.createProceduralMC = function () {
     const state = root.currentProjectState || {};
     const layers = state.layers || [];
     const selId = root.selectedLayerId;
@@ -1125,7 +1125,7 @@
   // =========================================================================
   // 4. 2-SPLIT & 3-SPLIT & TUNNEL
   // =========================================================================
-  FishTools3D.createProcedural2Split = function () {
+  DenjiMotion3D.createProcedural2Split = function () {
     const state = root.currentProjectState || {};
     const layers = state.layers || [];
     const selId = root.selectedLayerId;
@@ -1197,7 +1197,7 @@
     });
   };
 
-  FishTools3D.createProcedural3Split = function () {
+  DenjiMotion3D.createProcedural3Split = function () {
     const state = root.currentProjectState || {};
     const layers = state.layers || [];
     const selId = root.selectedLayerId;
@@ -1283,7 +1283,7 @@
     });
   };
 
-  FishTools3D.createProceduralTunnel = function () {
+  DenjiMotion3D.createProceduralTunnel = function () {
     const state = root.currentProjectState || {};
     const layers = state.layers || [];
     const selId = root.selectedLayerId;
@@ -1349,12 +1349,12 @@
   };
 
   // Export to window / root
-  root.FishTools3D = FishTools3D;
-  root.createProceduralCube = FishTools3D.createProceduralCube;
-  root.createProcedural3D = FishTools3D.createProcedural3D;
-  root.createProcedural2Split = FishTools3D.createProcedural2Split;
-  root.createProcedural3Split = FishTools3D.createProcedural3Split;
-  root.createProceduralTunnel = FishTools3D.createProceduralTunnel;
-  root.createProceduralMC = FishTools3D.createProceduralMC;
+  root.DenjiMotion3D = DenjiMotion3D;
+  root.createProceduralCube = DenjiMotion3D.createProceduralCube;
+  root.createProcedural3D = DenjiMotion3D.createProcedural3D;
+  root.createProcedural2Split = DenjiMotion3D.createProcedural2Split;
+  root.createProcedural3Split = DenjiMotion3D.createProcedural3Split;
+  root.createProceduralTunnel = DenjiMotion3D.createProceduralTunnel;
+  root.createProceduralMC = DenjiMotion3D.createProceduralMC;
 
 })(typeof window !== 'undefined' ? window : globalThis);

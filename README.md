@@ -1,4 +1,4 @@
-# 🐟 OpenFishTools Studio — Node.js Port
+# 🐟 DenjiMotion Studio — Node.js Port
 
 Hasil salinan **1:1** dari https://fishtoolstudio.vercel.app/ (v0.5.14) menjadi aplikasi web **Node.js + Express**,
 plus **18 efek layer eksklusif** (v0.6.0 + v0.10.0).
@@ -8,7 +8,7 @@ Seluruh tampilan & fitur editor berjalan persis seperti situs aslinya (semua HTM
 ## Struktur
 
 ```
-fishtool-nodejs/
+denjimotion-nodejs/
 ├── server.js          # Server Express (halaman + REST API)
 ├── package.json       # start / dev / test
 ├── test/
@@ -29,7 +29,7 @@ fishtool-nodejs/
 ## Cara menjalankan
 
 ```bash
-cd fishtool-nodejs
+cd denjimotion-nodejs
 npm install
 npm start
 ```
@@ -142,6 +142,6 @@ curl http://localhost:3000/api/projects
   Scale khusus video & foto.
 - **Impor font kustom** (v0.8.0): dropdown Font di panel Edit Text (12 built-in + font sendiri
   `.ttf/.otf/.woff/.woff2`, preview WYSIWYG), tersimpan permanen di IndexedDB.
-- **Panel FishTools editor 100% lokal & fungsional** (v0.6.1): 19 file klien di-vendor ke `public/Extension/`
+- **Panel DenjiMotion editor 100% lokal & fungsional** (v0.6.1): 19 file klien di-vendor ke `public/Extension/`
   (tanpa ketergantungan CDN), 11 preset CF_* dan SHKE yang tadinya mati/disabled kini semuanya jalan.
 - Lisensi mengikuti proyek asli: **MIT**. Kredit UI & aset: [cutefishaep / OpenFishTools](https://github.com/cutefishaep/OpenFishTools).

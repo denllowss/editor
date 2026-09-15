@@ -29,9 +29,9 @@
         return;
       }
 
-      // Fast Path: WebGL Hardware RGB Split via FishToolEngine (< 0.2ms)
-      if (typeof window !== 'undefined' && window.FishToolEngine && window.FishToolEngine.isReady && typeof window.FishToolEngine.renderRGBSplit === 'function') {
-        if (window.FishToolEngine.renderRGBSplit(ctx, el, bounds, fx)) {
+      // Fast Path: WebGL Hardware RGB Split via DenjiMotionEngine (< 0.2ms)
+      if (typeof window !== 'undefined' && window.DenjiMotionEngine && window.DenjiMotionEngine.isReady && typeof window.DenjiMotionEngine.renderRGBSplit === 'function') {
+        if (window.DenjiMotionEngine.renderRGBSplit(ctx, el, bounds, fx)) {
           return;
         }
       }

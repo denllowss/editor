@@ -1,5 +1,5 @@
 /**
- * Test routing FishToolsBridge (panel FishTool di editor).
+ * Test routing DenjiMotionBridge (panel DenjiMotion di editor).
  *
  * - Semua tombol CF_* memanggil efek yang benar (termasuk preset).
  * - SHKE di-remap ke OSCILLATE (pengganti web) — tidak lagi error.
@@ -23,7 +23,7 @@ function ok(cond, label, extra) {
 // Sandbox: stub editor secukupnya untuk routing bridge
 // ----------------------------------------------------------
 function createEditorSandbox() {
-  const calls = { appliedEffects: [], execFishTool: [], beatNull: [], saves: 0, redraws: 0, rackSyncs: 0 };
+  const calls = { appliedEffects: [], execDenjiMotion: [], beatNull: [], saves: 0, redraws: 0, rackSyncs: 0 };
   const layer = {
     id: 'l1', name: 'Layer 1', type: 'video',
     startSec: 0, durationSec: 5, effects: [],
@@ -43,7 +43,7 @@ function createEditorSandbox() {
     saveCurrentProjectLayers() { calls.saves++; },
     redrawComposition() { calls.redraws++; },
     syncEffectsRackUI() { calls.rackSyncs++; },
-    // CATATAN: editor asli TIDAK punya window.executeFishTool (dispatcher
+    // CATATAN: editor asli TIDAK punya window.executeDenjiMotion (dispatcher
     // terpusat belum ada), jadi bridge selalu memakai handler internalnya.
     // Stub itu hanya ditambahkan di kasus delegasi khusus di bawah.
     applyBeatNullTool(name) { calls.beatNull.push(name); return 'true'; },
@@ -55,8 +55,8 @@ function createEditorSandbox() {
   };
   sandbox.window.window = win;
   vm.createContext(sandbox);
-  const code = fs.readFileSync(path.join(PUBLIC, 'js', 'fishtools-adapter.js'), 'utf8');
-  vm.runInContext(code, sandbox, { filename: 'fishtools-adapter.js' });
+  const code = fs.readFileSync(path.join(PUBLIC, 'js', 'denjimotion-adapter.js'), 'utf8');
+  vm.runInContext(code, sandbox, { filename: 'denjimotion-adapter.js' });
   return { sandbox, win, calls, layer };
 }
 
@@ -70,7 +70,7 @@ function lastFx(layer) {
 console.log('\n[1] CF_* routing');
 {
   const t = createEditorSandbox();
-  const run = (name, ...a) => t.win.FishToolsBridge.executeTool(name, ...a);
+  const run = (name, ...a) => t.win.DenjiMotionBridge.executeTool(name, ...a);
 
   run('CF_COLORIZE');
   ok(t.calls.appliedEffects[0] === 'colorize', 'CF_COLORIZE → colorize');
@@ -116,16 +116,16 @@ console.log('\n[1] CF_* routing');
 console.log('\n[2] SHKE remap');
 {
   const t = createEditorSandbox();
-  const res = t.win.FishToolsBridge.executeTool('SHKE');
+  const res = t.win.DenjiMotionBridge.executeTool('SHKE');
   ok(t.calls.beatNull.length === 1 && t.calls.beatNull[0] === 'OSCILLATE',
     'SHKE → applyBeatNullTool("OSCILLATE")', JSON.stringify(t.calls.beatNull));
   ok(typeof res === 'string' && res.indexOf('disabled') === -1, 'SHKE tidak lagi error disabled');
 
   // dispatcher terpusat (jika suatu saat ada) menerima nama hasil remap
   const t2 = createEditorSandbox();
-  t2.win.executeFishTool = (name, ...a) => { t2.calls.execFishTool.push([name, ...a]); return 'true'; };
-  t2.win.FishToolsBridge.executeTool('SHKE');
-  ok(t2.calls.execFishTool.length === 1 && t2.calls.execFishTool[0][0] === 'SHKE',
+  t2.win.executeDenjiMotion = (name, ...a) => { t2.calls.execDenjiMotion.push([name, ...a]); return 'true'; };
+  t2.win.DenjiMotionBridge.executeTool('SHKE');
+  ok(t2.calls.execDenjiMotion.length === 1 && t2.calls.execDenjiMotion[0][0] === 'SHKE',
     'delegasi dispatcher (pre-existing) meneruskan SHKE apa adanya');
 }
 
@@ -138,7 +138,7 @@ console.log('\n[3] Guard tanpa layer');
   t.win.currentProjectState.layers = [];
   t.win.selectedLayerIds = new Set();
   t.win.selectedLayerId = null;
-  const res = t.win.FishToolsBridge.executeTool('CF_MONO');
+  const res = t.win.DenjiMotionBridge.executeTool('CF_MONO');
   let parsed = null;
   try { parsed = JSON.parse(res); } catch (_) {}
   ok(parsed && parsed.error === true && /select at least one layer/i.test(parsed.message || ''),
@@ -157,14 +157,14 @@ console.log('\n[4] Sweep semua data-tool panel');
   let threw = [];
   for (const name of tools) {
     try {
-      t.win.FishToolsBridge.executeTool(name);
+      t.win.DenjiMotionBridge.executeTool(name);
     } catch (e) {
       threw.push(name + ':' + (e && e.message));
     }
   }
   // tombol konteks: BLUR/LENS dengan arg true (klik kanan), MIR true
   for (const [name, arg] of [['BLUR', true], ['LENS', true], ['MIR', true]]) {
-    try { t.win.FishToolsBridge.executeTool(name, arg); }
+    try { t.win.DenjiMotionBridge.executeTool(name, arg); }
     catch (e) { threw.push(name + '(alt):' + (e && e.message)); }
   }
   ok(threw.length === 0, `executeTool tanpa throw (${tools.length}+3 kasus)`, threw.slice(0, 3).join(' | '));

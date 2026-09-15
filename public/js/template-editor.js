@@ -1,5 +1,5 @@
 /**
- * FishTool Studio - Modular Template & Preset Editor Engine
+ * DenjiMotion Studio - Modular Template & Preset Editor Engine
  * Pure Flat & High Performance: 100% Theme Token Binding, No Blur, No Shadows
  */
 (function() {

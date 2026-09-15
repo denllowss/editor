@@ -1,5 +1,5 @@
 /**
- * FishToolEngine - Custom High-Performance Micro-GPU 2.5D/3D Layer Engine
+ * DenjiMotionEngine - Custom High-Performance Micro-GPU 2.5D/3D Layer Engine
  * Dedicated 1-Quad hardware perspective blitter (< 8 KB).
  * Zero bloat, zero subdivision, zero seams, zero warping.
  * 144+ FPS hardware perspective via WebGL2/WebGL1.
@@ -83,7 +83,7 @@
     }
   `;
 
-  class FishToolEngineCore {
+  class DenjiMotionEngineCore {
     constructor() {
       this.glCanvas = null;
       this.gl = null;
@@ -117,7 +117,7 @@
                   this.glCanvas.getContext('experimental-webgl', opts);
 
         if (!this.gl) {
-          console.warn('FishToolEngine: WebGL not supported, falling back to 2D.');
+          console.warn('DenjiMotionEngine: WebGL not supported, falling back to 2D.');
           return;
         }
 
@@ -132,7 +132,7 @@
         gl.linkProgram(prog);
 
         if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-          console.error('FishToolEngine Program Link Error:', gl.getProgramInfoLog(prog));
+          console.error('DenjiMotionEngine Program Link Error:', gl.getProgramInfoLog(prog));
           return;
         }
 
@@ -219,7 +219,7 @@
 
         this.isReady = true;
       } catch (err) {
-        console.error('FishToolEngine Init Failed:', err);
+        console.error('DenjiMotionEngine Init Failed:', err);
       }
     }
 
@@ -229,7 +229,7 @@
       gl.shaderSource(s, src);
       gl.compileShader(s);
       if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-        console.error('FishToolEngine Shader Compile Error:', gl.getShaderInfoLog(s));
+        console.error('DenjiMotionEngine Shader Compile Error:', gl.getShaderInfoLog(s));
       }
       return s;
     }
@@ -1584,8 +1584,8 @@
     }
   }
 
-  const engine = new FishToolEngineCore();
+  const engine = new DenjiMotionEngineCore();
 
-  window.FishToolEngine = engine;
+  window.DenjiMotionEngine = engine;
   window.LayerTransform = engine; // Seamless drop-in alias
 })(window);

@@ -1,3 +1,17 @@
+## v0.29.0 — 16 Sep 2026
+
+### Changed
+- **Rebrand total Denji Motion**: seluruh nama `fishtool`/`FishTool`/
+  `OpenFishTools` di kode menjadi `DenjiMotion` — termasuk nama file
+  (`denjimotion-engine/adapters/controller.js`), global
+  (`DenjiMotionEngine`, `executeDenjiMotion`), id/class, komentar, dan
+  dokumen. Kunci penyimpanan pindah ke `denjimotion_*` dengan **migrasi
+  otomatis** (baca fallback kunci lama sekali, tulis selalu baru; font
+  kustom disalin lalu DB lama dihapus). Jembatan iframe hulu
+  menyimpan alias (`executeFishTool`, `FishToolsBridge`, pesan lama)
+  agar panel CDN tetap berfungsi; URL hulu, kredit MIT, dan daftar
+  hapus IDB legacy dipertahankan apa adanya.
+
 ## v0.28.0 — 16 Sep 2026
 
 ### Changed
@@ -5,7 +19,7 @@
   about, donasi, changelog, tooltip, loader, splash extension, teks
   default layer) memakai nama Denji Motion; kredit MIT + URL aset hulu
   dipertahankan; identifier internal utuh (localStorage, id, class, src,
-  format .fishtool).
+  format .denjimotion).
 
 ## v0.27.0 — 16 Sep 2026
 
@@ -173,7 +187,7 @@
   tiap item preview WYSIWYG dengan fontnya sendiri) + tombol "＋ Impor" untuk file
   `.ttf/.otf/.woff/.woff2` (maks 15MB, validasi + pesan ramah Indonesia).
 - Modul murni `js/custom-fonts.js` (tanpa dependensi editor): registrasi via FontFace API,
-  persistensi IndexedDB sendiri (`fishtool-custom-fonts`, fallback memory-only), restore
+  persistensi IndexedDB sendiri (`denjimotion-custom-fonts`, fallback memory-only), restore
   otomatis saat boot + redraw kanvas, dan hapus font via tombol × (semua layer pemakai
   fallback ke Cal Sans).
 - Font tersimpan sebagai `layer.textProps.fontFamily` sehingga preview kanvas & ekspor
@@ -217,8 +231,8 @@
   Modal tetap bisa dibuka manual via tombol Info (i) di header dashboard & editor.
 
 ### Added
-- Panel FishTools di editor kini 100% fungsional & 100% lokal:
-  - Vendor 19 file klien FishTools ke `public/Extension/` (HTML, CSS, 13 JS, Logo, 2 font) — panel tidak lagi
+- Panel DenjiMotion di editor kini 100% fungsional & 100% lokal:
+  - Vendor 19 file klien DenjiMotion ke `public/Extension/` (HTML, CSS, 13 JS, Logo, 2 font) — panel tidak lagi
     bergantung pada CDN/jsDelivr/GitHub raw saat dibuka.
   - 11 tombol preset CF_* yang tadinya mati kini jalan: Colorize (warna acak), Scanline, Mono, Glow Aura,
     Solid Aura, Starburst/Grid/Radio (kombo + bevel + drop shadow), Shatter Simple/Slow (preset cepat/lambat),
@@ -242,7 +256,7 @@
 
 # Changelog
 
-All notable changes to OpenFishTools Studio are documented in this file.
+All notable changes to DenjiMotion Studio are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -392,21 +406,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.5] - 2026-09-10
 
 ### Added
-- **OpenFishTools Warp Presets (`WARP1`, `WARP2`, `WARP3`)**: Added a dedicated "Preset" section under Beat Effects featuring one-click multi-layer adjustment presets (`Mid-Wave`, `Ghost Effect`, `Hue Spin`, `Warp Effect`) with automatic layer stacking, synchronized keyframes, and cubic Bézier easing curves.
+- **DenjiMotion Warp Presets (`WARP1`, `WARP2`, `WARP3`)**: Added a dedicated "Preset" section under Beat Effects featuring one-click multi-layer adjustment presets (`Mid-Wave`, `Ghost Effect`, `Hue Spin`, `Warp Effect`) with automatic layer stacking, synchronized keyframes, and cubic Bézier easing curves.
 
 ### Fixed
 - **Timeline Playhead Synchronization & Sub-frame Drift**: Resolved background cache render pollution of `window.currentSec` during asset preview generation; established `getCurrentPlayheadTime()` with strict project-FPS frame-snapping so presets land precisely on the current playhead frame.
 - **Wave Warp Effect Rendering**: Enhanced `effects/wave_warp.js` to support smooth-noise wave synthesis, direction angle handling, speed/phase offsets, and seamless edge tiling.
 
 ### Improved
-- **Debug & Layer Inspector Telemetry**: Expanded OpenFishTools Debug Inspector with real-time playhead timecode, multi-layer sequence duration metrics, and layer property overview for precision inspection.
+- **Debug & Layer Inspector Telemetry**: Expanded DenjiMotion Debug Inspector with real-time playhead timecode, multi-layer sequence duration metrics, and layer property overview for precision inspection.
 
 ---
 
 ## [0.4.4] - 2026-09-10
 
 ### Fixed
-- **Debug / Layer Inspector Relocation**: Relocated Debug panel from Composition Settings header to OpenFishTools Settings panel (`Extension/extension.html`), complete with JSON state copying and live status indicators.
+- **Debug / Layer Inspector Relocation**: Relocated Debug panel from Composition Settings header to DenjiMotion Settings panel (`Extension/extension.html`), complete with JSON state copying and live status indicators.
 - **IndexedDB Storage Calculation**: Fixed project database storage calculation to accurately account for all raw binary media blobs and frame render cache.
 - **Template Editor Media Replace**: Media replacement dock is now pinned to the top on desktop, and media cards are enlarged on mobile for easier touch manipulation.
 - **Template Media Slot Isolation**: Prevented audio and video tracks from automatically entering template replacement slots.
@@ -494,8 +508,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-08-01
 
 ### Added
-- **First Public Release**: Initial launch of OpenFishTools Studio as an in-browser motion graphics and video editor.
+- **First Public Release**: Initial launch of DenjiMotion Studio as an in-browser motion graphics and video editor.
 - **Multi-layer Timeline**: Multi-layer timeline editor with duration controls, trim in/out, and playhead scrubbing.
-- **OpenFishTools CEP Integration**: CEP extension panel adapter via iframe bridge.
+- **DenjiMotion CEP Integration**: CEP extension panel adapter via iframe bridge.
 - **Client-Side Project Storage**: Local browser-based storage engine using IndexedDB (`FishDatabase`).
-- **OFTS Project Format**: Native `.ofts` (OpenFishTools Studio) project package format for offline saving and loading.
+- **OFTS Project Format**: Native `.ofts` (DenjiMotion Studio) project package format for offline saving and loading.

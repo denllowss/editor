@@ -96,7 +96,7 @@ console.log('[7] CSS');
 
 // [8] Preset
 console.log('[8] Logika preset');
-ok(editorCode.includes('fishtool_grad_presets'), 'kunci localStorage preset ada');
+ok(editorCode.includes('denjimotion_grad_presets'), 'kunci localStorage preset ada');
 ok(editorCode.includes('function gradBuiltinPresets('), 'gradBuiltinPresets ada');
 ok(editorCode.includes('function gradCustomPresets('), 'gradCustomPresets ada');
 ok(editorCode.includes('function renderGradPresets('), 'renderGradPresets ada');

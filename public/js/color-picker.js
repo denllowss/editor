@@ -1,5 +1,5 @@
 /**
- * FishTool Studio - Universal Color Picker Popover
+ * DenjiMotion Studio - Universal Color Picker Popover
  * Strictly compliant with AGENTS.md rules:
  * - Clean inline vector SVGs with currentColor
  * - Guaranteed contrast & dynamic textColor inversion
@@ -133,7 +133,7 @@
 
     _loadSavedSwatches() {
       try {
-        const saved = localStorage.getItem('fishtool:custom-swatches');
+        const saved = localStorage.getItem('denjimotion:custom-swatches') || localStorage.getItem('fishtool:custom-swatches');
         if (saved) return JSON.parse(saved);
       } catch (_) {}
       return [];
@@ -141,7 +141,7 @@
 
     _saveSwatches() {
       try {
-        localStorage.setItem('fishtool:custom-swatches', JSON.stringify(this.savedSwatches));
+        localStorage.setItem('denjimotion:custom-swatches', JSON.stringify(this.savedSwatches));
       } catch (_) {}
     }
 

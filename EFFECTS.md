@@ -1,4 +1,4 @@
-# 🎨 Efek Tambahan — FishTool Studio Node.js (v0.6.0 + v0.10.0)
+# 🎨 Efek Tambahan — DenjiMotion Studio Node.js (v0.6.0 + v0.10.0)
 
 18 efek layer baru eksklusif port Node.js ini (6 orisinal v0.6.0 + 12 setara Alight Motion
 v0.10.0), dibangun persis mengikuti arsitektur plugin

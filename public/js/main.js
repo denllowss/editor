@@ -1,5 +1,5 @@
 /**
- * OpenFishTools Studio - Main JavaScript
+ * DenjiMotion Studio - Main JavaScript
  * Handles data fetching from FishDatabase, New Project creation,
  * Your Project listing, ContextMenu integration, and package version.
  */
@@ -1535,14 +1535,15 @@ function toggleQrisDisplay() {
 }
 
 /* ==========================================================================
-   Setting Utama: Mode Tampilan Dark / Light (tersimpan fishtool_theme,
+   Setting Utama: Mode Tampilan Dark / Light (tersimpan denjimotion_theme,
    berlaku dasbor + editor via snippet pra-render di <head>)
    ========================================================================== */
-const APP_THEME_KEY = 'fishtool_theme';
+const APP_THEME_KEY = 'denjimotion_theme';
+const APP_THEME_KEY_LEGACY = 'fishtool_theme'; // fallback baca sekali (era FishTool)
 
 function getAppTheme() {
   try {
-    const v = window.localStorage ? localStorage.getItem(APP_THEME_KEY) : null;
+    const v = window.localStorage ? (localStorage.getItem(APP_THEME_KEY) || localStorage.getItem(APP_THEME_KEY_LEGACY)) : null;
     return v === 'light' ? 'light' : 'dark';
   } catch (_) {
     return 'dark';

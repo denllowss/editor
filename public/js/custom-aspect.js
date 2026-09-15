@@ -1,5 +1,5 @@
 /**
- * OpenFishTools Studio — Custom Aspect Ratio helper (v0.16.0, shared).
+ * DenjiMotion Studio — Custom Aspect Ratio helper (v0.16.0, shared).
  *
  * Dipakai index.html (main.js) dan editor.html (editor.js):
  * - parse("W:H") dengan validasi (int 1–999, rasio 0.1–10).

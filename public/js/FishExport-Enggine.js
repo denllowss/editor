@@ -1,6 +1,6 @@
 /**
  * FishExport-Enggine.js
- * FishTools Studio — Offline Frame-by-Frame Video Export Engine
+ * DenjiMotion Studio — Offline Frame-by-Frame Video Export Engine
  *
  * Architecture: True deterministic render loop. Time t = i/fps (never wall-clock).
  * No dropped frames regardless of render speed. Each frame gets exact timestamp.

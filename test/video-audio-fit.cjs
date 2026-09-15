@@ -15,7 +15,7 @@ const path = require('path');
 const PUBLIC = path.join(__dirname, '..', 'public');
 const html = fs.readFileSync(path.join(PUBLIC, 'editor.html'), 'utf8');
 const editor = fs.readFileSync(path.join(PUBLIC, 'js', 'editor.js'), 'utf8');
-const toolbox = fs.readFileSync(path.join(PUBLIC, 'js', 'openfishtools-controller.js'), 'utf8');
+const toolbox = fs.readFileSync(path.join(PUBLIC, 'js', 'denjimotion-controller.js'), 'utf8');
 const tcss = fs.readFileSync(path.join(PUBLIC, 'css', 'transform-controller.css'), 'utf8');
 
 let passed = 0;
@@ -66,7 +66,7 @@ console.log('\n[3] Wiring editor.js');
   ok(editor.includes('btnExtractAudioD') && editor.includes("fitRowD.style.display = 'none'"), 'deselect sembunyikan tombol+baris');
   ok(editor.includes("wireTransformFitBtn('btn-transform-fit', false)"), 'tombol Pas → fit (false)');
   ok(editor.includes("wireTransformFitBtn('btn-transform-stretch', true)"), 'tombol Regangkan → stretch (true)');
-  ok(editor.includes('window.applyToolboxFitToComp(stretch)'), 'pakai toolbox FishTools');
+  ok(editor.includes('window.applyToolboxFitToComp(stretch)'), 'pakai toolbox DenjiMotion');
   ok(editor.includes("layer.type === 'video' || layer.type === 'image'") && editor.includes("getElementById('transform-fit-row')"), 'baris fit khusus video & foto');
 }
 

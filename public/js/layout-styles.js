@@ -16,8 +16,8 @@
 (function (root) {
   'use strict';
 
-  var KEY_DESKTOP = 'fishtool_layout_desktop';
-  var KEY_TABLET = 'fishtool_layout_tablet';
+  var KEY_DESKTOP = 'denjimotion_layout_desktop';
+  var KEY_TABLET = 'denjimotion_layout_tablet';
 
   var OPTIONS = {
     desktop: [

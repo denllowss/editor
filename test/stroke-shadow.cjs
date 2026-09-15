@@ -15,7 +15,7 @@ const vm = require('vm');
 
 const PUBLIC = path.join(__dirname, '..', 'public');
 const editorCode = fs.readFileSync(path.join(PUBLIC, 'js', 'editor.js'), 'utf8');
-const engineCode = fs.readFileSync(path.join(PUBLIC, 'js', 'fishtool-engine.js'), 'utf8');
+const engineCode = fs.readFileSync(path.join(PUBLIC, 'js', 'denjimotion-engine.js'), 'utf8');
 const exportCode = fs.readFileSync(path.join(PUBLIC, 'js', 'FishExport-Enggine.js'), 'utf8');
 const editorHtml = fs.readFileSync(path.join(PUBLIC, 'editor.html'), 'utf8');
 

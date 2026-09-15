@@ -1,19 +1,19 @@
 /**
- * OpenFishTools Web App Bridge & Runtime Adapter
- * Fetches original tools/OpenFishTools/client/index.html dynamically and:
- * - Converts all asset/script URLs to absolute paths (/tools/OpenFishTools/client/...)
+ * DenjiMotion Web App Bridge & Runtime Adapter
+ * Fetches original tools/DenjiMotion/client/index.html dynamically and:
+ * - Converts all asset/script URLs to absolute paths (/tools/DenjiMotion/client/...)
  * - Completely removes unused components/scripts (Controller, Graph, TTS, BeatMaker, AutoSave, AeToAm, ProjectPool, Debug, Updater)
  * - Injects Adobe CEP & CSInterface web mocks with localStorage persistence
  * - Updates System Status info (System Time: local real-time, Ext: Latest, AE: Web App, OS: Browser)
  * 
- * ZERO modifications to tools/OpenFishTools/ source repository files.
+ * ZERO modifications to tools/DenjiMotion/ source repository files.
  */
 
 /**
- * FishTools Bridge for OpenFishTools Web App Integration
+ * DenjiMotion Bridge for DenjiMotion Web App Integration
  * Handles Anchor Point (grid & center in comp), Cut (front, mid, back), and Align (left, center, right, top, bottom)
  */
-window.FishToolsBridge = (function () {
+window.DenjiMotionBridge = (function () {
   function getResolutionDims() {
     const pState = window.currentProjectState;
     const res = (pState && (pState.resolution || (pState.settings && pState.settings.resolution))) || '1080p';
@@ -177,7 +177,7 @@ window.FishToolsBridge = (function () {
     }
 
     const [baseW, baseH] = getResolutionDims();
-    const engine = (typeof window !== 'undefined' && (window.FishToolEngine || window.LayerTransform));
+    const engine = (typeof window !== 'undefined' && (window.DenjiMotionEngine || window.LayerTransform));
 
     selected.forEach(layer => {
       const dims = getLayerDimensions(layer, baseW, baseH);
@@ -238,7 +238,7 @@ window.FishToolsBridge = (function () {
     }
 
     const [baseW, baseH] = getResolutionDims();
-    const engine = (typeof window !== 'undefined' && (window.FishToolEngine || window.LayerTransform));
+    const engine = (typeof window !== 'undefined' && (window.DenjiMotionEngine || window.LayerTransform));
 
     selected.forEach(layer => {
       const dims = getLayerDimensions(layer, baseW, baseH);
@@ -428,9 +428,9 @@ window.FishToolsBridge = (function () {
   }
 
   function executeTool(toolName, ...args) {
-    const directExec = (typeof window.executeFishTool === 'function')
-      ? window.executeFishTool
-      : (window.parent && typeof window.parent.executeFishTool === 'function' ? window.parent.executeFishTool : null);
+    const directExec = (typeof window.executeDenjiMotion === 'function')
+      ? window.executeDenjiMotion
+      : (window.parent && typeof window.parent.executeDenjiMotion === 'function' ? window.parent.executeDenjiMotion : null);
     if (directExec) {
       const res = directExec(toolName, ...args);
       if (res !== undefined) return res;
@@ -496,8 +496,8 @@ window.FishToolsBridge = (function () {
       return 'true';
     }
     if (toolName === 'CUBE' || (typeof toolName === 'string' && toolName.indexOf('GEN_3D') === 0)) {
-      if (typeof window.executeFishTool === 'function') {
-        return window.executeFishTool(toolName, ...args);
+      if (typeof window.executeDenjiMotion === 'function') {
+        return window.executeDenjiMotion(toolName, ...args);
       }
     }
     // --- Toolbox & Layer Helpers ---
@@ -759,9 +759,9 @@ window.FishToolsBridge = (function () {
       if (typeof fnNull === 'function' && (type === 'OSCILLATE' || type === 'SWING' || type === 'Y_BEAT' || type === 'Y_FLIP' || type === 'X_BEAT' || type === 'X_FLIP' || type === 'SCALE_BEAT' || type === 'SCALE_OVERLAP')) {
         return fnNull(type);
       }
-      const fnExec = (typeof window.executeFishTool === 'function')
-        ? window.executeFishTool
-        : (window.parent && typeof window.parent.executeFishTool === 'function' ? window.parent.executeFishTool : null);
+      const fnExec = (typeof window.executeDenjiMotion === 'function')
+        ? window.executeDenjiMotion
+        : (window.parent && typeof window.parent.executeDenjiMotion === 'function' ? window.parent.executeDenjiMotion : null);
       if (typeof fnExec === 'function' && (type === 'OSCILLATE' || type === 'SWING' || type === 'Y_BEAT' || type === 'Y_FLIP' || type === 'X_BEAT' || type === 'X_FLIP' || type === 'SCALE_BEAT' || type === 'SCALE_OVERLAP')) {
         return fnExec(type);
       }
@@ -807,9 +807,9 @@ window.FishToolsBridge = (function () {
       if (typeof fnNull === 'function') {
         return fnNull(type === 'PANNING' ? 'PANNING_MIX_ALL' : type);
       }
-      const fnExec = (typeof window.executeFishTool === 'function')
-        ? window.executeFishTool
-        : (window.parent && typeof window.parent.executeFishTool === 'function' ? window.parent.executeFishTool : null);
+      const fnExec = (typeof window.executeDenjiMotion === 'function')
+        ? window.executeDenjiMotion
+        : (window.parent && typeof window.parent.executeDenjiMotion === 'function' ? window.parent.executeDenjiMotion : null);
       if (typeof fnExec === 'function') {
         return fnExec(type === 'PANNING' ? 'PANNING_MIX_ALL' : type);
       }
@@ -991,9 +991,9 @@ window.FishToolsBridge = (function () {
         toolName === 'Y_BEAT' || toolName === 'Y_FLIP' || toolName === 'X_BEAT' || toolName === 'X_FLIP' ||
         toolName === 'SCALE_BEAT' || toolName === 'SCALE_OVERLAP' ||
         (typeof toolName === 'string' && (toolName === 'PANNING' || toolName.indexOf('PANNING_') === 0))) {
-      const exec = (typeof window.executeFishTool === 'function')
-        ? window.executeFishTool
-        : (window.parent && typeof window.parent.executeFishTool === 'function' ? window.parent.executeFishTool : null);
+      const exec = (typeof window.executeDenjiMotion === 'function')
+        ? window.executeDenjiMotion
+        : (window.parent && typeof window.parent.executeDenjiMotion === 'function' ? window.parent.executeDenjiMotion : null);
       if (typeof exec === 'function') {
         return exec(toolName, ...args);
       }
@@ -1041,9 +1041,9 @@ window.FishToolsBridge = (function () {
 
     // --- Transitions ---
     if (typeof toolName === 'string' && toolName.indexOf('TRANS_') === 0) {
-      const exec = (typeof window.executeFishTool === 'function')
-        ? window.executeFishTool
-        : (window.parent && typeof window.parent.executeFishTool === 'function' ? window.parent.executeFishTool : null);
+      const exec = (typeof window.executeDenjiMotion === 'function')
+        ? window.executeDenjiMotion
+        : (window.parent && typeof window.parent.executeDenjiMotion === 'function' ? window.parent.executeDenjiMotion : null);
       if (typeof exec === 'function') {
         return exec(toolName, ...args);
       }
@@ -1075,8 +1075,9 @@ window.FishToolsBridge = (function () {
     getSelectedLayers: getSelectedLayers
   };
 })();
+window.FishToolsBridge = window.DenjiMotionBridge; // alias: iframe panel hulu masih memakai nama lama
 
-window.FishToolsAdapter = (function () {
+window.DenjiMotionAdapter = (function () {
   let cachedTemplate = null;
 
   const CDN_BASE = 'https://cdn.jsdelivr.net/gh/cutefishaep/OpenFishTools@main/client/';
@@ -1250,7 +1251,7 @@ window.FishToolsAdapter = (function () {
           function load() {
             try {
               var db = getDB();
-              var raw = db ? db.getSyncSettings() : (localStorage.getItem('fishtools_save') || localStorage.getItem('fishToolsFileStore'));
+              var raw = db ? db.getSyncSettings() : (localStorage.getItem('denjimotion_save') || localStorage.getItem('denjiMotionFileStore') || localStorage.getItem('fishtools_save') || localStorage.getItem('fishToolsFileStore'));
               _cache = raw ? JSON.parse(raw) : {};
             } catch (e) {
               _cache = {};
@@ -1276,8 +1277,8 @@ window.FishToolsAdapter = (function () {
               if (db) {
                 db.saveSyncSettings(jsonStr);
               } else {
-                localStorage.setItem('fishtools_save', jsonStr);
-                localStorage.setItem('fishToolsFileStore', jsonStr);
+                localStorage.setItem('denjimotion_save', jsonStr);
+                localStorage.setItem('denjiMotionFileStore', jsonStr);
               }
             } catch (e) {
               console.warn('[Adapter] Failed to save cache:', e);
@@ -1375,18 +1376,18 @@ window.FishToolsAdapter = (function () {
           };
         };
 
-        // Expose FishTools execution bridge to iframe
-        window.FishTools = {
+        // Expose DenjiMotion execution bridge to iframe
+        window.DenjiMotion = {
           executeTool: function (toolName) {
             var args = Array.prototype.slice.call(arguments, 1);
-            var parentExec = (window.parent && typeof window.parent.executeFishTool === 'function')
-              ? window.parent.executeFishTool
-              : (typeof window.executeFishTool === 'function' ? window.executeFishTool : null);
+            var parentExec = (window.parent && typeof window.parent.executeDenjiMotion === 'function')
+              ? window.parent.executeDenjiMotion
+              : (typeof window.executeDenjiMotion === 'function' ? window.executeDenjiMotion : null);
             if (parentExec) {
               var r = parentExec.apply(window.parent || window, [toolName].concat(args));
               if (r !== undefined) return r;
             }
-            var bridge = (window.parent && window.parent.FishToolsBridge) || window.FishToolsBridge;
+            var bridge = (window.parent && window.parent.DenjiMotionBridge) || window.DenjiMotionBridge;
             if (bridge && typeof bridge.executeTool === 'function') {
               return bridge.executeTool.apply(bridge, [toolName].concat(args));
             }
@@ -1412,6 +1413,7 @@ window.FishToolsAdapter = (function () {
           changeCompRatio: function (w, h) { return this.executeTool('changeCompRatio', w, h); },
           changeCompFPS: function (fps) { return this.executeTool('changeCompFPS', fps); }
         };
+        window.FishTools = window.DenjiMotion; // alias: kode hulu di iframe memakai nama lama
 
         // Mock Adobe CEP Environment
         window.__adobe_cep__ = {
@@ -1516,7 +1518,7 @@ window.FishToolsAdapter = (function () {
                 return { err: 0, data: '<ExtensionManifest ExtensionBundleVersion="Latest"></ExtensionManifest>' };
               }
               var db = (window.parent && window.parent.FishDatabase) || window.FishDatabase;
-              var raw = db ? db.getSyncSettings() : (localStorage.getItem('fishtools_save') || localStorage.getItem('fishToolsFileStore'));
+              var raw = db ? db.getSyncSettings() : (localStorage.getItem('denjimotion_save') || localStorage.getItem('denjiMotionFileStore') || localStorage.getItem('fishtools_save') || localStorage.getItem('fishToolsFileStore'));
               var dataObj = {};
               try { dataObj = raw ? JSON.parse(raw) : {}; } catch (e) {
                 console.warn('[Adapter] Failed to parse raw settings in readFile:', e);
@@ -1541,8 +1543,8 @@ window.FishToolsAdapter = (function () {
                 db.saveSyncSettings(data);
               } else {
                 try {
-                  localStorage.setItem('fishtools_save', data);
-                  localStorage.setItem('fishToolsFileStore', data);
+                  localStorage.setItem('denjimotion_save', data);
+                  localStorage.setItem('denjiMotionFileStore', data);
                 } catch (e) {
                   console.warn('[Adapter] Failed to write localStorage fallback in writeFile:', e);
                 }
@@ -1941,9 +1943,9 @@ window.FishToolsAdapter = (function () {
         }
       };
     } catch (err) {
-      console.error('FishToolsAdapter load error:', err);
+      console.error('DenjiMotionAdapter load error:', err);
       if (loaderEl) {
-        loaderEl.innerHTML = '<span style="color:var(--color-danger, #ff5555);">Failed to load OpenFishTools</span>';
+        loaderEl.innerHTML = '<span style="color:var(--color-danger, #ff5555);">Failed to load Denji Motion</span>';
       }
     }
   }

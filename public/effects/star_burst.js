@@ -86,7 +86,7 @@
       const curTime = getCurrentTime(layer, currentSec);
 
       // Check if WebGL engine is handling perspective projection
-      const isEngineFxCtx = (typeof window !== 'undefined' && window.FishToolEngine && ctx === window.FishToolEngine._fxCtx);
+      const isEngineFxCtx = (typeof window !== 'undefined' && window.DenjiMotionEngine && ctx === window.DenjiMotionEngine._fxCtx);
 
       // Compute composite 3D Rotations
       let rotX = fx.rotX || 0;

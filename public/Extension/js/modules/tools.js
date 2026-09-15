@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-    var NS = "FishTools";
+    var NS = "DenjiMotion";
 
     window.ToolboxModule = function ToolboxModule() {
         this.csInterface = null;
@@ -48,7 +48,7 @@
                 return;
             }
             if (res === "false" || res === false) {
-                console.warn("FishTools: Tool '" + toolName + "' returned false.");
+                console.warn("DenjiMotion: Tool '" + toolName + "' returned false.");
             }
         });
     };

@@ -1,5 +1,5 @@
 /**
- * OpenFishTools Studio - Modular Canvas Wireframe & Selection Bounding Box Component
+ * DenjiMotion Studio - Modular Canvas Wireframe & Selection Bounding Box Component
  * 100% Theme Token Binding, Pure Flat Vector Lines, 8 Control Handles
  */
 (function(window) {
@@ -43,7 +43,7 @@
       const { w, h } = bounds;
 
       if (!bounds.isCamera && bounds.cx !== undefined && bounds.cy !== undefined) {
-        const engine = window.FishToolEngine || window.LayerTransform;
+        const engine = window.DenjiMotionEngine || window.LayerTransform;
         if (engine) {
           const ltBounds = engine.getBounds(bounds, 1);
           if (ltBounds && ltBounds.handles) return ltBounds.handles;
@@ -622,7 +622,7 @@
      */
     hitTest(bounds, x, y) {
       if (!bounds) return false;
-      const engine = window.FishToolEngine || window.LayerTransform;
+      const engine = window.DenjiMotionEngine || window.LayerTransform;
       if (bounds.corners && Array.isArray(bounds.corners)) {
         if (engine) {
           return engine.hitTest(bounds, x, y);

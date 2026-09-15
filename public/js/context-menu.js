@@ -1,5 +1,5 @@
 /**
- * OpenFishTools Studio - Modular Context Menu & Press-Hold Action Popup Controller
+ * DenjiMotion Studio - Modular Context Menu & Press-Hold Action Popup Controller
  * Features:
  * - Desktop Right-Click (contextmenu event) trigger
  * - Mobile / Touch Press & Hold (Long-press pointerdown timer) trigger

@@ -6,7 +6,7 @@ try {
     window.tips = new window.TipsModule();
     window.stopwatch = new window.StopwatchModule();
 } catch (e) {
-    console.error("FishTools: Pre-init failed", e);
+    console.error("DenjiMotion: Pre-init failed", e);
 }
 
 function setupFlyoutMenu() {
@@ -230,7 +230,7 @@ function loadHostScript(callback) {
             if (callback) callback();
         });
     } catch (e) {
-        console.error("FishTools: Host script load failed", e);
+        console.error("DenjiMotion: Host script load failed", e);
         if (callback) callback();
     }
 }
@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
             window.settings.init();
         }
     } catch (e) {
-        console.error('FishTools: Settings init failed', e);
+        console.error('DenjiMotion: Settings init failed', e);
     }
 
     var themeSelect = document.getElementById('theme-select');
@@ -540,7 +540,7 @@ function checkScriptPermissions() {
         '    if (tempPath.slice(-1) === "/" || tempPath.slice(-1) === "\\\\") {',
         '      tempPath = tempPath.slice(0, -1);',
         '    }',
-        '    var f = new File(tempPath + "/fishtools_permtest.tmp");',
+        '    var f = new File(tempPath + "/denjimotion_permtest.tmp");',
         '    if (f.open("w")) {',
         '      f.write("ok");',
         '      f.close();',

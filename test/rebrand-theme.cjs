@@ -1,8 +1,10 @@
 /**
- * Test regresi Rebrand Denji Motion + Tema Maroon (Fase 3, v0.28.0):
+ * Test regresi Rebrand Total Denji Motion + Tema Maroon (v0.29.0):
  * [1] Brand user-visible = Denji Motion (judul, header, about, donasi, changelog).
  * [2] Atribusi MIT ke proyek hulu tetap ada.
- * [3] Identifier internal TIDAK berubah (key, id, class, src, URL, format file).
+ * [3] Identifier internal memakai nama baru (key, id, src, global).
+ * [3b] Migrasi: kunci lama hanya fallback baca + alias jembatan hulu.
+ * [3c] Nama lama hilang dari permukaan HTML.
  * [4] String JS user-visible (toast, teks default, kanvas demo).
  * [5] Token tema maroon dark + kelengkapan tema terang.
  *
@@ -21,6 +23,13 @@ const textEngine = fs.readFileSync(path.join(PUBLIC, 'js', 'text-engine.js'), 'u
 const demoCode = fs.readFileSync(path.join(PUBLIC, 'js', 'demo.js'), 'utf8');
 const themeCss = fs.readFileSync(path.join(PUBLIC, 'css', 'theme.css'), 'utf8');
 const serverCode = fs.readFileSync(path.join(__dirname, '..', 'server.js'), 'utf8');
+const mainCode = fs.readFileSync(path.join(PUBLIC, 'js', 'main.js'), 'utf8');
+const dbCode = fs.readFileSync(path.join(PUBLIC, 'js', 'db.js'), 'utf8');
+const colorPickerCode = fs.readFileSync(path.join(PUBLIC, 'js', 'color-picker.js'), 'utf8');
+const fontsCode = fs.readFileSync(path.join(PUBLIC, 'js', 'custom-fonts.js'), 'utf8');
+const engineCode = fs.readFileSync(path.join(PUBLIC, 'js', 'denjimotion-engine.js'), 'utf8');
+const adapterCode = fs.readFileSync(path.join(PUBLIC, 'js', 'denjimotion-adapter.js'), 'utf8');
+const controllerCode = fs.readFileSync(path.join(PUBLIC, 'js', 'denjimotion-controller.js'), 'utf8');
 
 let passed = 0;
 let failed = 0;
@@ -57,34 +66,54 @@ console.log('[2] Atribusi MIT');
 });
 ok(indexHtml.includes('https://raw.githubusercontent.com/cutefishaep/OpenFishTools/'), 'URL aset hulu utuh');
 
-// [3] Identifier internal utuh
-console.log('[3] Identifier internal tak berubah');
-ok(indexHtml.includes("localStorage.getItem('fishtool_theme')"), 'kunci tema localStorage');
-ok(editorHtml.includes("'fishtool_layout_desktop'"), 'kunci layout localStorage');
-ok(editorCode.includes("'fishtool:custom-swatches'") || true, 'kunci swatch (skip-bersyarat)');
-ok(editorHtml.includes('id="editor-btn-fishtool-trigger"'), 'id trigger');
-ok(editorHtml.includes('id="popover-editor-fishtools"'), 'id popover');
-ok(editorHtml.includes('js/fishtool-engine.js'), 'src engine');
-ok(editorHtml.includes('js/fishtools-adapter.js'), 'src adapter');
-ok(editorHtml.includes('js/openfishtools-controller.js'), 'src controller');
-ok(demoHtml.includes('.FISHTOOL'), 'badge format .FISHTOOL');
-ok(demoHtml.includes('accept=".json,.fishtool,.fts'), 'accept format file');
+// [3] Identifier internal memakai nama baru
+console.log('[3] Identifier internal DenjiMotion');
+ok(indexHtml.includes("localStorage.getItem('denjimotion_theme')"), 'kunci tema localStorage');
+ok(editorHtml.includes("'denjimotion_layout_desktop'"), 'kunci layout localStorage');
+ok(colorPickerCode.includes("'denjimotion:custom-swatches'"), 'kunci swatch');
+ok(editorHtml.includes('id="editor-btn-denjimotion-trigger"'), 'id trigger');
+ok(editorHtml.includes('id="popover-editor-denjimotion"'), 'id popover');
+ok(editorHtml.includes('js/denjimotion-engine.js'), 'src engine');
+ok(editorHtml.includes('js/denjimotion-adapter.js'), 'src adapter');
+ok(editorHtml.includes('js/denjimotion-controller.js'), 'src controller');
+ok(demoHtml.includes('.DENJIMOTION'), 'badge format .DENJIMOTION');
+ok(demoHtml.includes('accept=".json,.denjimotion,.fts'), 'accept format file');
+ok(editorCode.includes('window.DenjiMotionEngine') || engineCode.includes('window.DenjiMotionEngine'), 'global engine baru');
+ok(controllerCode.includes('window.executeDenjiMotion'), 'dispatcher baru');
 
-// Tidak ada brand lama tersisa di permukaan terlihat HTML (di luar allowlist)
-console.log('[3b] Brand lama hilang dari permukaan');
+// [3b] Migrasi: kunci lama hanya sebagai fallback baca
+console.log('[3b] Migrasi kunci lama');
+ok(indexHtml.includes("localStorage.getItem('fishtool_theme')"), 'fallback tema dasbor');
+ok(editorHtml.includes("'fishtool_layout_desktop'"), 'fallback layout');
+ok(mainCode.includes("APP_THEME_KEY_LEGACY = 'fishtool_theme'"), 'konstanta legacy tema');
+ok(dbCode.includes('fishtools_save') && dbCode.includes('lsGetMigrate'), 'migrasi db.js');
+ok(editorCode.includes("localStorage.getItem('fishtool_grad_presets')"), 'fallback preset gradient');
+ok(fontsCode.includes("DB_NAME_LEGACY = 'fishtool-custom-fonts'"), 'migrasi IDB font');
+ok(!/localStorage\.setItem\('fishtool/i.test(editorCode + mainCode + dbCode + colorPickerCode), 'tulis selalu kunci baru');
+// Alias jembatan hulu (iframe CDN masih memakai nama lama)
+ok(controllerCode.includes('window.executeFishTool = executeDenjiMotion'), 'alias executeFishTool');
+ok(adapterCode.includes('window.FishToolsBridge = window.DenjiMotionBridge'), 'alias bridge');
+ok(adapterCode.includes("event.data.type === 'fishtools-run-tool'") || controllerCode.includes("'fishtools-run-tool'"), 'pesan lama diterima');
+// Daftar hapus IDB legacy wajib menunjuk nama DB lama yang asli
+ok(dbCode.includes("'FishTool_Studio_DB'") && dbCode.includes('cleanupLegacyData'), 'cleanup IDB legacy utuh');
+
+// Tidak ada nama lama tersisa di permukaan terlihat HTML (di luar allowlist)
+console.log('[3c] Nama lama hilang dari permukaan');
 [indexHtml, editorHtml, demoHtml].forEach((h, i) => {
   const tag = ['dasbor', 'editor', 'demo'][i];
   const scrubbed = h
     .replace(/https?:\/\/[^\s"']*/g, '')
     .replace(/Based on the open-source OpenFishTools project \(MIT\)\./g, '')
     .replace(/(src|href|id|class)="[^"]*"/g, '')
-    .replace(/\.fishtool/gi, '')
-    .replace(/fishtool_[a-z_]+/g, '')
+    .replace(/localStorage\.getItem\('[^']*'\)/g, '')
+    .replace(/window\.localStorage\.getItem\([^)]*\)/g, '')
+    .replace(/'(denjimotion|fishtool)_[a-z_]+'/g, '')
+    .replace(/\.denjimotion/gi, '')
     .replace(/&lt;[^;]*?&gt;/g, '')
-    .replace(/accept="[^"]*"/g, '')
-    .replace(/localStorage\.getItem\('[^']*'\)/g, '');
-  ok(!/OpenFishTools/i.test(scrubbed), `tanpa OpenFishTools terlihat (${tag})`);
-  ok(!/Fish\s?Tool/i.test(scrubbed), `tanpa FishTool terlihat (${tag})`);
+    .replace(/accept="[^"]*"/g, '');
+  ok(!/fishtool/i.test(scrubbed), `tanpa fishtool (${tag})`);
+  ok(!/openfish/i.test(scrubbed), `tanpa openfish (${tag})`);
+  ok(!/Fish\s?Tool/i.test(scrubbed), `tanpa Fish Tool (${tag})`);
 });
 
 // [4] String JS user-visible
@@ -113,5 +142,5 @@ ok(indexHtml.includes("setAttribute('data-theme', 'light')"), 'snippet pra-rende
 ok(editorHtml.includes("setAttribute('data-theme', 'light')"), 'snippet pra-render tema editor');
 
 // ----------------------------------------------------------
-console.log(`\nRebrand+Tema Fase 3: ${passed} lolos, ${failed} gagal.`);
+console.log(`\nRebrand Total v0.29.0: ${passed} lolos, ${failed} gagal.`);
 if (failed > 0) process.exit(1);

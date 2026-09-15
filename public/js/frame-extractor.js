@@ -1,5 +1,5 @@
 /**
- * FishTool Studio - VideoFrameExtractor
+ * DenjiMotion Studio - VideoFrameExtractor
  * Shared Media-Source Range Extractor & Frame Cache
  * 
  * Features:

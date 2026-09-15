@@ -1,5 +1,5 @@
 /**
- * OpenFishTools Studio — Node.js (Express) Port
+ * DenjiMotion Studio — Node.js (Express) Port
  * ============================================================
  * Hasil port 1:1 dari https://fishtoolstudio.vercel.app/ (v0.5.14)
  * ke aplikasi web Node.js + Express.
@@ -38,7 +38,7 @@ const PROJECTS_FILE = path.join(DATA_DIR, 'projects.json');
 // Helpers: penyimpanan project sisi-server (file JSON)
 // Rantai fallback tulis (Vercel = filesystem read-only):
 //   1) ./data/projects.json (lokal/VPS — persisten)
-//   2) $TMPDIR/fishtool-projects.json (serverless — semi-persisten antar
+//   2) $TMPDIR/denjimotion-projects.json (serverless — semi-persisten antar
 //      invocasi hangat; hilang saat cold start / redeploy)
 //   3) memori proses (darurat — hilang saat proses mati)
 // Bacaan pertama di (2) di-seed dari file bundel bila ada.
@@ -166,7 +166,7 @@ app.get(['/demo', '/demo.html', '/showcase'], (req, res) => {
 // REST API
 // ----------------------------------------------------------
 app.get('/api/health', (req, res) => {
-  res.json({ ok: true, app: 'fishtool-studio-nodejs', time: new Date().toISOString() });
+  res.json({ ok: true, app: 'denjimotion-studio-nodejs', time: new Date().toISOString() });
 });
 
 app.get('/api/version', (req, res) => {
@@ -251,7 +251,7 @@ app.use('/api', (req, res) => {
 // Fallback: hanya request mirip-navigasi halaman (TANPA ekstensi file)
 // yang dikembalikan ke beranda. Request file berekstensi yang hilang
 // (.html/.json/.js/...) harus 404 murni agar logika fetch() client
-// seperti `if (res.ok)` di fishtools-adapter.js tetap benar.
+// seperti `if (res.ok)` di denjimotion-adapter.js tetap benar.
 app.use((req, res) => {
   const hasExtension = path.extname(req.path) !== '';
   if (!hasExtension && req.accepts('html')) {

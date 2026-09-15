@@ -1,5 +1,5 @@
 /**
- * FishTool Studio - FishAudioEngine
+ * DenjiMotion Studio - FishAudioEngine
  * Web Audio API audio pipeline for synchronized video and audio playback.
  * Features automated click-free muting during scrubbing and gesture unlock.
  */

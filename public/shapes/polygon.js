@@ -1,6 +1,6 @@
 /**
  * SHAPES: Polygon (Poligon)
- * Modular plugin for OpenFishTools Studio
+ * Modular plugin for DenjiMotion Studio
  */
 
 (function() {

@@ -1,5 +1,5 @@
 /**
- * OpenFishTools Studio - Modular macOS-Style Popover Controller
+ * DenjiMotion Studio - Modular macOS-Style Popover Controller
  * Features:
  * - Dynamic Anchor scaling from pointy tail tip (transform-origin: tail tip)
  * - Auto smart flipping (top vs bottom, left vs right) and viewport margin clamping
@@ -87,7 +87,7 @@ const Popover = (function () {
     const isEmbedPanel = activePopover && activePopover.classList.contains('is-embed-panel');
     const explicitPlacement = (activeTrigger && activeTrigger.dataset ? activeTrigger.dataset.popoverPlacement : null) || activePopover.dataset.popoverPlacement;
 
-    // Special Case: On Mobile, OpenFishTools embed panel pops UPWARD to completely fill upper preview area
+    // Special Case: On Mobile, DenjiMotion embed panel pops UPWARD to completely fill upper preview area
     if (isMobile && isEmbedPanel) {
       const availableTopHeight = Math.max(160, Math.floor(effectiveTriggerRect.top - OFFSET - MARGIN));
       activePopover.style.width = `calc(100vw - ${MARGIN * 2}px)`;

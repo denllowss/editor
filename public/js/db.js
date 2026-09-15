@@ -1,5 +1,5 @@
 /**
- * OpenFishTools Studio - Database Persistence Layer (FishDatabase)
+ * DenjiMotion Studio - Database Persistence Layer (FishDatabase)
  * Manages Settings & Projects using IndexedDB with fallback to localStorage
  * and seamless project CRUD operations (Create, Read, Update, Delete, Duplicate).
  */
@@ -7,16 +7,40 @@
 window.FishDatabase = (function () {
   var DB_NAME = 'FishStudioDB';
   var DB_VERSION = 3;
-  var SETTINGS_KEY = 'fishtools_save';
-  var SETTINGS_KEY_ALT = 'fishToolsFileStore';
-  var PROJECTS_KEY = 'fishtools_projects';
-  var MEDIA_KEY = 'fishtools_media';
-  var DELETED_IDS_KEY = 'fishtools_deleted_ids';
+  var SETTINGS_KEY = 'denjimotion_save';
+  var SETTINGS_KEY_ALT = 'denjiMotionFileStore';
+  var PROJECTS_KEY = 'denjimotion_projects';
+  var MEDIA_KEY = 'denjimotion_media';
+  var DELETED_IDS_KEY = 'denjimotion_deleted_ids';
+  // Kunci era FishTool: hanya fallback baca + migrasi sekali (tulis selalu kunci baru).
+  var LEGACY_KEYS = {
+    denjimotion_save: 'fishtools_save',
+    denjiMotionFileStore: 'fishToolsFileStore',
+    denjimotion_projects: 'fishtools_projects',
+    denjimotion_media: 'fishtools_media',
+    denjimotion_deleted_ids: 'fishtools_deleted_ids',
+    denjimotion_emergency_layers: 'fishtool_emergency_layers',
+    denjimotion_custom_easing_presets: 'fishtool_custom_easing_presets'
+  };
+  function lsGetMigrate(newKey) {
+    var v = null;
+    try { v = localStorage.getItem(newKey); } catch (_) {}
+    if (v !== null && v !== undefined) return v;
+    var oldKey = LEGACY_KEYS[newKey];
+    if (!oldKey) return null;
+    try { v = localStorage.getItem(oldKey); } catch (_) {}
+    if (v === null || v === undefined) return null;
+    try {
+      localStorage.setItem(newKey, v); // migrasi sekali ke kunci baru
+      localStorage.removeItem(oldKey);
+    } catch (_) {}
+    return v;
+  }
 
   var dbPromise = null;
   var _deletedIds = new Set();
   try {
-    var _storedDeleted = localStorage.getItem(DELETED_IDS_KEY);
+    var _storedDeleted = lsGetMigrate(DELETED_IDS_KEY);
     if (_storedDeleted) {
       var _parsedDeleted = JSON.parse(_storedDeleted);
       if (Array.isArray(_parsedDeleted)) {
@@ -146,7 +170,7 @@ window.FishDatabase = (function () {
   // Synchronous localStorage project helpers
   function getLocalProjects() {
     try {
-      var raw = localStorage.getItem(PROJECTS_KEY);
+      var raw = lsGetMigrate(PROJECTS_KEY);
       if (!raw) return [];
       var list = JSON.parse(raw);
       return Array.isArray(list) ? list : [];
@@ -269,6 +293,7 @@ window.FishDatabase = (function () {
    */
   async function cleanupLegacyData() {
     if (typeof window !== 'undefined' && window.indexedDB && typeof window.indexedDB.deleteDatabase === 'function') {
+      // Nama DB era FishTool: SENGAJA tidak diganti — menunjuk DB asli versi lama agar hapus.
       var legacyDbs = [
         'FishTool_Studio_DB',
         'FishTool_MediaStorage_DB',
@@ -318,7 +343,7 @@ window.FishDatabase = (function () {
 
   async function init() {
     var db = await openDB();
-    var localRaw = localStorage.getItem(SETTINGS_KEY) || localStorage.getItem(SETTINGS_KEY_ALT);
+    var localRaw = lsGetMigrate(SETTINGS_KEY) || lsGetMigrate(SETTINGS_KEY_ALT);
     if (!localRaw) {
       var seed = getDefaultSettings();
       await saveSettings(seed);
@@ -338,7 +363,7 @@ window.FishDatabase = (function () {
 
   // --- Settings APIs ---
   function getSyncSettings() {
-    var raw = localStorage.getItem(SETTINGS_KEY) || localStorage.getItem(SETTINGS_KEY_ALT);
+    var raw = lsGetMigrate(SETTINGS_KEY) || lsGetMigrate(SETTINGS_KEY_ALT);
     if (!raw) {
       var defaultSettings = getDefaultSettings();
       raw = JSON.stringify(defaultSettings);
@@ -1132,7 +1157,7 @@ window.FishDatabase = (function () {
   // ==========================================================================
   function getLocalMedia() {
     try {
-      var raw = localStorage.getItem(MEDIA_KEY);
+      var raw = lsGetMigrate(MEDIA_KEY);
       if (!raw) return [];
       var list = JSON.parse(raw);
       return Array.isArray(list) ? list : [];
@@ -1644,11 +1669,11 @@ window.FishDatabase = (function () {
 
     // Also purge emergency layers snapshot if it belonged to this project
     try {
-      var emergencyRaw = localStorage.getItem('fishtool_emergency_layers');
+      var emergencyRaw = lsGetMigrate('denjimotion_emergency_layers');
       if (emergencyRaw) {
         var emergencyParsed = JSON.parse(emergencyRaw);
         if (emergencyParsed && (emergencyParsed.projectId === id || emergencyParsed.projectId === targetId)) {
-          localStorage.removeItem('fishtool_emergency_layers');
+          localStorage.removeItem('denjimotion_emergency_layers');
         }
       }
     } catch (_) {}
@@ -2313,7 +2338,7 @@ window.FishDatabase = (function () {
       if (s && Array.isArray(s.customEasingPresets) && s.customEasingPresets.length > 0) {
         return s.customEasingPresets;
       }
-      const raw = localStorage.getItem('fishtool_custom_easing_presets');
+      const raw = lsGetMigrate('denjimotion_custom_easing_presets');
       return raw ? JSON.parse(raw) : [];
     } catch (_) {
       return [];
@@ -2323,7 +2348,7 @@ window.FishDatabase = (function () {
   async function saveCustomEasingPresets(list) {
     if (!Array.isArray(list)) return;
     try {
-      localStorage.setItem('fishtool_custom_easing_presets', JSON.stringify(list));
+      localStorage.setItem('denjimotion_custom_easing_presets', JSON.stringify(list));
       const s = await getSettings();
       s.customEasingPresets = list;
       await saveSettings(s);

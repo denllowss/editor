@@ -1,4 +1,4 @@
-# 📋 Laporan Audit Full Fitur — FishTool Studio Node.js
+# 📋 Laporan Audit Full Fitur — DenjiMotion Studio Node.js
 
 **Tanggal:** 15 Sep 2026 · **Versi upstream:** 0.5.14 · **Hasil: ✅ LULUS — semua fitur dipastikan jalan**
 
@@ -28,9 +28,9 @@
 Dicek satu per satu: **status HTTP + ukuran byte lokal vs origin**. Rincian:
 
 - `js/` — 27 file inti: `db.js` (IndexedDB), `main.js` (dashboard), `editor.js` (1,24 MB — mesin editor),
-  `FishExport-Enggine.js` (export offline frame-by-frame), `fishtool-engine.js`, `fishtools-adapter.js`,
+  `FishExport-Enggine.js` (export offline frame-by-frame), `denjimotion-engine.js`, `denjimotion-adapter.js`,
   `fish-audio-engine.js`, `motion-blur-engine.js`, `preview-cache.js`, `frame-extractor.js`,
-  `template-editor.js`, `text-engine.js`, `openfishtools-controller.js`, `openfishtools-generators3d.js`,
+  `template-editor.js`, `text-engine.js`, `denjimotion-controller.js`, `denjimotion-generators3d.js`,
   `wireframe.js`, `color-picker.js`, `popover.js`, `drawer.js`, `switch.js`, `modal.js`,
   `context-menu.js`, `effects.js`, `shapes.js`, `demo.js`, `sync-height.js`, `jszip.min.js`
 - `effects/` — **50 efek**: warp, wave_warp, chromatic_aberration, fsmb (motion blur), deep_glow,
@@ -61,7 +61,7 @@ Dicek satu per satu: **status HTTP + ukuran byte lokal vs origin**. Rincian:
 ## 4. Bug yang ditemukan & diperbaiki 🛠️
 
 **Fallback SPA menelan 404.** Sebelumnya, request file hilang (mis. `Extension/extension.html`, `tips.json`)
-dikembalikan `index.html` dengan status **200**, sehingga cek `if (res.ok)` di `fishtools-adapter.js` salah jalan
+dikembalikan `index.html` dengan status **200**, sehingga cek `if (res.ok)` di `denjimotion-adapter.js` salah jalan
 (mengira file lokal ada, lalu mem-parsing HTML yang salah).
 
 **Perbaikan (`server.js`):** fallback ke `index.html` kini **hanya untuk path tanpa ekstensi**
@@ -120,7 +120,7 @@ uji di Live Preview (port 3000):
 ## 7. Cara menjalankan ulang audit
 
 ```bash
-cd fishtool-nodejs
+cd denjimotion-nodejs
 npm start
 # 1) 149 referensi: semua harus 200 (daftar di /tmp/refs.txt saat audit)
 # 2) node --check untuk tiap *.js
@@ -144,23 +144,23 @@ Verifikasi tambahan yang dilakukan:
 - Versi naik ke `0.6.0` (`package.json`, `public/version.json`, entri `CHANGELOG.md`).
   Tidak ada perubahan perilaku pada 149 aset audit awal.
 
-## 9. Addendum v0.6.1 (Node.js port) — tanpa notifikasi + FishTools 100%
+## 9. Addendum v0.6.1 (Node.js port) — tanpa notifikasi + DenjiMotion 100%
 
 **Notifikasi Welcome:** `initWelcomeModal()` di `public/js/main.js` tidak lagi auto-membuka
 `modal-welcome` (dulu: setiap kunjungan kecuali checkbox dicentang). Verifikasi: tidak ada
 lagi `Modal.open('modal-welcome')` terpanggil otomatis; modal tetap tersedia via tombol Info.
 
-**FishTools 100%:** investigasi menemukan panel editor memuat UI-nya dari CDN
+**DenjiMotion 100%:** investigasi menemukan panel editor memuat UI-nya dari CDN
 (`cdn.jsdelivr.net/.../@main/client/index.html`, fallback GitHub raw) dan 12 tombol mati:
-11 preset CF_* tanpa handler di `FishToolsBridge.executeTool` + SHKE yang di-disable.
+11 preset CF_* tanpa handler di `DenjiMotionBridge.executeTool` + SHKE yang di-disable.
 Perbaikan:
 - 19 file klien di-vendor ke `public/Extension/` → adapter otomatis memakai mode lokal
   (`fetch('Extension/extension.html')` 200, `CLIENT_BASE='Extension/'`). Simulasi logika
   strip adapter: 13 script kept (semua ada), 13 stripped, 0 hilang. Semua file 200 via curl.
-- `js/fishtools-adapter.js`: blok CF_* (mapping + preset via helper baru
+- `js/denjimotion-adapter.js`: blok CF_* (mapping + preset via helper baru
   `applyEffectWithPreset`, warna acak `randomHexColor`), SHKE di-remap ke OSCILLATE
   + blok disable tombol & CSS-nya dihapus.
-- Test baru `test/fishtools-bridge.cjs` (15 asserts, 0 gagal): routing CF_*,
+- Test baru `test/denjimotion-bridge.cjs` (15 asserts, 0 gagal): routing CF_*,
   preset shatter/colorize, remap SHKE (+fallback), guard tanpa-layer, sweep 84 tombol
   panel tanpa-throw. `npm test` kini menjalankan kedua suite (129 asserts total).
 
@@ -189,7 +189,7 @@ Test `test/responsive.cjs` (25 asserts, 0 gagal). Total `npm test`: 163 asserts,
 Panel Edit Text sebelumnya tanpa pemilih font (fontFamily hanya bawaan preset).
 Penambahan: dropdown Font di `editor.html` (built-in + impor, preview WYSIWYG per item,
 tombol × hapus font impor) + tombol Impor; modul `public/js/custom-fonts.js` (FontFace,
-IDB `fishtool-custom-fonts`, restore saat boot); wiring 3 titik di `editor.js`
+IDB `denjimotion-custom-fonts`, restore saat boot); wiring 3 titik di `editor.js`
 (helper sibling, hook `syncTextControllerUI`, init delegasi klik/impor/hapus);
 gaya picker di `editor.css`. Berlaku ke `textProps.fontFamily` → kanvas & ekspor ikut.
 Test `test/custom-fonts.cjs` (40 asserts, 0 gagal). Total `npm test`: 203 asserts, 0 gagal.
@@ -205,7 +205,7 @@ Test +10 asserts statis. Total `npm test`: 213 asserts, 0 gagal.
 ## 14. Addendum v0.9.0 (Node.js port) — convert video→audio & regangkan ke aspek
 
 Ekstraksi audio sebelumnya hanya via menu ⋯ (popover) sehingga sulit ditemukan; fit-to-comp
-hanya via panel FishTools (klik vs klik-kanan). Penambahan: tombol `btn-layer-extract-audio`
+hanya via panel DenjiMotion (klik vs klik-kanan). Penambahan: tombol `btn-layer-extract-audio`
 di action grid (khusus video) → pipeline MP3 eksisting (timeline + pool, video di-mute tapi
 TIDAK dihapus); baris `transform-fit-row` di pane Scale (khusus video/image) → reuse
 `window.applyToolboxFitToComp(false/true)` + re-sync nilai. Gaya tombol token tema.

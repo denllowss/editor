@@ -8,7 +8,7 @@
   
   <script>
     /* Mode tema pra-render: cegah kedip (selaras setAppTheme di js/main.js) */
-    try { if (window.localStorage && localStorage.getItem('fishtool_theme') === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (_) {}
+    try { if (window.localStorage && (localStorage.getItem('denjimotion_theme') || localStorage.getItem('fishtool_theme')) === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (_) {}
   </script>
   <!-- Separated CSS: Theme (Colors & Variables, Cal Sans Font), Layout, and Modular Modal -->
   <link rel="stylesheet" href="css/theme.css">
@@ -430,7 +430,7 @@
 
   <!-- ==========================================================================
        MODULAR POP-UP: APP SETTINGS MODAL (Setting Utama)
-       - Mode tampilan: Dark / Light (tersimpan fishtool_theme, berlaku dasbor + editor)
+       - Mode tampilan: Dark / Light (tersimpan denjimotion_theme, berlaku dasbor + editor)
        - Tampilan Editor: gaya layout (pindahan dari modal Composition editor)
        ========================================================================== -->
   <div class="modal-backdrop" id="modal-app-settings" role="dialog" aria-modal="true" aria-label="App Settings Dialog">

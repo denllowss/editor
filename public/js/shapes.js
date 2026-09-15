@@ -1,6 +1,6 @@
 /**
  * SHAPES.JS - Modular Shape Architecture & Plugin Registry
- * OpenFishTools Studio - Decoupled vector shape pipeline
+ * DenjiMotion Studio - Decoupled vector shape pipeline
  * Loads and coordinates modular shape plugins from shapes/*.js
  */
 

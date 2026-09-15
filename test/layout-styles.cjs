@@ -92,20 +92,20 @@ console.log('\n[3] Persistensi & validasi pilihan');
 {
   const t = makeSandbox(1280);
   ok(t.LS.setLayout('capcut') === true, 'desktop pilih capcut');
-  ok(t.mem.fishtool_layout_desktop === 'capcut', 'tersimpan di localStorage');
+  ok(t.mem.denjimotion_layout_desktop === 'capcut', 'tersimpan di localStorage');
   ok(t.LS.apply().layout === 'capcut', 'diterapkan setelah pilih');
   ok(t.LS.setLayout('capcut-tablet') === false, 'opsi tablet ditolak di desktop');
   ok(t.LS.setLayout('ngawur') === false, 'nilai asing ditolak');
-  ok(t.mem.fishtool_layout_desktop === 'capcut', 'penolakan tak menimpa simpanan');
+  ok(t.mem.denjimotion_layout_desktop === 'capcut', 'penolakan tak menimpa simpanan');
   ok(t.LS.setLayout('klasik') === true, 'desktop pilih klasik');
-  ok(t.mem.fishtool_layout_desktop === 'klasik', 'klasik desktop tersimpan');
+  ok(t.mem.denjimotion_layout_desktop === 'klasik', 'klasik desktop tersimpan');
 
   const p = makeSandbox(390);
   ok(p.LS.setLayout('capcut') === false, 'phone tak bisa pilih');
 
   const b = makeSandbox(800);
   ok(b.LS.setLayout('klasik') === true, 'tablet pilih klasik');
-  ok(b.mem.fishtool_layout_tablet === 'klasik', 'kunci tablet terpisah');
+  ok(b.mem.denjimotion_layout_tablet === 'klasik', 'kunci tablet terpisah');
   ok(b.LS.getSaved('tablet') === 'klasik', 'getSaved baca simpanan');
   ok(b.LS.getSaved('desktop') === 'after-effects', 'kelas lain tetap default');
 }
@@ -203,7 +203,7 @@ console.log('\n[7] Klik opsi menerapkan realtime');
   ok(t.sb.document.documentElement.dataset.layout === 'after-effects', 'awal: After Effects');
   items[1]._fire();
   ok(t.sb.document.documentElement.dataset.layout === 'capcut', 'klik CapCut langsung terap');
-  ok(t.mem.fishtool_layout_desktop === 'capcut', 'klik langsung tersimpan');
+  ok(t.mem.denjimotion_layout_desktop === 'capcut', 'klik langsung tersimpan');
   items[0]._fire();
   ok(t.sb.document.documentElement.dataset.layout === 'after-effects', 'klik balik langsung terap');
   ok(items[0]._count() === 1 && items[1]._count() === 1, 'binding Tepat sekali per item');

@@ -625,7 +625,7 @@
 
             _projectDirty = false;
             _lastSaveTime = Date.now();
-            try { localStorage.removeItem('fishtool_emergency_layers'); } catch (_) {}
+            try { localStorage.removeItem('denjimotion_emergency_layers'); localStorage.removeItem('fishtool_emergency_layers'); } catch (_) {}
 
             // Guarantee URL always has project ID so F5 refresh never loses project
             if (prj.id) {
@@ -673,7 +673,7 @@
     const _origDoSaveRef = saveCurrentProjectLayers;
 
     // Emergency localStorage snapshot key
-    const _EMERGENCY_KEY = 'fishtool_emergency_layers';
+    const _EMERGENCY_KEY = 'denjimotion_emergency_layers';
 
     function writeEmergencySnapshot() {
       if (!currentProjectState.id) return;
@@ -746,7 +746,7 @@
     // 4) ON LOAD: Restore emergency snapshot if DB save was lost
     (async function restoreEmergencySnapshot() {
       try {
-        const raw = localStorage.getItem(_EMERGENCY_KEY);
+        const raw = localStorage.getItem(_EMERGENCY_KEY) || localStorage.getItem('fishtool_emergency_layers');
         if (!raw) return;
         const snapshot = JSON.parse(raw);
         if (!snapshot || !snapshot.projectId || !snapshot.timestamp) {
@@ -1590,7 +1590,7 @@
 
     // Helper: Compute Adaptive 3D Group Wireframe Bounds for Collapsed Precompose Layer
     function computeCollapsedPrecompBounds(precompLayer, effProps, currentSec, bufferScale, camEff, w, h) {
-      const engine = window.FishToolEngine || window.LayerTransform;
+      const engine = window.DenjiMotionEngine || window.LayerTransform;
       if (!engine || !precompLayer) return null;
 
       const pps = window.currentPixelsPerSecond || 80;
@@ -2057,7 +2057,7 @@
           const curAbsW = Math.abs(curBw);
           const curAbsH = Math.abs(curBh);
 
-          const engine = window.FishToolEngine || window.LayerTransform;
+          const engine = window.DenjiMotionEngine || window.LayerTransform;
           const isChild3D = engine && (Math.abs(curRotX) > 0.001 || Math.abs(curRotY) > 0.001 || Math.abs(eff.posZ || 0) > 0.001 || Math.abs(eff.anchorZ || 0) > 0.001 || !!targetChild.is3D);
           if (isChild3D) {
             const animChild = Object.assign({}, targetChild, eff, {
@@ -2264,7 +2264,7 @@
           const allIds = (window.selectedLayerIds && window.selectedLayerIds.size > 0)
             ? Array.from(window.selectedLayerIds)
             : (window.selectedLayerId ? [window.selectedLayerId] : []);
-          const engine = window.FishToolEngine || window.LayerTransform;
+          const engine = window.DenjiMotionEngine || window.LayerTransform;
           allIds.forEach(id => {
             const selL = (currentProjectState.layers || []).find(l => l.id === id);
             if (!selL || selL.hidden || selL.type === 'audio') return;
@@ -2322,8 +2322,8 @@
         const layersToRender = [];
         let compositionBufferScale = bufferScale;
 
-        // Apply camera viewport transformation if active camera exists (2D canvas squash only when FishToolEngine is not active)
-        const engineActive = !!(window.FishToolEngine && window.FishToolEngine.isReady);
+        // Apply camera viewport transformation if active camera exists (2D canvas squash only when DenjiMotionEngine is not active)
+        const engineActive = !!(window.DenjiMotionEngine && window.DenjiMotionEngine.isReady);
         if (activeCamera && camEff && !engineActive) {
           const camZoom = (camEff.cameraZoom !== undefined ? camEff.cameraZoom : 100) / 100;
           const camLens = Math.max(1, camEff.cameraLens !== undefined ? camEff.cameraLens : 50);
@@ -2356,7 +2356,7 @@
 
         if (layer.type === 'adjustment') {
           // 1. Flush any batched layers rendered prior to this adjustment layer into ctx
-          const engine = window.FishToolEngine || window.LayerTransform;
+          const engine = window.DenjiMotionEngine || window.LayerTransform;
           const mbEngine = window.FishMotionBlurEngine;
           const compState = currentActivePrecomp || currentProjectState;
           if (engine && layersToRender.length > 0) {
@@ -2657,7 +2657,7 @@
             const pWorldZ = (effProps.posZ || 0) + (effProps.anchorZ || 0);
 
             const precompOpacity = effProps.opacity !== undefined ? effProps.opacity : 1.0;
-            const engine = window.FishToolEngine || window.LayerTransform;
+            const engine = window.DenjiMotionEngine || window.LayerTransform;
 
             validChildren.forEach(child => {
               const childEl = getPrecompChildRenderElement(child, innerSec, pw, ph, pps, triggerSource);
@@ -3112,7 +3112,7 @@
               layerDofBlur = blurFactor * maxBlur;
             }
 
-            const engine = window.FishToolEngine || window.LayerTransform;
+            const engine = window.DenjiMotionEngine || window.LayerTransform;
             if (engine) {
               const animLayer = Object.assign({}, layer, effProps);
               animLayer._dofBlur = layerDofBlur;
@@ -3262,7 +3262,7 @@
         });
 
         // Hardware 3D Perspective Scene: Batches intersecting 3D layers into WebGL with true Z-buffer penetration
-        const engine = window.FishToolEngine || window.LayerTransform;
+        const engine = window.DenjiMotionEngine || window.LayerTransform;
         const mbEngine = window.FishMotionBlurEngine;
         const compState = currentActivePrecomp || currentProjectState;
         if (engine && layersToRender.length > 0) {
@@ -3469,7 +3469,7 @@
 
       // In selection mode (multi-select / select-all), keep wireframe bounds fresh even during playback
       if (!isExport && !isTemplate && (!window.isTimelinePlaying || isSelectionMode) && allSelectedIds.length > 0) {
-        const engine = window.FishToolEngine || window.LayerTransform;
+        const engine = window.DenjiMotionEngine || window.LayerTransform;
         allSelectedIds.forEach(id => {
           const selL = (currentProjectState.layers || []).find(l => l.id === id);
           if (!selL || selL.hidden || selL.type === 'audio') return;
@@ -3796,7 +3796,7 @@
         if (!img || img.tagName !== 'IMG' || !img.complete || !img.naturalWidth || !img.naturalHeight) return false;
 
         const b = layer._canvasBounds;
-        const engine = window.FishToolEngine || window.LayerTransform;
+        const engine = window.DenjiMotionEngine || window.LayerTransform;
         if (!engine || !engine.hitTest(b, canvasX, canvasY)) return false;
 
         try {
@@ -3972,7 +3972,7 @@
             const curPlayheadSec = Math.abs(curPanX) / 80;
             const camEff = activeCam ? ((typeof getLayerEffectivePropsAtTime === 'function') ? getLayerEffectivePropsAtTime(activeCam, curPlayheadSec) : activeCam) : null;
 
-            const engine = window.FishToolEngine || window.LayerTransform;
+            const engine = window.DenjiMotionEngine || window.LayerTransform;
             const transformParams = {
               cx: layerPosX * bufferScale,
               cy: layerPosY * bufferScale,
@@ -4618,7 +4618,7 @@
               newPosY = startLayerState.posY + worldShiftY;
             } else {
               // 3D Euler shift
-              const engine = window.FishToolEngine || window.LayerTransform;
+              const engine = window.DenjiMotionEngine || window.LayerTransform;
               if (engine) {
                 const pOrigin = engine.projectPoint(0, 0, 0, { ...startLayerState.transformParams, cx: 0, cy: 0 });
                 const pTarget = engine.projectPoint(localShiftX, localShiftY, 0, { ...startLayerState.transformParams, cx: 0, cy: 0 });
@@ -6772,7 +6772,7 @@
 
       function getCustomPresets() {
         try {
-          const raw = localStorage.getItem('fishtool_custom_easing_presets');
+          const raw = localStorage.getItem('denjimotion_custom_easing_presets') || localStorage.getItem('fishtool_custom_easing_presets');
           const parsed = raw ? JSON.parse(raw) : [];
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
         } catch (_) {}
@@ -6785,7 +6785,7 @@
       function saveCustomPresets(list) {
         if (!Array.isArray(list)) return;
         try {
-          localStorage.setItem('fishtool_custom_easing_presets', JSON.stringify(list));
+          localStorage.setItem('denjimotion_custom_easing_presets', JSON.stringify(list));
         } catch (_) {}
         if (window.FishDatabase && typeof window.FishDatabase.saveCustomEasingPresets === 'function') {
           window.FishDatabase.saveCustomEasingPresets(list).catch(() => {});
@@ -7393,7 +7393,7 @@
                 merged.push(item);
               }
             });
-            try { localStorage.setItem('fishtool_custom_easing_presets', JSON.stringify(merged)); } catch (_) {}
+            try { localStorage.setItem('denjimotion_custom_easing_presets', JSON.stringify(merged)); } catch (_) {}
             renderCustomPresetsUI();
             updateGraphUI();
           }
@@ -7534,7 +7534,7 @@
         });
       }
 
-      // A3. Fit / Regangkan ke ukuran kanvas (video & foto) — pakai toolbox FishTools
+      // A3. Fit / Regangkan ke ukuran kanvas (video & foto) — pakai toolbox DenjiMotion
       function wireTransformFitBtn(id, stretch) {
         const btn = document.getElementById(id);
         if (!btn || btn.dataset.fitWired === '1') return;
@@ -10384,7 +10384,7 @@
     window.addSolidLayer = addSolidLayer;
 
     // ======================================================================
-    // TEXT LAYER CONTROLLER & FISHTOOL TEXT ENGINE INTEGRATION
+    // TEXT LAYER CONTROLLER & DENJIMOTION TEXT ENGINE INTEGRATION
     // ======================================================================
     function addTextLayer(presetId = 'default') {
       currentProjectState.layers = currentProjectState.layers || [];
@@ -11263,7 +11263,7 @@
               sctx.lineTo(cx - rx, cy + ry);
               sctx.closePath();
             } else {
-              const engine = window.FishToolEngine || window.LayerTransform;
+              const engine = window.DenjiMotionEngine || window.LayerTransform;
               const pts = engine && typeof engine.getShapeLocalContour === 'function'
                 ? engine.getShapeLocalContour(shapeType, shapeProps, sx, sy)
                 : [];
@@ -13814,7 +13814,7 @@
     }
 
     // ---- Preset gradient (bawaan + simpanan lokal, maks 12 custom) ----
-    const GRAD_PRESET_KEY = 'fishtool_grad_presets';
+    const GRAD_PRESET_KEY = 'denjimotion_grad_presets';
     function gradBuiltinPresets() {
       return [
         { name: 'Senja', type: 'linear', stops: [{ offset: 0, color: '#2B1055' }, { offset: 1, color: '#FF6B6B' }] },
@@ -13827,7 +13827,7 @@
     }
     function gradCustomPresets() {
       try {
-        const raw = window.localStorage ? localStorage.getItem(GRAD_PRESET_KEY) : null;
+        const raw = window.localStorage ? (localStorage.getItem(GRAD_PRESET_KEY) || localStorage.getItem('fishtool_grad_presets')) : null;
         const arr = raw ? JSON.parse(raw) : [];
         return Array.isArray(arr) ? arr.filter((p) => p && Array.isArray(p.stops) && p.stops.length >= 2).slice(0, 12) : [];
       } catch (_) { return []; }
@@ -16988,7 +16988,7 @@
       if (currentProject && Array.isArray(currentProject.customEasingPresets)) {
         currentProjectState.customEasingPresets = currentProject.customEasingPresets;
         try {
-          const raw = localStorage.getItem('fishtool_custom_easing_presets');
+          const raw = localStorage.getItem('denjimotion_custom_easing_presets') || localStorage.getItem('fishtool_custom_easing_presets');
           const localList = raw ? JSON.parse(raw) : [];
           const merged = Array.isArray(localList) ? [...localList] : [];
           currentProject.customEasingPresets.forEach(item => {
@@ -16996,7 +16996,7 @@
               merged.push(item);
             }
           });
-          localStorage.setItem('fishtool_custom_easing_presets', JSON.stringify(merged));
+          localStorage.setItem('denjimotion_custom_easing_presets', JSON.stringify(merged));
         } catch (_) {}
       }
 
@@ -22421,7 +22421,7 @@
 
         if (autoCrop) {
           let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-          const engine = (typeof FishToolEngine !== 'undefined' && FishToolEngine) || (typeof LayerTransform !== 'undefined' && LayerTransform);
+          const engine = (typeof DenjiMotionEngine !== 'undefined' && DenjiMotionEngine) || (typeof LayerTransform !== 'undefined' && LayerTransform);
           targetLayers.forEach(l => {
             if (l.type === 'camera' || l.type === 'audio' || l.type === 'null') return;
             const effProps = (typeof getLayerEffectivePropsAtTime === 'function') ? getLayerEffectivePropsAtTime(l, minStartSec, null, targetLayers) : {};
@@ -22618,7 +22618,7 @@
       window.precomposeSelectedLayers = precomposeSelectedLayers;
 
       // ======================================================================
-      // OPENFISHTOOLS ACTIONS: KEYFRAME OVERLAP (LEAPFROG RIG)
+      // DENJIMOTION ACTIONS: KEYFRAME OVERLAP (LEAPFROG RIG)
       // Ports _OVERLAP / _OVERLAP_2D from host/modules/misc.jsx
       // ======================================================================
       function applyKeyframeOverlap() {
@@ -22842,7 +22842,7 @@
       window.applyKeyframeOverlap = applyKeyframeOverlap;
 
       // ======================================================================
-      // OPENFISHTOOLS ACTIONS: DUPLICATE PRECOMPOSITION (DUP)
+      // DENJIMOTION ACTIONS: DUPLICATE PRECOMPOSITION (DUP)
       // Clones precomp in media pool & places duplicate on timeline
       // ======================================================================
       function duplicatePrecompLayer(newName) {
@@ -22956,7 +22956,7 @@
       window.duplicatePrecompLayer = duplicatePrecompLayer;
 
       // ======================================================================
-      // OPENFISHTOOLS FORMAT: COMPOSITION RATIO & FPS
+      // DENJIMOTION FORMAT: COMPOSITION RATIO & FPS
       // ======================================================================
       function changeCompositionRatio(w, h) {
         const wVal = parseInt(w, 10);
@@ -26947,12 +26947,12 @@
       };
     })();
 
-    // Dynamic On-Demand Lazy Loader for OpenFishTools Panel in Editor
-    (function initEditorFishToolsLoader() {
-      const triggerBtn = document.getElementById('editor-btn-fishtool-trigger');
-      const popoverEl = document.getElementById('popover-editor-fishtools');
-      const bodyEl = document.getElementById('editor-fishtools-body');
-      const loaderEl = document.getElementById('editor-fishtools-loader');
+    // Dynamic On-Demand Lazy Loader for DenjiMotion Panel in Editor
+    (function initEditorDenjiMotionLoader() {
+      const triggerBtn = document.getElementById('editor-btn-denjimotion-trigger');
+      const popoverEl = document.getElementById('popover-editor-denjimotion');
+      const bodyEl = document.getElementById('editor-denjimotion-body');
+      const loaderEl = document.getElementById('editor-denjimotion-loader');
 
       if (!triggerBtn || !popoverEl || !bodyEl) return;
 
@@ -26963,7 +26963,7 @@
         e.stopPropagation();
 
         // 1. Toggle Popover anchored to button immediately
-        Popover.toggle(triggerBtn, 'popover-editor-fishtools');
+        Popover.toggle(triggerBtn, 'popover-editor-denjimotion');
 
         // 2. Perform on-demand lazy load only on first click
         if (!isLoaded && Popover.isOpen && Popover.isOpen()) {
@@ -26972,12 +26972,12 @@
 
           const iframe = document.createElement('iframe');
           iframe.className = 'popover-embed-frame';
-          iframe.id = 'editor-fishtools-frame';
-          iframe.title = 'OpenFishTools Panel';
+          iframe.id = 'editor-denjimotion-frame';
+          iframe.title = 'DenjiMotion Panel';
           bodyEl.appendChild(iframe);
 
-          if (window.FishToolsAdapter) {
-            window.FishToolsAdapter.loadIntoIframe(iframe, loaderEl);
+          if (window.DenjiMotionAdapter) {
+            window.DenjiMotionAdapter.loadIntoIframe(iframe, loaderEl);
           }
         }
       });

@@ -1,6 +1,6 @@
 /**
- * OpenFishTools Controller & Dispatcher
- * Bridges OpenFishTools Panel actions into FishTools Studio Editor.
+ * DenjiMotion Controller & Dispatcher
+ * Bridges DenjiMotion Panel actions into DenjiMotion Studio Editor.
  * Modular, decoupled controller for toolbox tools, velocity tools, and beat effects.
  */
 (function(window) {
@@ -443,7 +443,7 @@
     const fps = (typeof window.getProjectFps === 'function') ? window.getProjectFps() : 60;
     const curSec = Number((Math.abs(window.timelinePanX || 0) / pps).toFixed(3));
     const frames = (typeof customFrames === 'number' && customFrames > 0) ? customFrames : 8;
-    const durationSec = Number((frames / fps).toFixed(3)); // 8 frames (punchy beat warp matching OpenFishTools)
+    const durationSec = Number((frames / fps).toFixed(3)); // 8 frames (punchy beat warp matching DenjiMotion)
     const selId = window.selectedLayerId;
 
     const adj = (typeof window.addAdjustmentLayer === 'function') ? window.addAdjustmentLayer(durationSec, curSec) : null;
@@ -2131,7 +2131,7 @@
     return JSON.stringify({ error: false, message: `${label} applied`, count: selected.length });
   }
 
-  // --- BEAT & PANNING EFFECTS (NULL LAYER RIG MATCHING OPENFISHTOOLS) ---
+  // --- BEAT & PANNING EFFECTS (NULL LAYER RIG MATCHING DENJIMOTION) ---
   function applyBeatNullTool(toolName) {
     const layers = (window.currentProjectState && window.currentProjectState.layers) || [];
     const selId = window.selectedLayerId || (window.selectedLayerIds && window.selectedLayerIds.size === 1 ? Array.from(window.selectedLayerIds)[0] : null);
@@ -2192,7 +2192,7 @@
     const targetScaleW = targetLayer.scaleW !== undefined ? targetLayer.scaleW : (targetLayer.mediaWidth || baseW);
     const targetScaleH = targetLayer.scaleH !== undefined ? targetLayer.scaleH : (targetLayer.mediaHeight || baseH);
 
-    // Map toolName to AE OpenFishTools Null Name
+    // Map toolName to AE DenjiMotion Null Name
     let nullName = 'Null';
     if (toolName === 'OSCILLATE') nullName = 'OSCILLATE';
     else if (toolName === 'Y_BEAT') nullName = 'Y BEAT';
@@ -2208,7 +2208,7 @@
     else if (toolName === 'PANNING_MIX_PR') nullName = 'PANNING Mix PR';
     else if (toolName === 'PANNING_MIX_ALL') nullName = 'PANNING Mix All';
 
-    // 1. Create Null Layer matching OpenFishTools structure
+    // 1. Create Null Layer matching DenjiMotion structure
     const nullLayer = {
       id: 'layer_null_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
       name: nullName,
@@ -2293,7 +2293,7 @@
       };
     }
 
-    // 4. Attach Slider Controls & Pure Mathematical Expressions (Matching GitHub OpenFishTools)
+    // 4. Attach Slider Controls & Pure Mathematical Expressions (Matching GitHub DenjiMotion)
     if (toolName === 'OSCILLATE') {
       activeProp = 'move';
       nullLayer.effects.push(createSlider('Freq', 3, 0.1, 20, 0.1, ' Hz'));
@@ -2837,12 +2837,12 @@
   }
 
   // ======================================================================
-  // CENTRAL DISPATCHER: executeFishTool
+  // CENTRAL DISPATCHER: executeDenjiMotion
   // ======================================================================
-  function executeFishTool(tool, ...args) {
+  function executeDenjiMotion(tool, ...args) {
     if (!tool) return;
     if (typeof window !== 'undefined') {
-      window._lastDirectFishToolCall = { key: tool + ':' + JSON.stringify(args), time: Date.now() };
+      window._lastDirectDenjiMotionCall = { key: tool + ':' + JSON.stringify(args), time: Date.now() };
     }
     switch (tool) {
       // Beat Effects
@@ -2871,7 +2871,7 @@
       case 'WARP3':
         return applyPresetWarp3();
 
-      // Null Rigs (matching After Effects OpenFishTools)
+      // Null Rigs (matching After Effects DenjiMotion)
       case 'OSCILLATE':
       case 'SWING':
       case 'Y_BEAT':
@@ -3108,7 +3108,8 @@
   }
 
   // Export to window
-  window.executeFishTool = executeFishTool;
+  window.executeDenjiMotion = executeDenjiMotion;
+  window.executeFishTool = executeDenjiMotion; // alias: iframe panel hulu (CDN) masih memanggil nama lama
   window.applyToolboxFreezeFrame = applyToolboxFreezeFrame;
   window.applyToolboxFitToComp = applyToolboxFitToComp;
   window.applyToolboxDropShadow = applyToolboxDropShadow;
@@ -3130,12 +3131,12 @@
   window.applyPresetWarp2 = applyPresetWarp2;
   window.applyPresetWarp3 = applyPresetWarp3;
 
-  // Cross-frame message listener for postMessage triggers from OpenFishTools panel iframe
+  // Cross-frame message listener for postMessage triggers from DenjiMotion panel iframe
   if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
     window.addEventListener('message', (event) => {
-      if (event && event.data && event.data.type === 'fishtools-run-tool' && event.data.tool) {
+      if (event && event.data && (event.data.type === 'denjimotion-run-tool' || event.data.type === 'fishtools-run-tool') && event.data.tool) {
         const args = Array.isArray(event.data.args) ? event.data.args : [];
-        executeFishTool(event.data.tool, ...args);
+        executeDenjiMotion(event.data.tool, ...args);
       }
     });
   }

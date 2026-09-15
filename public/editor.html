@@ -8,7 +8,7 @@
   
   <script>
     /* Mode tema pra-render: cegah kedip (selaras setAppTheme di js/main.js) */
-    try { if (window.localStorage && localStorage.getItem('fishtool_theme') === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (_) {}
+    try { if (window.localStorage && (localStorage.getItem('denjimotion_theme') || localStorage.getItem('fishtool_theme')) === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (_) {}
   </script>
   <!-- CSS: Theme (Colors & Variables, Cal Sans Font), Editor Layout, and Modular Modal / Popover / Drawer / Switch -->
   <link rel="stylesheet" href="css/theme.css">
@@ -33,9 +33,10 @@
         var root = document.documentElement;
         root.setAttribute('data-device', cls);
         if (cls === 'phone') { root.setAttribute('data-layout', 'mobile'); return; }
-        var key = cls === 'desktop' ? 'fishtool_layout_desktop' : 'fishtool_layout_tablet';
+        var key = cls === 'desktop' ? 'denjimotion_layout_desktop' : 'denjimotion_layout_tablet';
+        var legacyKey = cls === 'desktop' ? 'fishtool_layout_desktop' : 'fishtool_layout_tablet';
         var ok = cls === 'desktop' ? ['after-effects', 'capcut', 'klasik'] : ['capcut-tablet', 'klasik'];
-        var v = window.localStorage ? window.localStorage.getItem(key) : null;
+        var v = window.localStorage ? (window.localStorage.getItem(key) || window.localStorage.getItem(legacyKey)) : null;
         root.setAttribute('data-layout', ok.indexOf(v) >= 0 ? v : (cls === 'desktop' ? 'after-effects' : 'capcut-tablet'));
       } catch (_) {}
     })();
@@ -297,7 +298,7 @@
             </button>
 
             <!-- 7. Fish Icon (Denji Motion Lazy-Loaded Popover) -->
-            <button type="button" class="ctrl-btn ctrl-btn-fish" id="editor-btn-fishtool-trigger" title="Denji Motion Panel" aria-label="Denji Motion Panel">
+            <button type="button" class="ctrl-btn ctrl-btn-fish" id="editor-btn-denjimotion-trigger" title="Denji Motion Panel" aria-label="Denji Motion Panel">
               <img src="assets/icon.svg" alt="Denji Motion" width="22" height="22">
             </button>
           </div>
@@ -2985,12 +2986,12 @@
   <!-- ==========================================================================
        MODULAR DENJI EMBEDDED POPOVER (.is-embed-panel)
        ========================================================================== -->
-  <div class="popover-card is-embed-panel" id="popover-editor-fishtools" role="dialog" aria-hidden="true">
+  <div class="popover-card is-embed-panel" id="popover-editor-denjimotion" role="dialog" aria-hidden="true">
     <div class="popover-tail" aria-hidden="true"></div>
     
-    <div class="popover-embed-body" id="editor-fishtools-body">
+    <div class="popover-embed-body" id="editor-denjimotion-body">
       <!-- Minimalist Flat Loading State -->
-      <div class="popover-loader-box" id="editor-fishtools-loader">
+      <div class="popover-loader-box" id="editor-denjimotion-loader">
         <div class="popover-flat-spinner"></div>
         <span>Loading Denji Motion...</span>
       </div>
@@ -4223,8 +4224,8 @@
   <script src="effects/circle.js"></script>
   <script src="effects/motion_blur.js"></script>
   <script src="js/color-picker.js"></script>
-  <script src="js/fishtool-engine.js?v=6"></script>
-  <script src="js/fishtools-adapter.js?v=4"></script>
+  <script src="js/denjimotion-engine.js?v=6"></script>
+  <script src="js/denjimotion-adapter.js?v=4"></script>
   <script src="js/fish-audio-engine.js"></script>
   <script src="js/frame-extractor.js"></script>
   <script src="js/preview-cache.js"></script>
@@ -4239,7 +4240,7 @@
   <script src="js/FishExport-Enggine.js?v=0.5.14"></script>
   <script src="js/custom-aspect.js"></script>
   <script src="js/editor.js?v=0.5.14"></script>
-  <script src="js/openfishtools-generators3d.js"></script>
-  <script src="js/openfishtools-controller.js"></script>
+  <script src="js/denjimotion-generators3d.js"></script>
+  <script src="js/denjimotion-controller.js"></script>
 </body>
 </html>

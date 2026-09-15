@@ -58,7 +58,7 @@ console.log('\n[3] Tema terang + pra-render');
   ok(lightBlock.includes('--track-video:') && lightBlock.includes('--kf-active-bg:'),
     'token trek + keyframe lengkap');
   for (const [name, code] of [['dasbor', dashHtml], ['editor', editorHtml]]) {
-    ok(code.includes("localStorage.getItem('fishtool_theme')") && code.includes('data-theme\', \'light\''),
+    ok(code.includes("localStorage.getItem('denjimotion_theme')") && code.includes('data-theme\', \'light\''),
       `snippet pra-render ${name}`);
   }
   ok(dashCss.includes('.theme-mode-grid') && dashCss.includes('.theme-mode-btn.is-selected'),
@@ -68,7 +68,7 @@ console.log('\n[3] Tema terang + pra-render');
 // ----------------------------------------------------------
 console.log('\n[4] Logika tema main.js');
 {
-  ok(mainCode.includes("const APP_THEME_KEY = 'fishtool_theme'"), 'kunci penyimpanan');
+  ok(mainCode.includes("const APP_THEME_KEY = 'denjimotion_theme'"), 'kunci penyimpanan');
   ok(mainCode.includes('function setAppTheme(mode)'), 'fungsi setAppTheme');
   ok(mainCode.includes('function getAppTheme()'), 'fungsi getAppTheme');
   ok(mainCode.includes('function openAppSettingsModal()'), 'fungsi buka modal');
