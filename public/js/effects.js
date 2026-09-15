@@ -25,10 +25,35 @@
         icon: def.icon || 'assets/FXPH.svg',
         description: def.description || '',
         params: Array.isArray(def.params) ? def.params : [],
+        targets: Array.isArray(def.targets) ? def.targets.slice() : null,
         filter: typeof def.filter === 'function' ? def.filter : null,
         render: typeof def.render === 'function' ? def.render : null,
         renderPost: typeof def.renderPost === 'function' ? def.renderPost : null
       });
+    },
+
+    // Tipe layer visual bawaan yang didukung efek (audio/kamera/mask dikecualikan)
+    defaultTargets: ['video', 'image', 'shape', 'text', 'precomp', 'color', 'adjustment'],
+
+    /**
+     * Daftar tipe layer yang didukung sebuah efek (id atau def).
+     * Efek tanpa `targets` eksplisit memakai defaultTargets.
+     */
+    supportedTypes(idOrDef) {
+      const def = (typeof idOrDef === 'string') ? registry.get(idOrDef) : idOrDef;
+      if (def && Array.isArray(def.targets) && def.targets.length > 0) {
+        return def.targets.slice();
+      }
+      return FishEffectsRegistry.defaultTargets.slice();
+    },
+
+    /**
+     * Apakah efek (id atau def) bisa diterapkan ke tipe layer tertentu.
+     */
+    isApplicable(idOrDef, layerType) {
+      const t = String(layerType || '').toLowerCase();
+      if (!t) return true;
+      return FishEffectsRegistry.supportedTypes(idOrDef).indexOf(t) !== -1;
     },
 
     get(id) {

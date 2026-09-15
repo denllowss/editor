@@ -684,7 +684,7 @@
   if (reg) {
     reg.register({
       id: 'fsmb',
-      name: 'FSMB (Motion Blur)',
+      name: 'Motion Blur Pro',
       category: 'movement',
       icon: 'assets/FXPH.svg',
       description: 'RSMB-style motion blur with optical flow pixel tracking and transform velocity',

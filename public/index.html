@@ -463,6 +463,34 @@
     </div>
   </div>
 
+  <!-- Rename Project (quick rename dari menu kartu) -->
+  <div class="modal-backdrop" id="modal-rename-project" role="dialog" aria-modal="true" aria-label="Rename Project">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <header class="modal-header">
+        <h3 class="modal-title">Rename Project</h3>
+        <button type="button" class="modal-btn-close" aria-label="Close" onclick="Modal.close('modal-rename-project')">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+          </svg>
+        </button>
+      </header>
+
+      <div class="modal-body">
+        <input type="text" id="rename-input-name" class="modal-title-input" value="" placeholder="Enter Project Name..." autocomplete="off" spellcheck="false" aria-label="Project Name" style="width: 100%; box-sizing: border-box;">
+        <input type="hidden" id="rename-project-id">
+      </div>
+
+      <footer class="modal-footer" style="gap: 8px;">
+        <button type="button" class="modal-btn-create" id="btn-confirm-rename-project" onclick="saveRenameProjectAction()">
+          <span>Rename</span>
+        </button>
+        <button type="button" class="modal-btn-cancel-full" onclick="Modal.close('modal-rename-project')">
+          <span>Cancel</span>
+        </button>
+      </footer>
+    </div>
+  </div>
+
   <!-- ==========================================================================
        MODULAR POP-UP: WELCOME / PRE-ALPHA NOTICE MODAL
        ========================================================================== -->

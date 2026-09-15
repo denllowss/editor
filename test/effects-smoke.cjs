@@ -35,6 +35,7 @@ const NEW_EFFECTS = [
   { file: 'find_edges.js', id: 'find-edges' },
   { file: 'wipe.js', id: 'wipe' },
   { file: 'glow.js', id: 'glow' },
+  { file: 'motion_blur.js', id: 'motion-blur' },
   // Batch gaya AE/AM (v0.19.0)
   { file: 'noise.js', id: 'noise' },
   { file: 'spin_blur.js', id: 'spin-blur' },

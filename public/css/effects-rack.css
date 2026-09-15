@@ -1283,6 +1283,20 @@
   transform: scale(0.95);
 }
 
+/* Efek tak kompatibel dengan layer terpilih: redup + larang */
+.effects-gallery-item-card.is-incompatible {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.effects-gallery-item-card.is-incompatible .effects-gallery-item-thumb {
+  border-style: dashed;
+}
+
+.effects-gallery-item-card.is-incompatible:hover .effects-gallery-item-thumb {
+  border-color: var(--border-panel);
+}
+
 .effects-gallery-item-name {
   font-size: 10.5px;
   font-weight: 600;

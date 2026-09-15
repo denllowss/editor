@@ -288,6 +288,11 @@ async function initProjectsFetcher() {
       const projectName = target.querySelector('.project-name')?.textContent || 'Project';
       return [
         {
+          label: 'Rename',
+          icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>',
+          action: () => openRenameModal(projectId, projectName)
+        },
+        {
           label: 'Save as .ofts',
           icon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>',
           action: () => exportProjectAction(projectId, projectName)
@@ -837,14 +842,53 @@ async function saveProjectSettingsAction() {
 }
 
 /**
- * Legacy compatibility wrappers
+ * Quick rename project (modal kecil, tanpa membuka Settings)
  */
 function openRenameModal(projectId, currentName) {
-  openProjectSettingsModal(projectId);
+  if (!projectId) return;
+  const idInput = document.getElementById('rename-project-id');
+  const nameInput = document.getElementById('rename-input-name');
+  if (idInput) idInput.value = projectId;
+  if (nameInput) nameInput.value = currentName || '';
+  if (window.Modal) window.Modal.open('modal-rename-project');
+  if (nameInput) {
+    setTimeout(() => {
+      try { nameInput.focus(); nameInput.select(); } catch (_) {}
+    }, 80);
+  }
 }
 
 async function saveRenameProjectAction() {
-  await saveProjectSettingsAction();
+  const idInput = document.getElementById('rename-project-id');
+  const nameInput = document.getElementById('rename-input-name');
+  const projectId = idInput ? idInput.value : '';
+  const newName = nameInput && nameInput.value.trim() ? nameInput.value.trim() : '';
+  if (!projectId) return;
+  if (!newName) {
+    showDashboardToast('Name cannot be empty');
+    return;
+  }
+  try {
+    if (window.FishDatabase) {
+      if (typeof window.FishDatabase.renameProject === 'function') {
+        await window.FishDatabase.renameProject(projectId, newName);
+      } else if (typeof window.FishDatabase.getProject === 'function') {
+        const p = await window.FishDatabase.getProject(projectId);
+        if (p) {
+          p.name = newName;
+          await window.FishDatabase.saveProject(p);
+        }
+      }
+    }
+    const hit = allProjectsCache.find((p) => p && p.id === projectId);
+    if (hit) hit.name = newName;
+    renderProjects(getVisibleProjects(), document.getElementById('projects-container'), document.getElementById('project-count-badge'));
+    showDashboardToast('Project renamed');
+  } catch (err) {
+    console.warn('Failed to rename project:', err);
+    showDashboardToast('Failed to rename project');
+  }
+  try { if (window.Modal) window.Modal.close(); } catch (_) {}
 }
 
 /**

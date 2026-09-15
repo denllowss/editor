@@ -1538,11 +1538,17 @@
                             </div>
                             <span class="effects-gallery-item-name">Swing</span>
                           </div>
-                          <div class="effects-gallery-item-card" role="button" tabindex="0" data-effect-id="fsmb" data-category="movement" title="FSMB (Motion Blur)">
+                          <div class="effects-gallery-item-card" role="button" tabindex="0" data-effect-id="fsmb" data-category="movement" title="Motion Blur Pro">
                             <div class="effects-gallery-item-thumb">
-                              <img src="assets/FXPH.svg" alt="FSMB (Motion Blur)" class="effects-gallery-item-img" loading="lazy">
+                              <img src="assets/FXPH.svg" alt="Motion Blur Pro" class="effects-gallery-item-img" loading="lazy">
                             </div>
-                            <span class="effects-gallery-item-name">FSMB</span>
+                            <span class="effects-gallery-item-name">Motion Blur Pro</span>
+                          </div>
+                          <div class="effects-gallery-item-card" role="button" tabindex="0" data-effect-id="motion-blur" data-category="movement" title="Motion Blur">
+                            <div class="effects-gallery-item-thumb">
+                              <img src="assets/FXPH.svg" alt="Motion Blur" class="effects-gallery-item-img" loading="lazy">
+                            </div>
+                            <span class="effects-gallery-item-name">Motion Blur</span>
                           </div>
                           <div class="effects-gallery-item-card" role="button" tabindex="0" data-effect-id="drop-shadow" data-category="layer" title="Drop Shadow">
                             <div class="effects-gallery-item-thumb">
@@ -3093,6 +3099,18 @@
         </svg>
         <span>Paste Effect</span>
       </button>
+      <button type="button" class="popover-menu-item" id="btn-effects-paste-selected" title="Paste to selected layers">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M12 2L2 7v2h20V7L12 2zm-8 8v2h16v-2H4zm0 4v6h16v-6H4z"/>
+        </svg>
+        <span>Paste to Selected</span>
+      </button>
+      <button type="button" class="popover-menu-item" id="btn-effects-paste-everywhere" title="Paste to all layers">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M12 2L1 8v2h22V8L12 2zM3 12v2h18v-2H3zm0 4v6h18v-6H3z"/>
+        </svg>
+        <span>Paste to All Layers</span>
+      </button>
     </div>
   </div>
 
@@ -4201,6 +4219,7 @@
   <script src="effects/camera_shake.js"></script>
   <script src="effects/four_color_gradient.js"></script>
   <script src="effects/circle.js"></script>
+  <script src="effects/motion_blur.js"></script>
   <script src="js/color-picker.js"></script>
   <script src="js/fishtool-engine.js?v=6"></script>
   <script src="js/fishtools-adapter.js?v=4"></script>

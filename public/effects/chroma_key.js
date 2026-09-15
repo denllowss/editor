@@ -52,6 +52,7 @@
     category: 'layer',
     icon: 'assets/FXPH.svg',
     description: 'Green-screen style color keying with despill (Alight Motion equivalent)',
+    targets: ['video', 'image', 'precomp'],
     params: [
       { id: 'keyColor', label: 'Key Color', type: 'color', default: '#00ff00' },
       { id: 'tolerance', label: 'Tolerance', type: 'number', min: 0, max: 100, default: 30, unit: '%' },

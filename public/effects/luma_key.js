@@ -39,6 +39,7 @@
     category: 'layer',
     icon: 'assets/FXPH.svg',
     description: 'Key out dark or bright areas by luminance (Alight Motion equivalent)',
+    targets: ['video', 'image', 'precomp'],
     params: [
       { id: 'mode', label: 'Mode', type: 'select', options: ['Key Out Darker', 'Key Out Brighter'], default: 'Key Out Darker' },
       { id: 'threshold', label: 'Threshold', type: 'number', min: 0, max: 100, default: 50, unit: '%' },

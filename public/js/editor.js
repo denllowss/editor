@@ -13913,6 +13913,112 @@
     }
     window.showEffectsRackToast = showEffectsRackToast;
 
+    function getEffectsRegistry() {
+      if (window.FishEffects && window.FishEffects.registry) return window.FishEffects.registry;
+      if (window.FishEffectsRegistry) return window.FishEffectsRegistry;
+      return null;
+    }
+
+    // Ambil data tempel efek (memori → fallback clipboard sistem)
+    async function getEffectsPasteData() {
+      let data = window._copiedEffectsRack;
+      if (!data) {
+        try {
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            const parsed = JSON.parse(text);
+            if (parsed && Array.isArray(parsed.effects)) data = parsed;
+          }
+        } catch (_) {}
+      }
+      if (!data || !Array.isArray(data.effects) || data.effects.length === 0) return null;
+      return data;
+    }
+
+    // Tempel efek ke satu layer; efek yang tak kompatibel dilewati → { pasted, skipped }
+    function pasteEffectsDataToLayer(layer, dataToPaste) {
+      const result = { pasted: 0, skipped: [] };
+      if (!layer || !dataToPaste || !Array.isArray(dataToPaste.effects)) return result;
+      ensureLayerEffects(layer);
+      const reg = getEffectsRegistry();
+      dataToPaste.effects.forEach((fx) => {
+        const fxType = (fx && (fx.type || fx.effectType)) || '';
+        let applicable = true;
+        if (reg && typeof reg.isApplicable === 'function') {
+          try { applicable = reg.isApplicable(fxType, layer.type); } catch (_) { applicable = true; }
+        }
+        if (!applicable) {
+          result.skipped.push((fx && fx.name) || fxType || 'effect');
+          return;
+        }
+        const oldId = fx.id;
+        const newFx = JSON.parse(JSON.stringify(fx));
+        newFx.id = 'fx_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        newFx.name = fx.name; // Keep name exact
+        layer.effects.push(newFx);
+        if (dataToPaste.keyframes) {
+          layer.keyframes = layer.keyframes || {};
+          getEffectParamIds(fx).forEach((p) => {
+            const oldK = `${oldId}:${p}`;
+            if (dataToPaste.keyframes[oldK]) {
+              layer.keyframes[`${newFx.id}:${p}`] = JSON.parse(JSON.stringify(dataToPaste.keyframes[oldK]));
+            } else if (dataToPaste.keyframes[p]) {
+              layer.keyframes[`${newFx.id}:${p}`] = JSON.parse(JSON.stringify(dataToPaste.keyframes[p]));
+            }
+          });
+        }
+        result.pasted++;
+      });
+      if (result.pasted > 0) {
+        layer.hasBrightnessContrast = true;
+        if (layer.effects.length > 0) {
+          layer.brightness = layer.effects[0].brightness;
+          layer.contrast = layer.effects[0].contrast;
+          layer.effectsDisabled = !!layer.effects[0].disabled;
+        }
+      }
+      return result;
+    }
+    window.pasteEffectsDataToLayer = pasteEffectsDataToLayer;
+
+    function formatPasteToast(pasted, layerCount, skipped) {
+      if (pasted <= 0 && skipped > 0) return 'No compatible effects to paste';
+      if (pasted <= 0) return 'No effects pasted';
+      let msg = `Pasted ${pasted} effect${pasted > 1 ? 's' : ''}`;
+      if (layerCount > 1) msg += ` to ${layerCount} layers`;
+      if (skipped > 0) msg += ` · skipped ${skipped} (unsupported)`;
+      return msg;
+    }
+
+    // Refresh terpadu sehabis tempel (sekali untuk multi-layer)
+    function refreshAfterEffectsPaste(layers) {
+      (layers || []).forEach((l) => {
+        if (l && typeof invalidatePreviewCacheForLayer === 'function') invalidatePreviewCacheForLayer(l);
+      });
+      syncEffectsRackUI();
+      if (typeof redrawComposition === 'function') redrawComposition('effect-paste-multi');
+      if (typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers();
+      if (typeof renderTimelineLayers === 'function') renderTimelineLayers();
+      if (typeof updateTimelineKeyframeMarkersHighlight === 'function') updateTimelineKeyframeMarkersHighlight();
+    }
+
+    // Tandai kartu galeri yang tak kompatibel dengan layer terpilih
+    function markIncompatibleGalleryCards() {
+      const grid = document.getElementById('effects-items-grid');
+      if (!grid) return;
+      const layer = (currentProjectState.layers || []).find((l) => l.id === window.selectedLayerId);
+      const ltype = layer ? layer.type : '';
+      const reg = getEffectsRegistry();
+      grid.querySelectorAll('.effects-gallery-item-card').forEach((card) => {
+        let okc = true;
+        if (reg && typeof reg.isApplicable === 'function' && ltype) {
+          try { okc = reg.isApplicable(card.dataset.effectId, ltype); } catch (_) { okc = true; }
+        }
+        card.classList.toggle('is-incompatible', !okc);
+      });
+    }
+    window.markIncompatibleGalleryCards = markIncompatibleGalleryCards;
+
     function syncEffectsKeyframeState(layer) {
       const btnEffectsKeyframe = document.getElementById('btn-effects-keyframe');
       if (!btnEffectsKeyframe || !layer) return;
@@ -15075,7 +15181,8 @@
             keyframes: keyframesData
           };
           try {
-            navigator.clipboard.writeText(JSON.stringify(window._copiedEffectsRack));
+            const copyPromise = navigator.clipboard.writeText(JSON.stringify(window._copiedEffectsRack));
+            if (copyPromise && typeof copyPromise.catch === 'function') copyPromise.catch(() => {});
           } catch (_) {}
           showEffectsRackToast(`Copied ${clonedEffects.length} effect${clonedEffects.length > 1 ? 's' : ''}`);
         });
@@ -15088,61 +15195,76 @@
           const layer = (currentProjectState.layers || []).find(l => l.id === window.selectedLayerId);
           if (!layer) return;
 
-          let dataToPaste = window._copiedEffectsRack;
+          const dataToPaste = await getEffectsPasteData();
           if (!dataToPaste) {
-            try {
-              const text = await navigator.clipboard.readText();
-              if (text) {
-                const parsed = JSON.parse(text);
-                if (parsed && Array.isArray(parsed.effects)) {
-                  dataToPaste = parsed;
-                }
-              }
-            } catch (_) {}
-          }
-
-          if (!dataToPaste || !Array.isArray(dataToPaste.effects) || dataToPaste.effects.length === 0) {
             showEffectsRackToast('No effects to paste');
             return;
           }
 
-          ensureLayerEffects(layer);
+          const res = pasteEffectsDataToLayer(layer, dataToPaste);
+          refreshAfterEffectsPaste([layer]);
+          showEffectsRackToast(formatPasteToast(res.pasted, 1, res.skipped.length));
+        });
+      }
 
-          dataToPaste.effects.forEach(fx => {
-            const oldId = fx.id;
-            const newFx = JSON.parse(JSON.stringify(fx));
-            newFx.id = 'fx_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
-            newFx.name = fx.name; // Keep name exact
-            layer.effects.push(newFx);
+      // 5c. Paste to Selected Layers / All Layers
+      const btnPasteSelected = document.getElementById('btn-effects-paste-selected');
+      const btnPasteEverywhere = document.getElementById('btn-effects-paste-everywhere');
 
-            if (dataToPaste.keyframes) {
-              layer.keyframes = layer.keyframes || {};
-              getEffectParamIds(fx).forEach(p => {
-                const oldK = `${oldId}:${p}`;
-                if (dataToPaste.keyframes[oldK]) {
-                  layer.keyframes[`${newFx.id}:${p}`] = JSON.parse(JSON.stringify(dataToPaste.keyframes[oldK]));
-                } else if (dataToPaste.keyframes[p]) {
-                  layer.keyframes[`${newFx.id}:${p}`] = JSON.parse(JSON.stringify(dataToPaste.keyframes[p]));
-                }
-              });
-            }
-          });
-
-          layer.hasBrightnessContrast = true;
-          if (layer.effects.length > 0) {
-            layer.brightness = layer.effects[0].brightness;
-            layer.contrast = layer.effects[0].contrast;
-            layer.effectsDisabled = !!layer.effects[0].disabled;
+      if (btnPasteSelected) {
+        btnPasteSelected.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (window.Popover) window.Popover.close(false);
+          const dataToPaste = await getEffectsPasteData();
+          if (!dataToPaste) {
+            showEffectsRackToast('No effects to paste');
+            return;
           }
+          const ids = (window.selectedLayerIds && window.selectedLayerIds.size > 0)
+            ? Array.from(window.selectedLayerIds)
+            : (window.selectedLayerId ? [window.selectedLayerId] : []);
+          const layers = (currentProjectState.layers || []).filter((l) => l && ids.indexOf(l.id) !== -1);
+          if (layers.length === 0) {
+            showEffectsRackToast('No layers selected');
+            return;
+          }
+          let pasted = 0;
+          let skipped = 0;
+          layers.forEach((l) => {
+            const r = pasteEffectsDataToLayer(l, dataToPaste);
+            pasted += r.pasted;
+            skipped += r.skipped.length;
+          });
+          refreshAfterEffectsPaste(layers);
+          showEffectsRackToast(formatPasteToast(pasted, layers.length, skipped));
+        });
+      }
 
-          syncEffectsRackUI();
-          if (typeof invalidatePreviewCacheForLayer === 'function') invalidatePreviewCacheForLayer(layer);
-          if (typeof redrawComposition === 'function') redrawComposition('effect-paste-all');
-          if (typeof saveCurrentProjectLayers === 'function') saveCurrentProjectLayers();
-          if (typeof renderTimelineLayers === 'function') renderTimelineLayers();
-          if (typeof updateTimelineKeyframeMarkersHighlight === 'function') updateTimelineKeyframeMarkersHighlight();
-
-          showEffectsRackToast(`Pasted ${dataToPaste.effects.length} effect${dataToPaste.effects.length > 1 ? 's' : ''}`);
+      if (btnPasteEverywhere) {
+        btnPasteEverywhere.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (window.Popover) window.Popover.close(false);
+          const dataToPaste = await getEffectsPasteData();
+          if (!dataToPaste) {
+            showEffectsRackToast('No effects to paste');
+            return;
+          }
+          const layers = (currentProjectState.layers || []).filter((l) => l && l.id);
+          if (layers.length === 0) {
+            showEffectsRackToast('No layers in composition');
+            return;
+          }
+          let pasted = 0;
+          let skipped = 0;
+          let touched = 0;
+          layers.forEach((l) => {
+            const r = pasteEffectsDataToLayer(l, dataToPaste);
+            if (r.pasted > 0) touched++;
+            pasted += r.pasted;
+            skipped += r.skipped.length;
+          });
+          refreshAfterEffectsPaste(layers);
+          showEffectsRackToast(formatPasteToast(pasted, touched, skipped));
         });
       }
 
@@ -15168,6 +15290,7 @@
             ((cat === 'extension' || cat === 'expression') && (itemCat === 'extension' || itemCat === 'expression'));
           c.style.display = matches ? '' : 'none';
         });
+        if (typeof markIncompatibleGalleryCards === 'function') markIncompatibleGalleryCards();
       }
 
       function closeGalleryCategory() {
@@ -15215,6 +15338,20 @@
       function addEffectToLayer(effectTypeId = 'brightness-contrast') {
         const layer = (currentProjectState.layers || []).find(l => l.id === window.selectedLayerId);
         if (!layer) return;
+        const fxReg = getEffectsRegistry();
+        if (fxReg && typeof fxReg.isApplicable === 'function') {
+          let applicable = true;
+          try { applicable = fxReg.isApplicable(effectTypeId, layer.type); } catch (_) { applicable = true; }
+          if (!applicable) {
+            let fxName = effectTypeId;
+            try {
+              const fxDef = fxReg.get(effectTypeId);
+              if (fxDef && fxDef.name) fxName = fxDef.name;
+            } catch (_) {}
+            showEffectsRackToast(`${fxName} doesn't support ${layer.type || 'this'} layers`);
+            return;
+          }
+        }
         ensureLayerEffects(layer);
         let newFx = null;
         if (window.FishEffects && window.FishEffects.registry && typeof window.FishEffects.registry.createInstance === 'function') {
@@ -15318,6 +15455,7 @@
             if (itemsView) itemsView.style.display = 'none';
             if (noResultsEl) noResultsEl.style.display = 'flex';
           }
+          if (typeof markIncompatibleGalleryCards === 'function') markIncompatibleGalleryCards();
         });
       }
 
@@ -15410,7 +15548,7 @@
         { id: 'transform', name: 'Transform', category: 'movement', icon: 'assets/FXPH.svg' },
         { id: 'oscillate', name: 'Oscillate', category: 'movement', icon: 'assets/FXPH.svg' },
         { id: 'swing', name: 'Swing', category: 'movement', icon: 'assets/FXPH.svg' },
-        { id: 'fsmb', name: 'FSMB (Motion Blur)', category: 'movement', icon: 'assets/FXPH.svg' },
+        { id: 'fsmb', name: 'Motion Blur Pro', category: 'movement', icon: 'assets/FXPH.svg' },
         { id: 'tint', name: 'Tint', category: 'lightning', icon: 'assets/FXPH.svg' },
         { id: 'lumia', name: 'Lumia', category: 'lightning', icon: 'assets/FXPH.svg' },
         { id: 'curve', name: 'Curve', category: 'lightning', icon: 'assets/FXPH.svg' },
