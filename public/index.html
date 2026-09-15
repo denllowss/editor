@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="css/modal.css">
   <link rel="stylesheet" href="css/context-menu.css">
   <link rel="stylesheet" href="css/safari.css">
+  <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/responsive.css">
   <script>
     if (!window.DEBUG && !new URLSearchParams(window.location.search).has('debug') && localStorage.getItem('FISH_DEBUG') !== 'true') {
@@ -79,26 +80,32 @@
     <!-- Dashboard Container (Bottom Half on Mobile, Responsive on Tablet/Fold/Web) -->
     <section class="dashboard-container">
 
-      <!-- Action Buttons Row (Interactive Hover & Press animations) -->
-      <div class="action-buttons-row">
-        <!-- New Project Button with background watermark icon & modular modal trigger -->
-        <button type="button" class="action-btn btn-new-project" aria-label="Create New Project" onclick="Modal.open('modal-new-project')">
-          <div class="btn-bg-icon" aria-hidden="true">
+      <!-- CapCut-style create tiles (modal triggers unchanged) -->
+      <div class="action-buttons-row cc-create-row">
+        <!-- New Project: primary create tile -->
+        <button type="button" class="action-btn btn-new-project cc-create-tile cc-create-primary" aria-label="Create New Project" onclick="Modal.open('modal-new-project')">
+          <span class="cc-tile-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M4 4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8L10 4H4zm8 5c.55 0 1 .45 1 1v2h2c.55 0 1 .45 1 1s-.45 1-1 1h-2v2c0 .55-.45 1-1 1s-1-.45-1-1v-2H9c-.55 0-1-.45-1-1s.45-1 1-1h2v-2c0-.55.45-1 1-1z"/>
+              <path d="M12 5c.55 0 1 .45 1 1v5h5c.55 0 1 .45 1 1s-.45 1-1 1h-5v5c0 .55-.45 1-1 1s-1-.45-1-1v-5H6c-.55 0-1-.45-1-1s.45-1 1-1h5V6c0-.55.45-1 1-1z"/>
             </svg>
-          </div>
-          <span class="action-btn-title">New Project</span>
+          </span>
+          <span class="cc-tile-text">
+            <span class="action-btn-title">New Project</span>
+            <span class="cc-tile-sub">Blank canvas</span>
+          </span>
         </button>
 
-        <!-- Import Project Button with background watermark icon -->
-        <button type="button" class="action-btn btn-import-project" aria-label="Import Existing Project" onclick="Modal.open('modal-import-project')">
-          <div class="btn-bg-icon" aria-hidden="true">
+        <!-- Import Project: secondary tile -->
+        <button type="button" class="action-btn btn-import-project cc-create-tile" aria-label="Import Existing Project" onclick="Modal.open('modal-import-project')">
+          <span class="cc-tile-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M4 4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8L10 4H4zm8 3c.55 0 1 .45 1 1v4.59l1.3-1.29c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41l-3 3a.996.996 0 0 1-1.41 0l-3-3a.996.996 0 1 1 1.41-1.41l1.29 1.29V8c0-.55.45-1 1-1z"/>
+              <path d="M12 3c.55 0 1 .45 1 1v8.59l2.3-2.29c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41l-4 4a.996.996 0 0 1-1.41 0l-4-4a.996.996 0 1 1 1.41-1.41l2.29 2.29V4c0-.55.45-1 1-1zM5 19c0 .55.45 1 1 1h12c.55 0 1-.45 1-1s-.45-1-1-1H6c-.55 0-1 .45-1 1z"/>
             </svg>
-          </div>
-          <span class="action-btn-title">Import Project</span>
+          </span>
+          <span class="cc-tile-text">
+            <span class="action-btn-title">Import Project</span>
+            <span class="cc-tile-sub">Open .ofts file</span>
+          </span>
         </button>
       </div>
 
@@ -108,8 +115,23 @@
         <div class="projects-tab-content is-active" id="panel-local-projects" role="tabpanel">
           <!-- Toolbar daftar project: hitungan + tombol mode pilih (multi-select) -->
           <div class="projects-toolbar" id="projects-toolbar">
+            <span class="projects-section-title">Recent projects</span>
             <span class="projects-count-label" id="projects-count-label"></span>
             <button type="button" class="projects-select-toggle" id="btn-toggle-select">Pilih</button>
+          </div>
+          <!-- Finder ala CapCut: cari + urutkan -->
+          <div class="projects-finder" id="projects-finder" hidden>
+            <label class="projects-search" aria-label="Search projects">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/>
+              </svg>
+              <input type="search" id="project-search" placeholder="Search projects…" autocomplete="off" spellcheck="false">
+            </label>
+            <select id="project-sort" class="projects-sort" aria-label="Sort projects">
+              <option value="newest">Newest</option>
+              <option value="oldest">Oldest</option>
+              <option value="name">Name A–Z</option>
+            </select>
           </div>
           <!-- Bilah aksi mode pilih (multi-select): batal, hitungan, semua, hapus -->
           <div class="projects-selectbar" id="projects-selectbar" hidden>

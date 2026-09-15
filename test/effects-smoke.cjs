@@ -35,6 +35,21 @@ const NEW_EFFECTS = [
   { file: 'find_edges.js', id: 'find-edges' },
   { file: 'wipe.js', id: 'wipe' },
   { file: 'glow.js', id: 'glow' },
+  // Batch gaya AE/AM (v0.19.0)
+  { file: 'noise.js', id: 'noise' },
+  { file: 'spin_blur.js', id: 'spin-blur' },
+  { file: 'radial_wipe.js', id: 'radial-wipe' },
+  { file: 'venetian_blinds.js', id: 'venetian-blinds' },
+  { file: 'strobe.js', id: 'strobe' },
+  { file: 'glitch.js', id: 'glitch' },
+  { file: 'light_sweep.js', id: 'light-sweep' },
+  { file: 'tritone.js', id: 'tritone' },
+  { file: 'leave_color.js', id: 'leave-color' },
+  { file: 'emboss.js', id: 'emboss' },
+  { file: 'solarize.js', id: 'solarize' },
+  { file: 'camera_shake.js', id: 'camera-shake' },
+  { file: 'four_color_gradient.js', id: 'four-color-gradient' },
+  { file: 'circle.js', id: 'circle' },
 ];
 const KNOWN_CATEGORIES = ['lightning', 'layer', 'expression', 'warp', 'movement', 'background'];
 const KNOWN_TYPES = ['number', 'color', 'select', 'switch', 'boolean', 'angle', 'curve'];
@@ -381,6 +396,68 @@ function freshGrainRender(fx, t) {
   def.render(mainCtx, fakeEl, {}, bounds, fx, 7.0);
   const second = getPuts().length;
   ok(first === 1 && second === 0, 'film-grain: tile di-cache (render ulang tanpa regenerasi)');
+}
+
+// ---- Batch AE/AM: assert deterministik piksel (stub abu (128,64,192)) ----
+
+// Solarize thr=128: (128,64,192) → (127,64,63)
+{
+  const def = getDef('solarize');
+  resetPuts();
+  def.render(mainCtx, fakeEl, {}, bounds, { threshold: 128, blend: 100 }, 0);
+  const puts = getPuts();
+  const px = puts.length ? Array.from(puts[0].data.slice(0, 4)) : null;
+  ok(px && px[0] === 127 && px[1] === 64 && px[2] === 63 && px[3] === 255,
+    'solarize thr=128: (128,64,192)→(127,64,63)', JSON.stringify(px));
+}
+
+// Tritone default pada lum 86.8 → abu ±1
+{
+  const def = getDef('tritone');
+  resetPuts();
+  def.render(mainCtx, fakeEl, {}, bounds, { shadows: '#000000', midtones: '#888888', highlights: '#ffffff', intensity: 100 }, 0);
+  const puts = getPuts();
+  const px = puts.length ? Array.from(puts[0].data.slice(0, 4)) : null;
+  ok(px && Math.abs(px[0] - 93) <= 1 && px[0] === px[1] && px[1] === px[2],
+    'tritone: lum→abu netral ±1', JSON.stringify(px));
+}
+
+// Leave-color merah pada (128,64,192) → abu (jauh dari kunci)
+{
+  const def = getDef('leave-color');
+  resetPuts();
+  def.render(mainCtx, fakeEl, {}, bounds, { keyColor: '#ff0000', tolerance: 25, softness: 30, saturation: 0 }, 0);
+  const puts = getPuts();
+  const px = puts.length ? Array.from(puts[0].data.slice(0, 4)) : null;
+  ok(px && Math.abs(px[0] - 87) <= 1 && px[0] === px[1] && px[1] === px[2],
+    'leave-color: non-kunci → abu ±1', JSON.stringify(px));
+}
+
+// Emboss pada bidang seragam → 128 (diff 0)
+{
+  const def = getDef('emboss');
+  resetPuts();
+  def.render(mainCtx, fakeEl, {}, bounds, { angle: 135, depth: 3, intensity: 80 }, 0);
+  const puts = getPuts();
+  const px = puts.length ? Array.from(puts[0].data.slice(0, 4)) : null;
+  ok(px && px[0] === 128 && px[1] === 128 && px[2] === 128 && px[3] === 255,
+    'emboss seragam: → 128', JSON.stringify(px));
+}
+
+// Noise: buffer digambar + deterministik per bucket waktu
+{
+  const def = getDef('noise');
+  resetPuts();
+  def.render(mainCtx, fakeEl, {}, bounds, { amount: 50, size: 2, colorMode: 'mono', speed: 8, seed: 5 }, 1.0);
+  const a = getPuts().length ? getPuts()[0] : null;
+  resetPuts();
+  def.render(mainCtx, fakeEl, {}, bounds, { amount: 50, size: 2, colorMode: 'mono', speed: 8, seed: 5 }, 1.0);
+  const b = getPuts().length ? getPuts()[0] : null;
+  resetPuts();
+  def.render(mainCtx, fakeEl, {}, bounds, { amount: 50, size: 2, colorMode: 'mono', speed: 8, seed: 5 }, 2.0);
+  const c = getPuts().length ? getPuts()[0] : null;
+  ok(a && b && Buffer.compare(a.data, b.data) === 0, 'noise: frame sama → identik');
+  ok(a && c && Buffer.compare(a.data, c.data) !== 0, 'noise: frame beda → berubah');
 }
 
 // ----------------------------------------------------------

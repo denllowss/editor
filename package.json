@@ -1,6 +1,6 @@
 {
   "name": "fishtool-studio-nodejs",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "description": "OpenFishTools Studio — port Node.js (Express) dari https://fishtoolstudio.vercel.app/",
   "main": "server.js",
   "type": "commonjs",

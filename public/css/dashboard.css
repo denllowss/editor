@@ -1,0 +1,417 @@
+/* ==========================================================================
+   DASHBOARD.CSS - CapCut-style home layer (v0.19.0)
+   --------------------------------------------------------------------------
+   Dimuat SETELAH responsive.css di index.html. Hanya menata menu awal:
+   ubin "create", finder (cari + urut), dan kartu project bergambar.
+   Semua warna memakai token theme.css (Matcha) — warna & gaya tetap.
+   Perilaku JS (navigasi, swipe, context-menu, multi-select) tak berubah.
+   ========================================================================== */
+
+/* ---- Ubin create ala CapCut (struktur .action-btn tetap) ---- */
+.action-buttons-row.cc-create-row {
+  align-items: stretch;
+}
+
+.action-btn.cc-create-tile {
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  min-height: 84px;
+}
+
+.cc-tile-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 15px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(152, 206, 123, 0.14);
+  color: var(--color-primary);
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.cc-tile-icon svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.cc-tile-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cc-create-tile .action-btn-title {
+  text-align: left;
+  font-size: 16px;
+}
+
+.cc-tile-sub {
+  font-family: var(--font-brand);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s ease;
+}
+
+/* Ubin primer (New Project): hijau matcha solid */
+.action-btn.cc-create-primary {
+  background-color: var(--color-primary);
+}
+
+.action-btn.cc-create-primary .cc-tile-icon {
+  background: rgba(13, 17, 9, 0.16);
+  color: var(--bg-canvas);
+}
+
+.action-btn.cc-create-primary .action-btn-title {
+  color: var(--bg-canvas);
+}
+
+.action-btn.cc-create-primary .cc-tile-sub {
+  color: var(--bg-canvas);
+  opacity: 0.75;
+}
+
+.action-btn.cc-create-primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.action-btn.cc-create-primary:hover .cc-tile-icon {
+  color: var(--bg-canvas);
+  transform: scale(1.05);
+}
+
+.action-btn.cc-create-primary:hover .action-btn-title {
+  color: var(--bg-canvas);
+}
+
+.action-btn.cc-create-primary:hover .cc-tile-sub {
+  color: var(--bg-canvas);
+}
+
+.action-btn.cc-create-primary:active {
+  background-color: var(--color-primary-active);
+}
+
+/* Ubin sekunder: ikut hover invert bawaan + sub ikut gelap */
+.action-btn.cc-create-tile:not(.cc-create-primary):hover .cc-tile-icon {
+  background: rgba(13, 17, 9, 0.16);
+  color: var(--bg-canvas);
+}
+
+.action-btn.cc-create-tile:not(.cc-create-primary):hover .cc-tile-sub {
+  color: var(--bg-canvas);
+  opacity: 0.8;
+}
+
+.action-btn.cc-create-tile:not(.cc-create-primary):active .cc-tile-icon {
+  color: var(--bg-canvas);
+}
+
+.action-btn.cc-create-tile:not(.cc-create-primary):active .cc-tile-sub {
+  color: var(--bg-canvas);
+  opacity: 0.8;
+}
+
+/* ---- Judul seksi + finder ---- */
+.projects-section-title {
+  font-family: var(--font-brand);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  color: var(--text-primary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.projects-finder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px 8px;
+  flex-shrink: 0;
+}
+
+.projects-finder[hidden] {
+  display: none;
+}
+
+.projects-search {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background-color: var(--bg-panel-inner);
+  border: 1px solid transparent;
+  cursor: text;
+  box-sizing: border-box;
+}
+
+.projects-search:focus-within {
+  border-color: var(--color-primary);
+}
+
+.projects-search svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.projects-search input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  font-family: var(--font-brand);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+.projects-search input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.projects-sort {
+  min-height: 38px;
+  max-width: 128px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-color: var(--bg-panel-inner);
+  color: var(--text-primary);
+  font-family: var(--font-brand);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 0 8px;
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.projects-sort:focus {
+  border-color: var(--color-primary);
+}
+
+/* ---- Kartu project: thumbnail + meta + tombol ⋯ ---- */
+.project-swipe-container .project-item {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+}
+
+.project-thumb {
+  position: relative;
+  width: 116px;
+  height: 66px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #10160b;
+}
+
+.project-thumb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-thumb-shape {
+  height: 74%;
+  max-width: 88%;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.project-thumb-initial {
+  font-family: var(--font-brand);
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1;
+  transition: opacity 0.15s ease;
+}
+
+.project-thumb-play {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  color: #ffffff;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+}
+
+.project-item:hover .project-thumb-play {
+  opacity: 0.95;
+  transform: scale(1);
+}
+
+.project-item:hover .project-thumb-initial {
+  opacity: 0;
+}
+
+.project-thumb-badge {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  font-family: var(--font-brand);
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.4;
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  padding: 0 5px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.project-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.project-more-btn {
+  align-self: flex-start;
+  width: 30px;
+  height: 30px;
+  margin: -4px -4px 0 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.project-more-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text-primary);
+}
+
+.project-more-btn svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.project-item:hover .project-more-btn {
+  color: var(--bg-canvas);
+}
+
+.project-item:hover .project-more-btn:hover {
+  background: rgba(13, 17, 9, 0.14);
+  color: var(--bg-canvas);
+}
+
+.project-item:active .project-more-btn {
+  color: var(--bg-canvas);
+}
+
+/* Empty-state dua baris */
+.projects-empty-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.projects-empty-sub {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.projects-empty-sub b {
+  color: var(--color-primary);
+}
+
+/* ==========================================================================
+   TABLET/DESKTOP: kartu grid vertikal (thumbnail di atas, ala CapCut desktop)
+   ========================================================================== */
+@media (min-width: 768px) {
+  .project-swipe-container .project-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .project-thumb {
+    width: 100%;
+    height: 118px;
+  }
+
+  .project-thumb-initial {
+    font-size: 20px;
+  }
+
+  .project-more-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    margin: 0;
+    background: rgba(0, 0, 0, 0.45);
+    color: #ffffff;
+    opacity: 0;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+  }
+
+  .project-item:hover .project-more-btn,
+  .project-item:focus-within .project-more-btn {
+    opacity: 1;
+  }
+
+  .project-item:hover .project-more-btn {
+    color: #ffffff;
+  }
+
+  .project-item:hover .project-more-btn:hover {
+    background: rgba(0, 0, 0, 0.68);
+    color: #ffffff;
+  }
+
+  /* Mode pilih: kartu vertikal tak perlu padding kiri ekstra */
+  #panel-local-projects.is-selecting .project-item {
+    padding-left: 12px;
+  }
+}

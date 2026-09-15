@@ -227,11 +227,28 @@ async function initProjectsFetcher() {
         projects = [];
       }
     }
-    renderProjects(projects, listContainer, countBadge);
+    setAllProjectsCache(projects);
+    renderProjects(getVisibleProjects(), listContainer, countBadge);
   }
 
   // Initial load
   await loadAndRender();
+
+  // Finder ala CapCut: cari + urut (render ulang dari cache, tanpa baca DB)
+  const searchInput = document.getElementById('project-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      projectSearchQuery = searchInput.value || '';
+      renderProjects(getVisibleProjects(), listContainer, countBadge);
+    });
+  }
+  const sortSelect = document.getElementById('project-sort');
+  if (sortSelect) {
+    sortSelect.addEventListener('change', () => {
+      projectSortMode = sortSelect.value || 'newest';
+      renderProjects(getVisibleProjects(), listContainer, countBadge);
+    });
+  }
 
   // Listen to custom DB project update events
   window.addEventListener('fish-db-projects-updated', () => {
@@ -242,6 +259,12 @@ async function initProjectsFetcher() {
   listContainer.addEventListener('click', (e) => {
     const item = e.target.closest('.project-item');
     if (!item) return;
+    // Tombol ⋯: buka menu konteks ala CapCut (tanpa navigasi)
+    if (e.target.closest('.project-more-btn')) {
+      e.stopPropagation();
+      if (!selectionMode) openProjectCardMenu(item);
+      return;
+    }
     // Mode pilih: tap = centang, bukan navigasi
     if (selectionMode) {
       if (item.dataset.id) toggleProjectSelected(item.dataset.id);
@@ -299,6 +322,91 @@ async function initProjectsFetcher() {
 
 
 /**
+ * Cache + finder ala CapCut: daftar penuh dari DB disimpan sekali,
+ * pencarian & pengurutan hanya memfilter cache lalu render ulang.
+ */
+let allProjectsCache = [];
+let projectSearchQuery = '';
+let projectSortMode = 'newest';
+
+function setAllProjectsCache(projects) {
+  allProjectsCache = Array.isArray(projects) ? projects.slice() : [];
+}
+
+function projectTimestamp(p) {
+  if (!p) return 0;
+  const t = new Date(p.updatedAt || p.createdAt || 0).getTime();
+  return isNaN(t) ? 0 : t;
+}
+
+function getVisibleProjects() {
+  const q = String(projectSearchQuery || '').trim().toLowerCase();
+  let list = allProjectsCache.slice();
+  if (q) {
+    list = list.filter((p) => String((p && p.name) || '').toLowerCase().includes(q));
+  }
+  if (projectSortMode === 'oldest') {
+    list.sort((a, b) => projectTimestamp(a) - projectTimestamp(b));
+  } else if (projectSortMode === 'name') {
+    list.sort((a, b) => String((a && a.name) || '').localeCompare(String((b && b.name) || '')));
+  } else {
+    list.sort((a, b) => projectTimestamp(b) - projectTimestamp(a));
+  }
+  return list;
+}
+
+function syncProjectsFinder() {
+  const finder = document.getElementById('projects-finder');
+  if (finder) finder.hidden = allProjectsCache.length === 0;
+}
+
+/**
+ * Blok thumbnail kartu: placeholder gradien + bingkai rasio aspek project.
+ * Memakai thumbnail asli bila project menyimpannya (data:image…).
+ */
+function projectThumbHtml(project, name) {
+  const arRaw = (project && project.aspectRatio) || '16:9';
+  const m = String(arRaw).match(/(\d+(?:\.\d+)?)\s*[:/x×]\s*(\d+(?:\.\d+)?)/);
+  const arLabel = m ? `${m[1]}:${m[2]}` : '16:9';
+  const arCss = m ? `${m[1]} / ${m[2]}` : '16 / 9';
+  const palettes = [
+    ['#2a3a1e', '#10160b'], ['#1e3a2e', '#0b1611'],
+    ['#3a341e', '#16140b'], ['#22331f', '#0d1109']
+  ];
+  const nm = String(name || '?');
+  let hsh = 0;
+  for (let i = 0; i < nm.length; i++) hsh = (hsh * 31 + nm.charCodeAt(i)) | 0;
+  const pal = palettes[Math.abs(hsh) % palettes.length];
+  const initial = escapeHtml((nm.trim().charAt(0) || '•').toUpperCase());
+  const rawThumb = project && typeof project.thumbnail === 'string' ? project.thumbnail : '';
+  const thumbImg = rawThumb.startsWith('data:image')
+    ? `<img class="project-thumb-img" src="${escapeHtml(rawThumb)}" alt="" draggable="false">` : '';
+  return `<div class="project-thumb" style="background:linear-gradient(135deg,${pal[0]},${pal[1]})" aria-hidden="true">`
+    + thumbImg
+    + `<div class="project-thumb-shape" style="aspect-ratio:${escapeHtml(arCss)}">`
+    + `<span class="project-thumb-initial">${initial}</span>`
+    + `<svg class="project-thumb-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`
+    + `</div><span class="project-thumb-badge">${escapeHtml(arLabel)}</span></div>`;
+}
+
+/**
+ * Buka menu konteks kartu via event contextmenu sintetis — item menu
+ * dijamin identik dengan yang didaftarkan ContextMenu.bindTrigger.
+ */
+function openProjectCardMenu(item) {
+  if (!item || !window.ContextMenu) return;
+  const btn = item.querySelector('.project-more-btn');
+  const r = btn ? btn.getBoundingClientRect() : item.getBoundingClientRect();
+  const x = Math.min(window.innerWidth - 8, Math.max(8, r.left + r.width / 2));
+  const y = Math.min(window.innerHeight - 8, r.bottom + 6);
+  try {
+    item.dispatchEvent(new MouseEvent('contextmenu', {
+      bubbles: true, cancelable: true, clientX: x, clientY: y, button: 2
+    }));
+  } catch (_) {}
+}
+
+/**
  * Renders project cards inside the Your Project list with swipe actions
  */
 function renderProjects(projects, container, countBadge) {
@@ -308,8 +416,10 @@ function renderProjects(projects, container, countBadge) {
   }
 
   if (!container) return;
+  syncProjectsFinder();
 
   if (!projects || projects.length === 0) {
+    const isFiltering = allProjectsCache.length > 0;
     container.innerHTML = `
       <div class="projects-empty">
         <div class="projects-empty-icon" aria-hidden="true">
@@ -317,7 +427,9 @@ function renderProjects(projects, container, countBadge) {
             <path fill-rule="evenodd" clip-rule="evenodd" d="M10 4H4C2.9 4 2 4.9 2 6v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8L10 4zM12 7.2c-1.5 0-2.8 1.3-2.8 2.8h1.4c0-.8.6-1.4 1.4-1.4s1.4.6 1.4 1.4c0 .8-.6 1.4-1.3 2-.7.6-.8 1.2-.8 2.5h1.4v-.3c0-.8.4-1.3 1.1-1.9.7-.6 1-1.3 1-2.3 0-1.5-1.3-2.8-2.8-2.8zM12 17.6a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
           </svg>
         </div>
-        <span>No projects found in database</span>
+        ${isFiltering
+          ? '<span class="projects-empty-title">No matching projects</span><span class="projects-empty-sub">Try another keyword</span>'
+          : '<span class="projects-empty-title">No projects yet</span><span class="projects-empty-sub">Tap <b>New Project</b> to start creating</span>'}
       </div>
     `;
     updateProjectsToolbar([]);
@@ -351,14 +463,20 @@ function renderProjects(projects, container, countBadge) {
         <!-- Top Layer Project Item Card -->
         <article class="project-item" data-id="${escapeHtml(project.id)}" tabindex="0" role="button" aria-label="Project: ${escapeHtml(name)}">
           <span class="select-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></span>
-          <div class="project-row-main">
-            <span class="project-name">${escapeHtml(name)}</span>
-            <span class="project-size" data-project-size-id="${escapeHtml(project.id)}">${escapeHtml(size)}</span>
+          ${projectThumbHtml(project, name)}
+          <div class="project-meta">
+            <div class="project-row-main">
+              <span class="project-name">${escapeHtml(name)}</span>
+              <span class="project-size" data-project-size-id="${escapeHtml(project.id)}">${escapeHtml(size)}</span>
+            </div>
+            <div class="project-row-sub">
+              <span class="project-saved">${escapeHtml(savedTime)}</span>
+              <span class="project-specs">${specs}</span>
+            </div>
           </div>
-          <div class="project-row-sub">
-            <span class="project-saved">${escapeHtml(savedTime)}</span>
-            <span class="project-specs">${specs}</span>
-          </div>
+          <button type="button" class="project-more-btn" aria-label="Project options" tabindex="-1">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+          </button>
         </article>
       </div>
     `;
@@ -752,6 +870,8 @@ function setSelectionMode(on) {
   if (panel) panel.classList.toggle('is-selecting', selectionMode);
   const toolbar = document.getElementById('projects-toolbar');
   if (toolbar) toolbar.hidden = selectionMode;
+  const finder = document.getElementById('projects-finder');
+  if (finder) finder.style.display = selectionMode ? 'none' : '';
   const selectbar = document.getElementById('projects-selectbar');
   if (selectbar) selectbar.hidden = !selectionMode;
   const listContainer = document.getElementById('projects-container');
@@ -888,7 +1008,8 @@ async function confirmMultiDeleteProjects(ids) {
   if (listContainer && window.FishDatabase) {
     try {
       const projects = await window.FishDatabase.getProjects();
-      renderProjects(projects, listContainer, countBadge);
+      setAllProjectsCache(projects);
+      renderProjects(getVisibleProjects(), listContainer, countBadge);
     } catch (_) {}
   }
 }
@@ -952,6 +1073,7 @@ async function confirmDeleteProjectAction() {
       countBadge.setAttribute('title', `${remaining} Total Projects`);
     }
     if (remaining === 0) {
+      setAllProjectsCache([]);
       renderProjects([], listContainer, countBadge);
     }
   }
@@ -988,7 +1110,8 @@ async function confirmDeleteProjectAction() {
       if (deleted) {
         projects = projects.filter(p => p && p.id !== projectId && String(p.id).trim() !== String(projectId).trim());
       }
-      renderProjects(projects, listContainer, countBadge);
+      setAllProjectsCache(projects);
+      renderProjects(getVisibleProjects(), listContainer, countBadge);
     } catch (_) {}
   }
 }
