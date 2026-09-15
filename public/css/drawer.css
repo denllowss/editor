@@ -913,6 +913,16 @@
   box-sizing: border-box;
 }
 
+/* Varian bahaya (tombol Delete): teks & ikon merah */
+.layer-action-btn.is-danger {
+  color: var(--color-danger);
+}
+
+.layer-action-btn.is-danger:hover {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
 /* Solo / 1 child: proporsional sleek card */
 .layer-action-btn.is-solo,
 .layer-action-btn:only-child {

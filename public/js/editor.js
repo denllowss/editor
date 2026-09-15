@@ -3713,6 +3713,25 @@
       let startPointer = { x: 0, y: 0 };
       let startBounds = { x: 0, y: 0, w: 0, h: 0 };
       let startLayerState = null;
+      let moveFollowers = null; // snapshot {layer,posX,posY} layer terpilih lain saat multi-move kanvas
+
+      // Potret pengikut multi-move: semua layer terpilih kecuali primer (kamera/audio/ekspresi dikecualikan)
+      function snapshotMoveFollowers(primaryId) {
+        moveFollowers = null;
+        if (!selectedLayerIds || selectedLayerIds.size < 2) return;
+        if (!primaryId || !selectedLayerIds.has(primaryId)) return;
+        const snap = [];
+        selectedLayerIds.forEach((fid) => {
+          if (fid === primaryId) return;
+          const fl = (currentProjectState.layers || []).find((l) => l && l.id === fid);
+          if (!fl) return;
+          if (fl.type === 'camera' || fl.type === 'audio') return;
+          if (fl.expressions && fl.expressions.move) return;
+          if (typeof fl.posX !== 'number' || typeof fl.posY !== 'number') return;
+          snap.push({ layer: fl, posX: fl.posX, posY: fl.posY });
+        });
+        if (snap.length > 0) moveFollowers = snap;
+      }
       let hasMoved = false;
       // Cache rect kanvas selama SATU gestur drag (hindari getBoundingClientRect
       // = forced reflow — tiap pointermove; biang patah-patah di HP).
@@ -4030,6 +4049,10 @@
               baseH
             };
 
+            // Multi-move: potret posisi awal layer terpilih lain (pengikut kaku)
+            moveFollowers = null;
+            if (!isMoveAnchor) snapshotMoveFollowers(selectedLayer.id);
+
             activeCanvasEl.setPointerCapture(e.pointerId);
             activeCanvasEl.style.cursor = isMoveAnchor ? 'crosshair' : 'move';
             e.preventDefault();
@@ -4045,7 +4068,9 @@
           const b = l._canvasBounds;
           if (b && window.CanvasWireframe && window.CanvasWireframe.hitTest(b, coords.x, coords.y) &&
               !(l.type === 'image' && isLayerPixelTransparent(l, coords.x, coords.y))) {
-            if (typeof window.selectTimelineLayer === 'function') {
+            // Layer yang sudah terpilih jangan di-reselect tunggal (multi-select dipertahankan)
+            const alreadySelected = !!(selectedLayerIds && selectedLayerIds.has(l.id));
+            if (!alreadySelected && typeof window.selectTimelineLayer === 'function') {
               window.selectTimelineLayer(l.id);
             }
             syncLayerWithEffectiveProps(l);
@@ -4073,6 +4098,9 @@
               baseW,
               baseH
             };
+
+            // Multi-move dari layer terpilih lain (bukan primer): pengikut ikut tergeser
+            snapshotMoveFollowers(l.id);
 
             activeCanvasEl.setPointerCapture(e.pointerId);
             activeCanvasEl.style.cursor = 'move';
@@ -4359,6 +4387,23 @@
           targetLayer.normY = (targetLayer.posY - halfH) / baseH;
 
           if (typeof recordLayerPropertyChange === 'function') recordLayerPropertyChange(targetLayer, 'move');
+
+          // Pengikut multi-move: geser dengan delta dunia primer (kaku, tanpa snap sendiri)
+          if (moveFollowers && moveFollowers.length > 0) {
+            const fdx = targetLayer.posX - startX;
+            const fdy = targetLayer.posY - startY;
+            moveFollowers.forEach((fs) => {
+              const fl = fs.layer;
+              if (!fl || typeof fl.posX !== 'number') return;
+              fl.posX = Number((fs.posX + fdx).toFixed(2));
+              fl.posY = Number((fs.posY + fdy).toFixed(2));
+              const fsw = fl.scaleW !== undefined ? fl.scaleW : ((fl.normW || 0.2) * baseW);
+              const fsh = fl.scaleH !== undefined ? fl.scaleH : ((fl.normH || 0.2) * baseH);
+              fl.normX = (fl.posX - Math.abs(fsw) / 2) / baseW;
+              fl.normY = (fl.posY - Math.abs(fsh) / 2) / baseH;
+              if (typeof recordLayerPropertyChange === 'function') recordLayerPropertyChange(fl, 'move');
+            });
+          }
           requestTransformUiSync();
           requestCanvasRedraw();
         } else if (activeOp === 'scale' && startLayerState) {
@@ -4531,16 +4576,23 @@
         try { activeCanvasEl.releasePointerCapture(e.pointerId); } catch (_) {}
         const didMove = hasMoved;
         const finishedLayer = targetLayer;
+        const finishedFollowers = moveFollowers;
         activeOp = null;
         activeHandleType = null;
         targetLayer = null;
         startLayerState = null;
+        moveFollowers = null;
         hasMoved = false;
         cachedCanvasRect = null;
         window.activeSnapGuides = null;
         window.isTransformInteracting = false;
         if (finishedLayer && didMove) {
           invalidatePreviewCacheForLayer(finishedLayer);
+          if (finishedFollowers) {
+            finishedFollowers.forEach((fs) => {
+              if (fs && fs.layer) invalidatePreviewCacheForLayer(fs.layer);
+            });
+          }
         }
         flushCanvasRedraw();
         if (didMove) flushTransformUiSync();
@@ -21063,62 +21115,75 @@
           });
         }
 
-        // 3. Delete Selected Layer(s) Button
+        // 3. Delete Selected Layer(s): header + panel layer memakai fungsi sama
+        function deleteSelectedLayers() {
+          const idsToDelete = new Set();
+          if (selectedLayerId) idsToDelete.add(selectedLayerId);
+          if (selectedLayerIds && selectedLayerIds.size > 0) {
+            selectedLayerIds.forEach(id => idsToDelete.add(id));
+          }
+
+          if (idsToDelete.size === 0 || !currentProjectState.layers) return;
+
+          currentProjectState.layers.forEach(l => {
+            if (idsToDelete.has(l.id)) {
+              invalidatePreviewCacheForLayer(l);
+            }
+          });
+
+          // Remove layers from project state
+          const deletedLayers = currentProjectState.layers.filter(l => idsToDelete.has(l.id));
+          currentProjectState.layers = currentProjectState.layers.filter(l => !idsToDelete.has(l.id));
+
+          deletedLayers.forEach(l => {
+            const media = layerMediaCache.get(l.mediaId || l.id);
+            if (media && media.el && typeof media.el.pause === 'function') {
+              try { media.el.pause(); } catch (_) {}
+            }
+            layerMediaCache.delete(l.id);
+            layerMediaCache.delete(l.mediaId);
+            if (window.VideoFrameExtractor) {
+              window.VideoFrameExtractor.clearLayer(l);
+            }
+          });
+
+          // Clean up child layers pointing to deleted parents
+          currentProjectState.layers.forEach(l => {
+            if (idsToDelete.has(l.parentId)) {
+              l.parentId = null;
+              delete l.parentBind;
+            }
+          });
+
+          // Close drawer & reset selection state
+          if (window.Drawer && window.Drawer.isOpen('timeline-layer-drawer')) {
+            window.Drawer.close(false);
+          }
+          selectedLayerId = null;
+          window.selectedLayerId = null;
+          if (selectedLayerIds) selectedLayerIds.clear();
+
+          deselectTimelineLayer();
+          renderTimelineLayers();
+          saveCurrentProjectLayers();
+          redrawComposition();
+          updateEditorHeaderMode();
+        }
+        window.deleteSelectedLayers = deleteSelectedLayers;
+
         const btnLayerDelete = document.getElementById('btn-layer-header-delete');
         if (btnLayerDelete) {
           btnLayerDelete.addEventListener('click', (e) => {
             e.stopPropagation();
-            const idsToDelete = new Set();
-            if (selectedLayerId) idsToDelete.add(selectedLayerId);
-            if (selectedLayerIds && selectedLayerIds.size > 0) {
-              selectedLayerIds.forEach(id => idsToDelete.add(id));
-            }
+            deleteSelectedLayers();
+          });
+        }
 
-            if (idsToDelete.size === 0 || !currentProjectState.layers) return;
-
-            currentProjectState.layers.forEach(l => {
-              if (idsToDelete.has(l.id)) {
-                invalidatePreviewCacheForLayer(l);
-              }
-            });
-
-            // Remove layers from project state
-            const deletedLayers = currentProjectState.layers.filter(l => idsToDelete.has(l.id));
-            currentProjectState.layers = currentProjectState.layers.filter(l => !idsToDelete.has(l.id));
-
-            deletedLayers.forEach(l => {
-              const media = layerMediaCache.get(l.mediaId || l.id);
-              if (media && media.el && typeof media.el.pause === 'function') {
-                try { media.el.pause(); } catch (_) {}
-              }
-              layerMediaCache.delete(l.id);
-              layerMediaCache.delete(l.mediaId);
-              if (window.VideoFrameExtractor) {
-                window.VideoFrameExtractor.clearLayer(l);
-              }
-            });
-
-            // Clean up child layers pointing to deleted parents
-            currentProjectState.layers.forEach(l => {
-              if (idsToDelete.has(l.parentId)) {
-                l.parentId = null;
-                delete l.parentBind;
-              }
-            });
-
-            // Close drawer & reset selection state
-            if (window.Drawer && window.Drawer.isOpen('timeline-layer-drawer')) {
-              window.Drawer.close(false);
-            }
-            selectedLayerId = null;
-            window.selectedLayerId = null;
-            if (selectedLayerIds) selectedLayerIds.clear();
-
-            deselectTimelineLayer();
-            renderTimelineLayers();
-            saveCurrentProjectLayers();
-            redrawComposition();
-            updateEditorHeaderMode();
+        const btnGridDelete = document.getElementById('btn-layer-delete');
+        if (btnGridDelete) {
+          btnGridDelete.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteSelectedLayers();
           });
         }
 
@@ -21575,6 +21640,10 @@
 
         updateEditorHeaderMode();
         renderTimelineLayers();
+        if (window.Drawer && !window.Drawer.isOpen('timeline-layer-drawer')) {
+          window.Drawer.open('timeline-layer-drawer');
+          if (typeof switchLayerDrawerSubview === 'function') switchLayerDrawerSubview('main');
+        }
         redrawComposition('selectAll');
       }
       window.selectAllTimelineLayers = selectAllTimelineLayers;
@@ -21711,6 +21780,10 @@
             isSelectorMode = true;
             updateEditorHeaderMode();
             renderTimelineLayers();
+            if (window.Drawer && !window.Drawer.isOpen('timeline-layer-drawer')) {
+              window.Drawer.open('timeline-layer-drawer');
+              if (typeof switchLayerDrawerSubview === 'function') switchLayerDrawerSubview('main');
+            }
           }
         }
       }
@@ -21811,6 +21884,10 @@
             isSelectorMode = true;
             updateEditorHeaderMode();
             renderTimelineLayers();
+            if (window.Drawer && !window.Drawer.isOpen('timeline-layer-drawer')) {
+              window.Drawer.open('timeline-layer-drawer');
+              if (typeof switchLayerDrawerSubview === 'function') switchLayerDrawerSubview('main');
+            }
           }
         }
       }
@@ -23182,6 +23259,10 @@
                   window.selectedLayerIds = selectedLayerIds;
                   if (typeof syncSelectionClassesInPlace === 'function') syncSelectionClassesInPlace();
                   if (typeof updateEditorHeaderMode === 'function') updateEditorHeaderMode();
+                  if (window.Drawer && !window.Drawer.isOpen('timeline-layer-drawer')) {
+                    window.Drawer.open('timeline-layer-drawer');
+                    if (typeof switchLayerDrawerSubview === 'function') switchLayerDrawerSubview('main');
+                  }
                   if (navigator.vibrate) { try { navigator.vibrate(25); } catch (_) {} }
                 }, 450);
               });
@@ -23251,6 +23332,10 @@
 
                   syncSelectionClassesInPlace();
                   updateEditorHeaderMode();
+                  if (window.Drawer && !window.Drawer.isOpen('timeline-layer-drawer')) {
+                    window.Drawer.open('timeline-layer-drawer');
+                    if (typeof switchLayerDrawerSubview === 'function') switchLayerDrawerSubview('main');
+                  }
                   if (navigator.vibrate) navigator.vibrate(25);
                 }, 200);
 
@@ -23266,6 +23351,10 @@
 
                     if (!isSelectorMode) {
                       isSelectorMode = true;
+                      if (window.Drawer && !window.Drawer.isOpen('timeline-layer-drawer')) {
+                        window.Drawer.open('timeline-layer-drawer');
+                        if (typeof switchLayerDrawerSubview === 'function') switchLayerDrawerSubview('main');
+                      }
                     }
 
                     if (!hasHoldFired && initialSelectedIds.size <= 1) {
@@ -26180,12 +26269,51 @@
         }
       }
 
+      // Batch cut: di mode multi-pilih, satu klik tombol cut berlaku ke semua layer terpilih
+      function getCutTargetIds() {
+        const layers = currentProjectState.layers || [];
+        if (selectedLayerIds && selectedLayerIds.size > 1) {
+          const ids = Array.from(selectedLayerIds).filter((id) => layers.some((l) => l && l.id === id));
+          if (ids.length > 0) return ids;
+        }
+        return selectedLayerId ? [selectedLayerId] : [];
+      }
+
+      function executeCutForSelection(singleFn) {
+        const ids = getCutTargetIds();
+        if (ids.length <= 1) {
+          singleFn();
+          return;
+        }
+        ids.forEach((id) => {
+          selectedLayerId = id;
+          window.selectedLayerId = id;
+          try { singleFn(); } catch (err) { console.warn('Batch cut gagal:', id, err); }
+        });
+        // Pulihkan multi-select (split mempertahankan id asli sebagai potongan kiri)
+        const alive = (currentProjectState.layers || []).filter((l) => l).map((l) => l.id);
+        const keep = ids.filter((id) => alive.indexOf(id) !== -1);
+        selectedLayerIds = new Set(keep.length > 0 ? keep : alive.slice(0, 1));
+        window.selectedLayerIds = selectedLayerIds;
+        if (!selectedLayerIds.has(selectedLayerId)) {
+          selectedLayerId = Array.from(selectedLayerIds)[0] || null;
+          window.selectedLayerId = selectedLayerId;
+        }
+        isSelectorMode = selectedLayerIds.size > 1;
+        renderTimelineLayers();
+        redrawComposition();
+        saveCurrentProjectLayers();
+        if (typeof updateEditorHeaderMode === 'function') updateEditorHeaderMode();
+        if (typeof updateCutBarRowState === 'function') updateCutBarRowState();
+      }
+      window.executeCutForSelection = executeCutForSelection;
+
       // Hubungkan tombol Cut ke logic
       const btnCutLeft = document.getElementById('btn-cut-left');
       if (btnCutLeft) {
         btnCutLeft.addEventListener('click', (e) => {
           e.stopPropagation();
-          executeCutLeft();
+          executeCutForSelection(executeCutLeft);
         });
       }
 
@@ -26193,7 +26321,7 @@
       if (btnCutMid) {
         btnCutMid.addEventListener('click', (e) => {
           e.stopPropagation();
-          executeCutMid();
+          executeCutForSelection(executeCutMid);
         });
       }
 
@@ -26201,7 +26329,7 @@
       if (btnCutRight) {
         btnCutRight.addEventListener('click', (e) => {
           e.stopPropagation();
-          executeCutRight();
+          executeCutForSelection(executeCutRight);
         });
       }
 
@@ -26209,7 +26337,7 @@
       if (btnExpandRight) {
         btnExpandRight.addEventListener('click', (e) => {
           e.stopPropagation();
-          executeExpandRight();
+          executeCutForSelection(executeExpandRight);
         });
       }
 
@@ -26217,7 +26345,7 @@
       if (btnMoveRight) {
         btnMoveRight.addEventListener('click', (e) => {
           e.stopPropagation();
-          executeMoveRight();
+          executeCutForSelection(executeMoveRight);
         });
       }
 
@@ -26225,7 +26353,7 @@
       if (btnMoveLeft) {
         btnMoveLeft.addEventListener('click', (e) => {
           e.stopPropagation();
-          executeMoveLeft();
+          executeCutForSelection(executeMoveLeft);
         });
       }
 
@@ -26233,7 +26361,7 @@
       if (btnExpandLeft) {
         btnExpandLeft.addEventListener('click', (e) => {
           e.stopPropagation();
-          executeExpandLeft();
+          executeCutForSelection(executeExpandLeft);
         });
       }
 
