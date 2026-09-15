@@ -7545,7 +7545,7 @@
             window.applyToolboxFitToComp(stretch);
             if (typeof syncTransformControllerValues === 'function') syncTransformControllerValues();
           } else if (typeof showEffectsRackToast === 'function') {
-            showEffectsRackToast('Modul FishTools belum siap, coba lagi sebentar.');
+            showEffectsRackToast('Modul Denji Motion belum siap, coba lagi sebentar.');
           }
         });
       }
@@ -10402,7 +10402,7 @@
 
       const preset = (window.FishTextEngine && window.FishTextEngine.getPreset(presetId)) || {
         name: 'Text',
-        props: { text: 'FISH TOOL', fontSize: 64 }
+        props: { text: 'DENJI MOTION', fontSize: 64 }
       };
 
       const defaultTextProps = (window.FishTextEngine && window.FishTextEngine.getDefaultProps()) || {};

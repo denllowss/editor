@@ -1025,7 +1025,7 @@
       tctx.fillText('3D PERSPECTIVE', 80, 75);
       tctx.font = '11px sans-serif';
       tctx.fillStyle = '#a6b09d';
-      tctx.fillText('FishTool Studio', 80, 95);
+      tctx.fillText('Denji Motion', 80, 95);
 
       // Native CSS 3D Quad Elements
       const cssCard = document.getElementById('demo-css3d-card');

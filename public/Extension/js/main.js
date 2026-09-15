@@ -597,7 +597,7 @@ function showPermissionModal() {
     
     var desc = document.createElement('p');
     desc.style.cssText = 'font-size:11px;color:var(--text-mut,#888);line-height:1.6;margin:0 0 14px;';
-    desc.textContent = 'Fish Tools needs write access to save your settings, presets, and graph data. Please enable it in After Effects preferences.';
+    desc.textContent = 'Denji Motion needs write access to save your settings, presets, and graph data. Please enable it in After Effects preferences.';
 
     
     var steps = document.createElement('div');

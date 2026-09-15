@@ -8,7 +8,7 @@
   'use strict';
 
   const DEFAULT_TEXT_PROPS = {
-    text: 'FISH TOOL',
+    text: 'DENJI MOTION',
     fontFamily: 'Cal Sans, Inter, sans-serif',
     fontSize: 64,
     fontWeight: '700',

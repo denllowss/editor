@@ -1,6 +1,6 @@
 {
   "name": "fishtool-studio-nodejs",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "description": "OpenFishTools Studio — port Node.js (Express) dari https://fishtoolstudio.vercel.app/",
   "main": "server.js",
   "type": "commonjs",
@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node test/effects-smoke.cjs && node test/fishtools-bridge.cjs && node test/ui-buttons.cjs && node test/responsive.cjs && node test/custom-fonts.cjs && node test/video-audio-fit.cjs && node test/layout-styles.cjs && node test/desktop-drop.cjs && node test/vercel.cjs && node test/bugfix-trio.cjs && node test/dashboard-select.cjs && node test/custom-aspect.cjs && node test/touch-drag.cjs && node test/color-gradient.cjs && node test/effects-paste.cjs && node test/timeline-select.cjs && node test/stretch-element.cjs && node test/theme-maroon.cjs && node test/app-settings.cjs && node test/gradient-handles.cjs && node test/stroke-shadow.cjs"
+    "test": "node test/effects-smoke.cjs && node test/fishtools-bridge.cjs && node test/ui-buttons.cjs && node test/responsive.cjs && node test/custom-fonts.cjs && node test/video-audio-fit.cjs && node test/layout-styles.cjs && node test/desktop-drop.cjs && node test/vercel.cjs && node test/bugfix-trio.cjs && node test/dashboard-select.cjs && node test/custom-aspect.cjs && node test/touch-drag.cjs && node test/color-gradient.cjs && node test/effects-paste.cjs && node test/timeline-select.cjs && node test/stretch-element.cjs && node test/theme-maroon.cjs && node test/app-settings.cjs && node test/gradient-handles.cjs && node test/stroke-shadow.cjs && node test/rebrand-theme.cjs"
   },
   "keywords": [
     "motion-graphics",
