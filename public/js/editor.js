@@ -11311,12 +11311,25 @@
         }
         case 'polygon': {
           const sides = Math.max(3, parseInt(shapeProps.sides, 10) || 6);
-          for (let i = 0; i < sides; i++) {
-            const a = -Math.PI / 2 + (i / sides) * Math.PI * 2;
-            const px = cx + Math.cos(a) * rx;
-            const py = cy + Math.sin(a) * ry;
-            if (i === 0) sctx.moveTo(px, py);
-            else sctx.lineTo(px, py);
+          const roundness = Number(shapeProps.roundness);
+          const engine = window.DenjiMotionEngine || window.LayerTransform;
+          const roundedPts = roundness > 0 && engine && typeof engine.getShapeLocalContour === 'function'
+            ? engine.getShapeLocalContour(shapeType, shapeProps, sx, sy)
+            : [];
+
+          if (roundedPts.length > 0 && roundness > 0) {
+            sctx.moveTo(cx + roundedPts[0].x, cy + roundedPts[0].y);
+            for (let i = 1; i < roundedPts.length; i++) {
+              sctx.lineTo(cx + roundedPts[i].x, cy + roundedPts[i].y);
+            }
+          } else {
+            for (let i = 0; i < sides; i++) {
+              const a = -Math.PI / 2 + (i / sides) * Math.PI * 2;
+              const px = cx + Math.cos(a) * rx;
+              const py = cy + Math.sin(a) * ry;
+              if (i === 0) sctx.moveTo(px, py);
+              else sctx.lineTo(px, py);
+            }
           }
           sctx.closePath();
           break;
@@ -11404,6 +11417,19 @@
         ? window.FishShapesRegistry.get(shapeType)
         : null;
 
+      // Older projects may not have the newer roundness field yet. Restore
+      // the shape default once, otherwise the controller always shows 0 and
+      // the first edit starts from an invalid/missing value.
+      const supportsRoundness = shapeDef
+        ? !!shapeDef.controls.roundness
+        : (shapeType === 'rectangle' || shapeType === 'triangle' || shapeType === 'polygon');
+      if (supportsRoundness && !Number.isFinite(Number(shapeProps.roundness))) {
+        const fallbackRoundness = shapeDef && shapeDef.defaultProps
+          ? Number(shapeDef.defaultProps.roundness)
+          : (shapeType === 'rectangle' ? 24 : 0);
+        shapeProps.roundness = Number.isFinite(fallbackRoundness) ? fallbackRoundness : 0;
+      }
+
       const titleEl = document.getElementById('lbl-shape-title');
       if (titleEl) {
         titleEl.textContent = shapeDef ? shapeDef.name : (shapeType.charAt(0).toUpperCase() + shapeType.slice(1));
@@ -11431,13 +11457,11 @@
 
       // 2. Roundness section
       const secRound = document.getElementById('shape-section-roundness');
-      const hasRound = shapeDef
-        ? !!shapeDef.controls.roundness
-        : (shapeType === 'rectangle' || shapeType === 'triangle' || shapeType === 'polygon');
+      const hasRound = supportsRoundness;
       if (secRound) {
         secRound.style.display = hasRound ? '' : 'none';
         const valRound = document.getElementById('val-shape-roundness');
-        if (valRound) valRound.textContent = Math.round(shapeProps.roundness || 0);
+        if (valRound) valRound.textContent = Math.round(Number(shapeProps.roundness) || 0);
       }
 
       // 3. Step section
@@ -11622,13 +11646,24 @@
         onStart: () => {
           const layer = (currentProjectState.layers || []).find(l => l.id === window.selectedLayerId);
           if (!layer || layer.type !== 'shape') return;
-          initRound = Number(layer.shapeProps?.roundness) || 0;
+          if (!layer.shapeProps) layer.shapeProps = {};
+          const shapeDef = window.FishShapesRegistry && window.FishShapesRegistry.get(layer.shapeType || 'rectangle');
+          const defaultRoundness = shapeDef && shapeDef.defaultProps
+            ? Number(shapeDef.defaultProps.roundness)
+            : (layer.shapeType === 'rectangle' ? 24 : 0);
+          if (!Number.isFinite(Number(layer.shapeProps.roundness))) {
+            layer.shapeProps.roundness = Number.isFinite(defaultRoundness) ? defaultRoundness : 0;
+          }
+          initRound = Number(layer.shapeProps.roundness) || 0;
         },
         onMove: (delta) => {
           const layer = (currentProjectState.layers || []).find(l => l.id === window.selectedLayerId);
           if (!layer || layer.type !== 'shape') return;
-          const maxR = Math.min(layer.shapeProps?.sizeX || 300, layer.shapeProps?.sizeY || 300) / 2;
-          const newR = Math.max(0, Math.min(maxR, Math.round(initRound + delta * 0.5)));
+          // One screen pixel equals one roundness unit. There is no UI max;
+          // the renderer only limits the effective radius when needed to keep
+          // the geometry valid, while the entered value remains persisted.
+          // The old 0.5 multiplier made short drags round back to zero.
+          const newR = Math.max(0, Math.round(initRound + delta));
           updateShapeOtherProp('roundness', newR, false);
         },
         onEnd: () => {

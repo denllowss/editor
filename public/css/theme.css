@@ -116,7 +116,8 @@
 }
 
 /* Optional Alternate Themes (Full 100% token coverage for all windows, containers & components) */
-[data-theme="cyber-cyan"] {
+[data-theme="cyber-cyan"],
+[data-color-theme="cyber-cyan"]:not([data-theme="light"]) {
   /* Brand & Accents */
   --color-primary: #00e5ff;
   --color-primary-hover: #5df2ff;
@@ -184,7 +185,8 @@
   --kf-selected-dot: #00e5ff;
 }
 
-[data-theme="amber-terminal"] {
+[data-theme="amber-terminal"],
+[data-color-theme="amber-terminal"]:not([data-theme="light"]) {
   /* Brand & Accents */
   --color-primary: #ffaa00;
   --color-primary-hover: #ffc44d;
@@ -319,4 +321,225 @@
   --kf-selected-bg: #ffffff;
   --kf-selected-border: #4a0f0f;
   --kf-selected-dot: #a02323;
+}
+
+/* ========================================================================
+   User-selectable color palettes.
+   These attributes are separate from data-theme so Light mode can remain
+   independent from the selected accent palette.
+   ======================================================================== */
+[data-theme="light"][data-color-theme="cyber-cyan"] {
+  --color-primary: #08798b;
+  --color-primary-hover: #00b4c8;
+  --color-primary-active: #006b7d;
+  --color-accent: #006b7d;
+  --color-accent-subtle: #b8eaf0;
+  --color-danger: #d92d4b;
+  --color-danger-hover: #b51f3a;
+  --color-danger-bg: rgba(217, 45, 75, 0.12);
+  --color-danger-text: #ffffff;
+
+  --bg-canvas: #e7f7fa;
+  --bg-dashboard: #f2fcfd;
+  --bg-panel: #ffffff;
+  --bg-panel-hover: #e1f5f8;
+  --bg-panel-active: #d3eef2;
+  --bg-panel-inner: #f5fdfe;
+  --bg-panel-inner-hover: #e1f5f8;
+
+  --badge-prealpha-bg: #dff5f8;
+  --badge-prealpha-text: #08798b;
+  --badge-count-bg: #08798b;
+  --badge-count-text: #ffffff;
+
+  --track-video: #08798b;
+  --track-video-dark: #8acfd8;
+  --track-image: #00a0b5;
+  --track-image-dark: #8acfd8;
+  --track-audio: #0f9f88;
+  --track-audio-dark: #86cfc5;
+  --track-adj: #006b7d;
+  --track-adj-dark: #9adce3;
+  --track-color: #00a0b5;
+  --track-color-dark: #a8e1e8;
+  --track-text: #08798b;
+  --track-text-dark: #8acfd8;
+
+  --grid-line-thin: rgba(8, 121, 139, 0.16);
+  --grid-line-major: rgba(8, 121, 139, 0.4);
+  --grid-crosshair: #08798b;
+  --grid-dot: rgba(8, 121, 139, 0.5);
+
+  --text-primary: #08798b;
+  --text-secondary: #006b7d;
+  --text-muted: #547d83;
+  --text-dim: #8eb9be;
+  --border-panel: #bde3e8;
+  --border-subtle: rgba(8, 121, 139, 0.25);
+  --border-focus: #08798b;
+
+  --kf-default-bg: #f2fcfd;
+  --kf-default-border: #547d83;
+  --kf-active-bg: #08798b;
+  --kf-active-border: #064c58;
+  --kf-selected-bg: #ffffff;
+  --kf-selected-border: #064c58;
+  --kf-selected-dot: #08798b;
+}
+
+[data-theme="light"][data-color-theme="amber-terminal"] {
+  --color-primary: #9a6500;
+  --color-primary-hover: #c48700;
+  --color-primary-active: #795000;
+  --color-accent: #795000;
+  --color-accent-subtle: #f1d795;
+  --color-danger: #c72f2f;
+  --color-danger-hover: #a92121;
+  --color-danger-bg: rgba(199, 47, 47, 0.12);
+  --color-danger-text: #ffffff;
+
+  --bg-canvas: #fff8e8;
+  --bg-dashboard: #fffdf6;
+  --bg-panel: #ffffff;
+  --bg-panel-hover: #fff3d4;
+  --bg-panel-active: #f7e7b8;
+  --bg-panel-inner: #fffaf0;
+  --bg-panel-inner-hover: #fff3d4;
+
+  --badge-prealpha-bg: #fff0c7;
+  --badge-prealpha-text: #9a6500;
+  --badge-count-bg: #9a6500;
+  --badge-count-text: #ffffff;
+
+  --track-video: #9a6500;
+  --track-video-dark: #d8bd78;
+  --track-image: #c48700;
+  --track-image-dark: #d8bd78;
+  --track-audio: #a77b00;
+  --track-audio-dark: #d8bd78;
+  --track-adj: #795000;
+  --track-adj-dark: #d7b66a;
+  --track-color: #c48700;
+  --track-color-dark: #e2cb91;
+  --track-text: #9a6500;
+  --track-text-dark: #d8bd78;
+
+  --grid-line-thin: rgba(154, 101, 0, 0.16);
+  --grid-line-major: rgba(154, 101, 0, 0.4);
+  --grid-crosshair: #9a6500;
+  --grid-dot: rgba(154, 101, 0, 0.5);
+
+  --text-primary: #855700;
+  --text-secondary: #9a6500;
+  --text-muted: #866f3f;
+  --text-dim: #b7a06c;
+  --border-panel: #ead8a6;
+  --border-subtle: rgba(154, 101, 0, 0.25);
+  --border-focus: #9a6500;
+
+  --kf-default-bg: #fffdf6;
+  --kf-default-border: #866f3f;
+  --kf-active-bg: #9a6500;
+  --kf-active-border: #5a3b00;
+  --kf-selected-bg: #ffffff;
+  --kf-selected-border: #5a3b00;
+  --kf-selected-dot: #9a6500;
+}
+
+/* Custom color fallback used during the first paint before main.js hydrates
+   all derived tokens. main.js replaces these with contrast-aware values. */
+[data-color-theme="custom"] {
+  --color-primary: var(--custom-theme-color, #c23b3b);
+  --color-primary-hover: color-mix(in srgb, var(--custom-theme-color, #c23b3b), white 22%);
+  --color-primary-active: color-mix(in srgb, var(--custom-theme-color, #c23b3b), black 24%);
+  --color-accent: var(--color-primary-active);
+  --color-accent-subtle: color-mix(in srgb, var(--custom-theme-color, #c23b3b), black 58%);
+  --bg-canvas: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 14%, #0f0b0b);
+  --bg-dashboard: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 18%, #170f0f);
+  --bg-panel: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 22%, #201313);
+  --bg-panel-hover: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 28%, #2b1a1a);
+  --bg-panel-active: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 18%, #170f0f);
+  --bg-panel-inner: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 18%, #170f0f);
+  --bg-panel-inner-hover: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 28%, #2b1a1a);
+  --badge-prealpha-bg: var(--bg-panel-hover);
+  --badge-prealpha-text: var(--color-primary-hover);
+  --badge-count-bg: var(--color-primary);
+  --badge-count-text: #0f0b0b;
+  --track-video: var(--color-primary);
+  --track-video-dark: var(--color-accent-subtle);
+  --track-image: var(--color-primary-hover);
+  --track-image-dark: var(--color-accent-subtle);
+  --track-adj: var(--color-primary-active);
+  --track-audio: var(--color-primary-hover);
+  --track-audio-dark: var(--color-accent-subtle);
+  --track-color: var(--color-primary-hover);
+  --track-color-dark: var(--color-accent-subtle);
+  --track-text: var(--color-primary-hover);
+  --track-text-dark: var(--color-accent-subtle);
+  --grid-line-thin: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 18%, transparent);
+  --grid-line-major: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 45%, transparent);
+  --grid-crosshair: var(--color-primary-hover);
+  --grid-dot: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 55%, transparent);
+  --text-primary: var(--color-primary);
+  --text-secondary: var(--color-primary-hover);
+  --text-muted: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 52%, #b39a9a);
+  --text-dim: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 28%, #6e4e4e);
+  --border-panel: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 32%, #332121);
+  --border-subtle: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 22%, transparent);
+  --border-focus: var(--color-primary);
+  --kf-default-bg: var(--bg-dashboard);
+  --kf-default-border: var(--text-muted);
+  --kf-active-bg: var(--color-primary);
+  --kf-active-border: #0f0b0b;
+  --kf-selected-bg: #ffffff;
+  --kf-selected-border: #0f0b0b;
+  --kf-selected-dot: var(--color-primary);
+}
+
+[data-theme="light"][data-color-theme="custom"] {
+  --color-primary: color-mix(in srgb, var(--custom-theme-color, #c23b3b), black 35%);
+  --color-primary-hover: color-mix(in srgb, var(--custom-theme-color, #c23b3b), black 12%);
+  --color-primary-active: color-mix(in srgb, var(--custom-theme-color, #c23b3b), black 50%);
+  --color-accent: var(--color-primary-active);
+  --color-accent-subtle: color-mix(in srgb, var(--custom-theme-color, #c23b3b), white 58%);
+  --bg-canvas: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 10%, #ece5e5);
+  --bg-dashboard: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 7%, #f7f2f2);
+  --bg-panel: #ffffff;
+  --bg-panel-hover: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 10%, #f3e6e6);
+  --bg-panel-active: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 14%, #ecdcdc);
+  --bg-panel-inner: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 6%, #f8f3f3);
+  --bg-panel-inner-hover: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 10%, #f3e6e6);
+  --badge-prealpha-bg: var(--bg-panel-hover);
+  --badge-prealpha-text: var(--color-primary);
+  --badge-count-bg: var(--color-primary);
+  --badge-count-text: #ffffff;
+  --track-video: var(--color-primary);
+  --track-video-dark: var(--color-accent-subtle);
+  --track-image: var(--color-primary-hover);
+  --track-image-dark: var(--color-accent-subtle);
+  --track-adj: var(--color-primary-active);
+  --track-audio: var(--color-primary-hover);
+  --track-audio-dark: var(--color-accent-subtle);
+  --track-color: var(--color-primary-hover);
+  --track-color-dark: var(--color-accent-subtle);
+  --track-text: var(--color-primary);
+  --track-text-dark: var(--color-accent-subtle);
+  --grid-line-thin: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 16%, transparent);
+  --grid-line-major: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 40%, transparent);
+  --grid-crosshair: var(--color-primary);
+  --grid-dot: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 50%, transparent);
+  --text-primary: var(--color-primary);
+  --text-secondary: var(--color-primary-hover);
+  --text-muted: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 52%, #8a6f6f);
+  --text-dim: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 30%, #bd9898);
+  --border-panel: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 28%, #e2caca);
+  --border-subtle: color-mix(in srgb, var(--custom-theme-color, #c23b3b) 25%, transparent);
+  --border-focus: var(--color-primary);
+  --kf-default-bg: var(--bg-dashboard);
+  --kf-default-border: var(--text-muted);
+  --kf-active-bg: var(--color-primary);
+  --kf-active-border: #4a0f0f;
+  --kf-selected-bg: #ffffff;
+  --kf-selected-border: #4a0f0f;
+  --kf-selected-dot: var(--color-primary);
 }

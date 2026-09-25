@@ -839,9 +839,9 @@ html, body {
   .tech-grid-container {
     position: absolute;
     top: 25vh;
-    left: auto;
-    right: -100px;
-    transform: translateY(-50%);
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
     width: clamp(360px, 95vw, 420px);
     height: clamp(360px, 95vw, 420px);
     aspect-ratio: 1/1;

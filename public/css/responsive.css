@@ -190,3 +190,427 @@
     max-width: 1320px;
   }
 }
+
+/* ==========================================================================
+   HOME DASHBOARD VISUAL POLISH (v0.30.0)
+   --------------------------------------------------------------------------
+   Landing page only. Existing IDs, modal triggers, project gestures and
+   editor layout remain unchanged; this layer only improves hierarchy,
+   spacing, contrast and responsive presentation.
+   ========================================================================== */
+
+.app-viewport {
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(194, 59, 59, 0.08), transparent 34%),
+    var(--bg-canvas);
+}
+
+.app-viewport::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.018), transparent 42%);
+}
+
+.app-viewport .studio-header {
+  align-items: center;
+}
+
+.app-viewport .brand-wrapper {
+  gap: 7px;
+}
+
+.app-viewport .brand-title {
+  font-size: clamp(30px, 4.2vw, 58px);
+  letter-spacing: -1.8px;
+  line-height: 0.96;
+  color: var(--text-primary);
+}
+
+.app-viewport .brand-subtitle-row {
+  gap: 9px;
+  align-items: center;
+}
+
+.app-viewport .brand-subtitle {
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.app-viewport .badge-pre-alpha {
+  margin-top: 1px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  transform: none;
+}
+
+.app-viewport .studio-header-actions {
+  gap: 8px;
+}
+
+.app-viewport .studio-top-btn {
+  min-height: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background-color: var(--bg-panel);
+  border-color: var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.app-viewport .studio-top-btn:hover {
+  background-color: var(--bg-panel-hover);
+  color: var(--color-primary-hover);
+  border-color: var(--color-primary);
+}
+
+.app-viewport .tech-grid-container {
+  opacity: 0.72;
+}
+
+.app-viewport .studio-doodles-container {
+  opacity: 0.64;
+}
+
+.app-viewport .dashboard-container {
+  background-color: var(--bg-dashboard);
+  border: 1px solid var(--border-subtle);
+  border-radius: 30px;
+  padding: 18px;
+  gap: 14px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+}
+
+.dashboard-intro {
+  min-height: 47px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-shrink: 0;
+  padding: 0 2px;
+}
+
+.dashboard-intro-copy {
+  min-width: 0;
+}
+
+.dashboard-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.dashboard-intro h2 {
+  color: var(--text-primary);
+  font-size: clamp(18px, 2vw, 23px);
+  font-weight: 700;
+  letter-spacing: -0.45px;
+  line-height: 1.05;
+}
+
+.dashboard-intro p {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.dashboard-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(194, 59, 59, 0.14);
+}
+
+.app-viewport .action-buttons-row.cc-create-row {
+  gap: 10px;
+}
+
+.app-viewport .action-btn.cc-create-tile {
+  min-height: 78px;
+  padding: 13px 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  gap: 11px;
+  box-shadow: none;
+}
+
+.app-viewport .action-btn.cc-create-primary {
+  border-color: var(--color-primary);
+  box-shadow: 0 10px 24px rgba(194, 59, 59, 0.18);
+}
+
+.app-viewport .cc-tile-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: rgba(194, 59, 59, 0.14);
+}
+
+.app-viewport .action-btn.cc-create-primary .cc-tile-icon {
+  background: rgba(15, 11, 11, 0.18);
+}
+
+.app-viewport .cc-tile-icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.app-viewport .cc-create-tile .action-btn-title {
+  font-size: 14px;
+  letter-spacing: -0.15px;
+}
+
+.app-viewport .cc-tile-sub {
+  font-size: 10px;
+  letter-spacing: 0.1px;
+}
+
+.app-viewport .action-btn.cc-create-tile:not(.cc-create-primary) {
+  background-color: var(--bg-panel);
+}
+
+.app-viewport .action-btn.cc-create-tile:not(.cc-create-primary):hover {
+  background-color: var(--bg-panel-hover);
+  border-color: var(--color-primary);
+}
+
+.app-viewport .projects-panel {
+  padding: 13px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 19px;
+  background-color: var(--bg-panel);
+}
+
+.app-viewport .projects-toolbar {
+  padding: 1px 1px 10px;
+  gap: 9px;
+}
+
+.app-viewport .projects-section-title {
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+.app-viewport .projects-count-label:empty {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border-color: transparent;
+  opacity: 0;
+}
+
+.app-viewport .projects-count-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.app-viewport .projects-select-toggle {
+  min-height: 30px;
+  padding: 0 11px;
+  border-color: var(--border-subtle);
+  border-radius: 9px;
+  color: var(--text-secondary);
+  background-color: var(--bg-panel-inner);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.app-viewport .projects-select-toggle:hover,
+.app-viewport .selectbar-btn:hover {
+  color: var(--color-primary-hover);
+  border-color: var(--color-primary);
+  background-color: var(--bg-panel-hover);
+}
+
+.app-viewport .projects-finder {
+  padding: 0 1px 9px;
+}
+
+.app-viewport .projects-search,
+.app-viewport .projects-sort {
+  min-height: 34px;
+  border-color: var(--border-subtle);
+  border-radius: 10px;
+  background-color: var(--bg-panel-inner);
+}
+
+.app-viewport .projects-search {
+  padding: 0 10px;
+}
+
+.app-viewport .projects-sort {
+  max-width: 116px;
+  font-size: 11px;
+}
+
+.app-viewport .projects-list {
+  gap: 9px;
+}
+
+.app-viewport .project-swipe-container {
+  border: 1px solid transparent;
+  border-radius: 13px;
+  background-color: var(--bg-panel-inner);
+}
+
+.app-viewport .project-swipe-container .project-item {
+  min-height: 73px;
+  padding: 9px;
+  border-radius: 12px;
+  background-color: var(--bg-panel-inner);
+  border-color: transparent;
+  gap: 11px;
+}
+
+.app-viewport .project-thumb {
+  width: 108px;
+  height: 62px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background-color: #1a1011;
+}
+
+.app-viewport .project-thumb-shape {
+  border-color: rgba(255, 255, 255, 0.34);
+}
+
+.app-viewport .project-meta {
+  gap: 5px;
+}
+
+.app-viewport .project-name {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.app-viewport .project-size {
+  color: var(--text-secondary);
+  font-size: 10px;
+}
+
+.app-viewport .project-row-sub,
+.app-viewport .project-specs {
+  font-size: 10px;
+}
+
+.app-viewport .project-item:hover,
+.app-viewport .project-item:focus-visible {
+  background-color: var(--bg-panel-hover);
+  border-color: var(--border-subtle);
+}
+
+.app-viewport .project-item:hover .project-name,
+.app-viewport .project-item:hover .project-size,
+.app-viewport .project-item:hover .project-saved,
+.app-viewport .project-item:hover .project-specs {
+  color: inherit;
+  opacity: 1;
+}
+
+.app-viewport .project-item:hover .project-name {
+  color: var(--text-primary);
+}
+
+.app-viewport .project-item:hover .project-size {
+  color: var(--text-secondary);
+}
+
+.app-viewport .project-more-btn,
+.app-viewport .project-item:hover .project-more-btn {
+  color: var(--text-muted);
+}
+
+.app-viewport .project-more-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-panel-hover);
+}
+
+.app-viewport .projects-empty,
+.app-viewport .projects-loading {
+  min-height: 116px;
+  padding: 22px 10px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: 13px;
+  background-color: rgba(194, 59, 59, 0.035);
+}
+
+.app-viewport .projects-empty-icon {
+  width: 34px;
+  height: 34px;
+  opacity: 0.84;
+}
+
+.app-viewport .projects-empty-title {
+  font-size: 13px;
+}
+
+.app-viewport .projects-empty-sub {
+  font-size: 11px;
+}
+
+.app-viewport .projects-selectbar {
+  padding: 1px 1px 9px;
+}
+
+.app-viewport .selectbar-btn {
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 9px;
+  border-color: var(--border-subtle);
+  font-size: 11px;
+}
+
+.app-viewport .select-check {
+  width: 22px;
+  height: 22px;
+}
+
+.app-viewport .dashboard-container :focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

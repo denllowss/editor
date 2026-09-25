@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 424 424" width="424" height="424">
   <defs>
     <style>
-      .grid-sub { stroke: #22c55e; stroke-opacity: 0.18; stroke-width: 0.8; }
-      .grid-major { stroke: #22c55e; stroke-opacity: 0.48; stroke-width: 1.2; }
-      .grid-box { fill: none; stroke: #22c55e; stroke-opacity: 0.48; stroke-width: 1.2; }
-      .grid-dot { fill: #22c55e; fill-opacity: 0.65; }
-      .grid-cross { stroke: #22c55e; stroke-width: 1.5; stroke-linecap: square; }
+      .grid-sub { stroke: #c23b3b; stroke-opacity: 0.18; stroke-width: 0.8; }
+      .grid-major { stroke: #c23b3b; stroke-opacity: 0.48; stroke-width: 1.2; }
+      .grid-box { fill: none; stroke: #c23b3b; stroke-opacity: 0.48; stroke-width: 1.2; }
+      .grid-dot { fill: #c23b3b; fill-opacity: 0.65; }
+      .grid-cross { stroke: #c23b3b; stroke-width: 1.5; stroke-linecap: square; }
     </style>
   </defs>
 

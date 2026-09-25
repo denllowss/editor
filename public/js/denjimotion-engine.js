@@ -619,9 +619,40 @@
         }
         case 'polygon': {
           const sides = Math.max(3, parseInt(shapeProps.sides, 10) || 6);
+          const raw = [];
           for (let i = 0; i < sides; i++) {
             const a = -Math.PI / 2 + (i / sides) * Math.PI * 2;
-            pts.push({ x: Math.cos(a) * rx, y: Math.sin(a) * ry });
+            raw.push({ x: Math.cos(a) * rx, y: Math.sin(a) * ry });
+          }
+
+          let roundness = Number(shapeProps.roundness);
+          if (!Number.isFinite(roundness) || roundness <= 0) {
+            pts.push(...raw);
+            break;
+          }
+
+          const requested = roundness * scaleR;
+          for (let i = 0; i < raw.length; i++) {
+            const corner = raw[i];
+            const prev = raw[(i + raw.length - 1) % raw.length];
+            const next = raw[(i + 1) % raw.length];
+            const prevLen = Math.hypot(prev.x - corner.x, prev.y - corner.y) || 1;
+            const nextLen = Math.hypot(next.x - corner.x, next.y - corner.y) || 1;
+            const distance = Math.min(requested, prevLen * 0.46, nextLen * 0.46);
+            const prevUnit = { x: (prev.x - corner.x) / prevLen, y: (prev.y - corner.y) / prevLen };
+            const nextUnit = { x: (next.x - corner.x) / nextLen, y: (next.y - corner.y) / nextLen };
+            const start = { x: corner.x + prevUnit.x * distance, y: corner.y + prevUnit.y * distance };
+            const end = { x: corner.x + nextUnit.x * distance, y: corner.y + nextUnit.y * distance };
+
+            pts.push(start);
+            for (let k = 1; k <= 5; k++) {
+              const t = k / 5;
+              const inv = 1 - t;
+              pts.push({
+                x: inv * inv * start.x + 2 * inv * t * corner.x + t * t * end.x,
+                y: inv * inv * start.y + 2 * inv * t * corner.y + t * t * end.y
+              });
+            }
           }
           break;
         }

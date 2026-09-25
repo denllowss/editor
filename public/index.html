@@ -4,19 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Denji Motion</title>
-  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg?v=logo-center">
   
   <script>
-    /* Mode tema pra-render: cegah kedip (selaras setAppTheme di js/main.js) */
-    try { if (window.localStorage && (localStorage.getItem('denjimotion_theme') || localStorage.getItem('fishtool_theme')) === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (_) {}
+    /* Tema pra-render: cegah kedip untuk mode dan warna (selaras main.js). */
+    try {
+      if (window.localStorage && (localStorage.getItem('denjimotion_theme') || localStorage.getItem('fishtool_theme')) === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+      const initialColorTheme = localStorage.getItem('denjimotion_color_theme') || localStorage.getItem('fishtool_color_theme');
+      if (initialColorTheme === 'cyber-cyan' || initialColorTheme === 'amber-terminal') {
+        document.documentElement.setAttribute('data-color-theme', initialColorTheme);
+      }
+      const initialCustomColor = localStorage.getItem('denjimotion_custom_color') || localStorage.getItem('fishtool_custom_color') || initialColorTheme;
+      if (initialColorTheme === 'custom' && /^#(?:[0-9a-f]{3}){1,2}$/i.test(initialCustomColor || '')) {
+        document.documentElement.setAttribute('data-color-theme', 'custom');
+        document.documentElement.style.setProperty('--custom-theme-color', initialCustomColor);
+      }
+    } catch (_) {}
   </script>
   <!-- Separated CSS: Theme (Colors & Variables, Cal Sans Font), Layout, and Modular Modal -->
-  <link rel="stylesheet" href="css/theme.css">
-  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/theme.css?v=0.5.15-theme">
+  <link rel="stylesheet" href="css/layout.css?v=logo-center">
   <link rel="stylesheet" href="css/modal.css">
   <link rel="stylesheet" href="css/context-menu.css">
   <link rel="stylesheet" href="css/safari.css">
-  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/dashboard.css?v=0.5.15-theme">
   <link rel="stylesheet" href="css/responsive.css">
   <script>
     if (!window.DEBUG && !new URLSearchParams(window.location.search).has('debug') && localStorage.getItem('FISH_DEBUG') !== 'true') {
@@ -68,7 +81,7 @@
       <!-- Icon Frame with Object Corner Handles -->
       <div class="icon-build-frame">
         <!-- Enlarged App Icon (Clean & Unobstructed) -->
-        <img src="assets/icon.svg" class="grid-center-icon" alt="Denji Motion Logo" draggable="false" />
+        <img src="assets/icon.svg?v=logo-center" class="grid-center-icon" alt="Denji Motion Logo" draggable="false" />
 
         <!-- Snug Vector Handles Asset -->
         <img src="assets/handles.svg" class="object-handles-svg" alt="" draggable="false" />
@@ -77,6 +90,19 @@
 
     <!-- Dashboard Container (Bottom Half on Mobile, Responsive on Tablet/Fold/Web) -->
     <section class="dashboard-container">
+
+      <!-- Compact workspace overview: visual-only, actions below keep their original wiring -->
+      <div class="dashboard-intro" aria-label="Workspace overview">
+        <div class="dashboard-intro-copy">
+          <span class="dashboard-kicker">Your workspace</span>
+          <h2>Start creating</h2>
+          <p>Bring your next idea to life, one frame at a time.</p>
+        </div>
+        <div class="dashboard-status" aria-label="Local workspace">
+          <span class="dashboard-status-dot" aria-hidden="true"></span>
+          <span>Local</span>
+        </div>
+      </div>
 
       <!-- CapCut-style create tiles (modal triggers unchanged) -->
       <div class="action-buttons-row cc-create-row">
@@ -431,6 +457,7 @@
   <!-- ==========================================================================
        MODULAR POP-UP: APP SETTINGS MODAL (Setting Utama)
        - Mode tampilan: Dark / Light (tersimpan denjimotion_theme, berlaku dasbor + editor)
+       - Warna tema: Maroon / Cyan / Amber / Custom (tersimpan denjimotion_color_theme)
        - Tampilan Editor: gaya layout (pindahan dari modal Composition editor)
        ========================================================================== -->
   <div class="modal-backdrop" id="modal-app-settings" role="dialog" aria-modal="true" aria-label="App Settings Dialog">
@@ -465,7 +492,38 @@
           </div>
         </div>
 
-        <!-- 2. Tampilan Editor (pindahan dari editor; ponsel disembunyikan via CSS) -->
+        <!-- 2. Warna Tema -->
+        <div class="modal-form-group" id="cat-settings-color-theme">
+          <label class="modal-label">WARNA TEMA</label>
+          <div class="theme-color-grid" id="settings-color-theme-grid">
+            <button type="button" class="theme-color-btn is-selected" data-color-theme-val="maroon" title="Maroon Red" onclick="setAppColorTheme('maroon')">
+              <span class="theme-color-dot theme-color-dot-maroon" aria-hidden="true"></span>
+              <span>Maroon</span>
+            </button>
+            <button type="button" class="theme-color-btn" data-color-theme-val="cyber-cyan" title="Cyber Cyan" onclick="setAppColorTheme('cyber-cyan')">
+              <span class="theme-color-dot theme-color-dot-cyan" aria-hidden="true"></span>
+              <span>Cyan</span>
+            </button>
+            <button type="button" class="theme-color-btn" data-color-theme-val="amber-terminal" title="Amber Terminal" onclick="setAppColorTheme('amber-terminal')">
+              <span class="theme-color-dot theme-color-dot-amber" aria-hidden="true"></span>
+              <span>Amber</span>
+            </button>
+            <button type="button" class="theme-color-btn" data-color-theme-val="custom" title="Custom Color" onclick="setAppColorTheme('custom')">
+              <span class="theme-color-dot theme-color-dot-custom" id="settings-custom-color-dot" aria-hidden="true"></span>
+              <span>Custom</span>
+            </button>
+          </div>
+          <div class="custom-theme-color-editor">
+            <label class="custom-theme-color-label" for="settings-custom-color">WARNA BEBAS</label>
+            <div class="custom-theme-color-inputs">
+              <input type="color" id="settings-custom-color" value="#c23b3b" aria-label="Pilih warna tema bebas" oninput="setAppCustomColorTheme(this.value)">
+              <input type="text" id="settings-custom-color-hex" value="#C23B3B" maxlength="7" inputmode="text" spellcheck="false" aria-label="Kode warna tema hex" onchange="setAppCustomColorFromInput(this.value)">
+            </div>
+          </div>
+          <p class="layout-style-note">Pilih warna bebas. Sistem otomatis menyesuaikan aksen, panel, teks, border, dan grid agar tetap serasi.</p>
+        </div>
+
+        <!-- 3. Tampilan Editor (pindahan dari editor; ponsel disembunyikan via CSS) -->
         <div class="modal-form-group" id="cat-settings-layout">
           <label class="modal-label" for="dropdown-layout-style">TAMPILAN EDITOR</label>
           <div class="custom-dropdown" id="dropdown-layout-style" data-value="after-effects">
@@ -1266,6 +1324,6 @@
   <script src="js/context-menu.js?v=0.5.14"></script>
   <script src="js/custom-aspect.js"></script>
   <script src="js/layout-styles.js"></script>
-  <script src="js/main.js?v=0.5.14"></script>
+  <script src="js/main.js?v=0.5.15-theme"></script>
 </body>
 </html>

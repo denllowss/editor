@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initProjectsFetcher();
   initDashboardSelection();
   initWelcomeModal();
+  applyAppColorTheme();
   syncAppThemeUI();
 
   // Purge all non-essential caches when opening index.html (preserves projects and media)
@@ -376,8 +377,8 @@ function projectThumbHtml(project, name) {
   const arLabel = m ? `${m[1]}:${m[2]}` : '16:9';
   const arCss = m ? `${m[1]} / ${m[2]}` : '16 / 9';
   const palettes = [
-    ['#2a3a1e', '#10160b'], ['#1e3a2e', '#0b1611'],
-    ['#3a341e', '#16140b'], ['#22331f', '#0d1109']
+    ['#5a252c', '#1b1012'], ['#4b2a3b', '#160f15'],
+    ['#67412a', '#21140f'], ['#32264a', '#110e18']
   ];
   const nm = String(name || '?');
   let hsh = 0;
@@ -1535,11 +1536,31 @@ function toggleQrisDisplay() {
 }
 
 /* ==========================================================================
-   Setting Utama: Mode Tampilan Dark / Light (tersimpan denjimotion_theme,
-   berlaku dasbor + editor via snippet pra-render di <head>)
+   Setting Utama: mode tampilan + warna tema.
+   Mode disimpan di denjimotion_theme; warna di denjimotion_color_theme.
+   Keduanya berlaku di dasbor dan editor via snippet pra-render di <head>.
    ========================================================================== */
 const APP_THEME_KEY = 'denjimotion_theme';
 const APP_THEME_KEY_LEGACY = 'fishtool_theme'; // fallback baca sekali (era FishTool)
+const APP_COLOR_THEME_KEY = 'denjimotion_color_theme';
+const APP_COLOR_THEME_KEY_LEGACY = 'fishtool_color_theme';
+const APP_CUSTOM_COLOR_KEY = 'denjimotion_custom_color';
+const APP_CUSTOM_COLOR_KEY_LEGACY = 'fishtool_custom_color';
+const APP_COLOR_THEMES = new Set(['maroon', 'cyber-cyan', 'amber-terminal', 'custom']);
+
+const CUSTOM_THEME_VARIABLES = [
+  '--custom-theme-color',
+  '--color-primary', '--color-primary-hover', '--color-primary-active', '--color-accent', '--color-accent-subtle',
+  '--bg-canvas', '--bg-dashboard', '--bg-panel', '--bg-panel-hover', '--bg-panel-active', '--bg-panel-inner', '--bg-panel-inner-hover',
+  '--badge-prealpha-bg', '--badge-prealpha-text', '--badge-count-bg', '--badge-count-text',
+  '--track-video', '--track-video-dark', '--track-image', '--track-image-dark', '--track-audio', '--track-audio-dark',
+  '--track-adj', '--track-adj-dark', '--track-color', '--track-color-dark', '--track-text', '--track-text-dark',
+  '--grid-line-thin', '--grid-line-major', '--grid-crosshair', '--grid-dot',
+  '--text-primary', '--text-secondary', '--text-muted', '--text-dim',
+  '--border-panel', '--border-subtle', '--border-focus',
+  '--kf-default-bg', '--kf-default-border', '--kf-active-bg', '--kf-active-border',
+  '--kf-selected-bg', '--kf-selected-border', '--kf-selected-dot'
+];
 
 function getAppTheme() {
   try {
@@ -1550,11 +1571,183 @@ function getAppTheme() {
   }
 }
 
+function normalizeHexColor(value) {
+  const raw = String(value || '').trim().replace(/^#/, '');
+  if (/^[0-9a-f]{3}$/i.test(raw)) {
+    return '#' + raw.split('').map(ch => ch + ch).join('').toLowerCase();
+  }
+  if (/^[0-9a-f]{6}$/i.test(raw)) return '#' + raw.toLowerCase();
+  return null;
+}
+
+function getAppCustomColor() {
+  try {
+    if (!window.localStorage) return '#c23b3b';
+    const customStored = localStorage.getItem(APP_CUSTOM_COLOR_KEY) || localStorage.getItem(APP_CUSTOM_COLOR_KEY_LEGACY);
+    const themeStored = localStorage.getItem(APP_COLOR_THEME_KEY) || localStorage.getItem(APP_COLOR_THEME_KEY_LEGACY);
+    return normalizeHexColor(customStored) || normalizeHexColor(themeStored) || '#c23b3b';
+  } catch (_) {
+    return '#c23b3b';
+  }
+}
+
+function getAppColorTheme() {
+  try {
+    const stored = window.localStorage
+      ? (localStorage.getItem(APP_COLOR_THEME_KEY) || localStorage.getItem(APP_COLOR_THEME_KEY_LEGACY))
+      : null;
+    if (stored === 'custom' || normalizeHexColor(stored)) return 'custom';
+    return APP_COLOR_THEMES.has(stored) ? stored : 'maroon';
+  } catch (_) {
+    return 'maroon';
+  }
+}
+
+function clampThemeValue(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function rgbToHslColor(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const lightness = (max + min) / 2;
+  let hue = 0;
+  let saturation = 0;
+  const delta = max - min;
+
+  if (delta !== 0) {
+    saturation = delta / (1 - Math.abs(2 * lightness - 1));
+    if (max === r) hue = 60 * (((g - b) / delta) % 6);
+    else if (max === g) hue = 60 * ((b - r) / delta + 2);
+    else hue = 60 * ((r - g) / delta + 4);
+  }
+  if (hue < 0) hue += 360;
+  return { h: hue, s: saturation * 100, l: lightness * 100 };
+}
+
+function hslThemeColor(h, s, l) {
+  return `hsl(${Math.round(h)}, ${Math.round(s)}%, ${Math.round(l)}%)`;
+}
+
+function rgbFromHexColor(hex) {
+  const normalized = normalizeHexColor(hex) || '#c23b3b';
+  return {
+    r: parseInt(normalized.slice(1, 3), 16),
+    g: parseInt(normalized.slice(3, 5), 16),
+    b: parseInt(normalized.slice(5, 7), 16)
+  };
+}
+
+function getCustomThemeVariables(hex, mode) {
+  const rgb = rgbFromHexColor(hex);
+  const hsl = rgbToHslColor(rgb.r, rgb.g, rgb.b);
+  const isLight = mode === 'light';
+  const accentS = clampThemeValue(hsl.s, 35, 92);
+  const accentL = isLight
+    ? clampThemeValue(hsl.l, 28, 48)
+    : clampThemeValue(hsl.l, 48, 70);
+  const surfaceS = clampThemeValue(Math.max(hsl.s * 0.34, 8), 8, 32);
+  const alpha = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, `;
+  const primary = hslThemeColor(hsl.h, accentS, accentL);
+  const hover = hslThemeColor(hsl.h, accentS, clampThemeValue(accentL + (isLight ? 10 : 12), 0, 92));
+  const active = hslThemeColor(hsl.h, accentS, clampThemeValue(accentL - (isLight ? 10 : 14), 8, 85));
+  const subtle = hslThemeColor(hsl.h, clampThemeValue(accentS * 0.72, 20, 78), isLight ? 82 : 28);
+  const surface = (lightness) => hslThemeColor(hsl.h, surfaceS, lightness);
+
+  const vars = {
+    '--custom-theme-color': normalizeHexColor(hex) || '#c23b3b',
+    '--color-primary': primary,
+    '--color-primary-hover': hover,
+    '--color-primary-active': active,
+    '--color-accent': active,
+    '--color-accent-subtle': subtle,
+    '--bg-canvas': surface(isLight ? 94 : 5),
+    '--bg-dashboard': surface(isLight ? 98 : 8),
+    '--bg-panel': isLight ? '#ffffff' : surface(13),
+    '--bg-panel-hover': surface(isLight ? 91 : 17),
+    '--bg-panel-active': surface(isLight ? 87 : 10),
+    '--bg-panel-inner': surface(isLight ? 97 : 9),
+    '--bg-panel-inner-hover': surface(isLight ? 91 : 17),
+    '--badge-prealpha-bg': surface(isLight ? 91 : 17),
+    '--badge-prealpha-text': primary,
+    '--badge-count-bg': primary,
+    '--badge-count-text': isLight ? '#ffffff' : surface(5),
+    '--track-video': primary,
+    '--track-video-dark': subtle,
+    '--track-image': hover,
+    '--track-image-dark': subtle,
+    '--track-audio': hslThemeColor(hsl.h, clampThemeValue(accentS - 8, 25, 90), isLight ? 44 : 68),
+    '--track-audio-dark': hslThemeColor(hsl.h, clampThemeValue(accentS - 15, 18, 75), isLight ? 72 : 35),
+    '--track-adj': active,
+    '--track-adj-dark': surface(isLight ? 78 : 23),
+    '--track-color': hover,
+    '--track-color-dark': surface(isLight ? 80 : 26),
+    '--track-text': primary,
+    '--track-text-dark': subtle,
+    '--grid-line-thin': `${alpha}0.18)`,
+    '--grid-line-major': `${alpha}0.45)`,
+    '--grid-crosshair': hover,
+    '--grid-dot': `${alpha}0.55)`,
+    '--text-primary': primary,
+    '--text-secondary': hover,
+    '--text-muted': isLight ? surface(38) : surface(64),
+    '--text-dim': isLight ? surface(58) : surface(38),
+    '--border-panel': surface(isLight ? 80 : 25),
+    '--border-subtle': `${alpha}0.22)`,
+    '--border-focus': primary,
+    '--kf-default-bg': surface(isLight ? 98 : 8),
+    '--kf-default-border': isLight ? surface(38) : surface(64),
+    '--kf-active-bg': primary,
+    '--kf-active-border': isLight ? surface(24) : surface(5),
+    '--kf-selected-bg': '#ffffff',
+    '--kf-selected-border': isLight ? surface(24) : surface(5),
+    '--kf-selected-dot': primary
+  };
+  return vars;
+}
+
+function clearCustomThemeVariables() {
+  const root = document.documentElement;
+  CUSTOM_THEME_VARIABLES.forEach((name) => root.style.removeProperty(name));
+}
+
+function applyAppColorTheme() {
+  const root = document.documentElement;
+  const theme = getAppColorTheme();
+  clearCustomThemeVariables();
+
+  if (theme === 'maroon') {
+    root.removeAttribute('data-color-theme');
+    return;
+  }
+  if (theme === 'custom') {
+    root.setAttribute('data-color-theme', 'custom');
+    const customColor = getAppCustomColor();
+    Object.entries(getCustomThemeVariables(customColor, getAppTheme())).forEach(([name, value]) => {
+      root.style.setProperty(name, value);
+    });
+    return;
+  }
+  root.setAttribute('data-color-theme', theme);
+}
+
 function syncAppThemeUI() {
   const mode = getAppTheme();
+  const colorTheme = getAppColorTheme();
+  const customColor = getAppCustomColor();
   document.querySelectorAll('#settings-theme-grid .theme-mode-btn').forEach((btn) => {
     btn.classList.toggle('is-selected', btn.dataset.themeVal === mode);
   });
+  document.querySelectorAll('#settings-color-theme-grid .theme-color-btn').forEach((btn) => {
+    btn.classList.toggle('is-selected', btn.dataset.colorThemeVal === colorTheme);
+  });
+  const colorInput = document.getElementById('settings-custom-color');
+  if (colorInput) colorInput.value = customColor;
+  const hexInput = document.getElementById('settings-custom-color-hex');
+  if (hexInput) hexInput.value = customColor.toUpperCase();
+  const customDot = document.getElementById('settings-custom-color-dot');
+  if (customDot) customDot.style.backgroundColor = customColor;
 }
 
 function setAppTheme(mode) {
@@ -1567,7 +1760,35 @@ function setAppTheme(mode) {
   } else {
     document.documentElement.removeAttribute('data-theme');
   }
+  applyAppColorTheme();
   syncAppThemeUI();
+}
+
+function setAppColorTheme(theme) {
+  const next = APP_COLOR_THEMES.has(theme) ? theme : 'maroon';
+  try {
+    if (window.localStorage) localStorage.setItem(APP_COLOR_THEME_KEY, next);
+  } catch (_) {}
+  applyAppColorTheme();
+  syncAppThemeUI();
+}
+
+function setAppCustomColorTheme(value) {
+  const normalized = normalizeHexColor(value);
+  if (!normalized) return false;
+  try {
+    if (window.localStorage) {
+      localStorage.setItem(APP_CUSTOM_COLOR_KEY, normalized);
+      localStorage.setItem(APP_COLOR_THEME_KEY, 'custom');
+    }
+  } catch (_) {}
+  applyAppColorTheme();
+  syncAppThemeUI();
+  return true;
+}
+
+function setAppCustomColorFromInput(value) {
+  if (!setAppCustomColorTheme(value)) syncAppThemeUI();
 }
 
 function openAppSettingsModal() {
@@ -1584,6 +1805,11 @@ function openAppSettingsModal() {
 // Global exposes for HTML onclick handlers & module interop
 window.setAppTheme = setAppTheme;
 window.getAppTheme = getAppTheme;
+window.setAppColorTheme = setAppColorTheme;
+window.getAppColorTheme = getAppColorTheme;
+window.setAppCustomColorTheme = setAppCustomColorTheme;
+window.setAppCustomColorFromInput = setAppCustomColorFromInput;
+window.getAppCustomColor = getAppCustomColor;
 window.openAppSettingsModal = openAppSettingsModal;
 window.openDeleteModal = openDeleteModal;
 window.confirmDeleteProjectAction = confirmDeleteProjectAction;

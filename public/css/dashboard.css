@@ -3,7 +3,7 @@
    --------------------------------------------------------------------------
    Dimuat SETELAH responsive.css di index.html. Hanya menata menu awal:
    ubin "create", finder (cari + urut), dan kartu project bergambar.
-   Semua warna memakai token theme.css (Matcha) — warna & gaya tetap.
+   Semua warna memakai token theme.css agar mengikuti warna tema aktif.
    Perilaku JS (navigasi, swipe, context-menu, multi-select) tak berubah.
    ========================================================================== */
 
@@ -29,7 +29,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(152, 206, 123, 0.14);
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
   color: var(--color-primary);
   transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
@@ -63,13 +63,13 @@
   transition: color 0.15s ease;
 }
 
-/* Ubin primer (New Project): hijau matcha solid */
+/* Ubin primer (New Project): warna tema aktif */
 .action-btn.cc-create-primary {
   background-color: var(--color-primary);
 }
 
 .action-btn.cc-create-primary .cc-tile-icon {
-  background: rgba(13, 17, 9, 0.16);
+  background: color-mix(in srgb, var(--bg-canvas) 16%, transparent);
   color: var(--bg-canvas);
 }
 
@@ -105,7 +105,7 @@
 
 /* Ubin sekunder: ikut hover invert bawaan + sub ikut gelap */
 .action-btn.cc-create-tile:not(.cc-create-primary):hover .cc-tile-icon {
-  background: rgba(13, 17, 9, 0.16);
+  background: color-mix(in srgb, var(--bg-canvas) 16%, transparent);
   color: var(--bg-canvas);
 }
 
@@ -232,7 +232,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #10160b;
+  background-color: var(--bg-canvas);
 }
 
 .project-thumb-img {
@@ -326,7 +326,7 @@
 }
 
 .project-more-btn:hover {
-  background: rgba(255, 255, 255, 0.09);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--bg-panel-inner));
   color: var(--text-primary);
 }
 
@@ -341,7 +341,7 @@
 }
 
 .project-item:hover .project-more-btn:hover {
-  background: rgba(13, 17, 9, 0.14);
+  background: color-mix(in srgb, var(--bg-canvas) 14%, transparent);
   color: var(--bg-canvas);
 }
 
@@ -449,6 +449,110 @@
 .theme-mode-btn.is-selected {
   background-color: var(--bg-panel-hover);
   color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* === Setting Utama: Warna Tema === */
+.theme-color-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+  gap: 8px;
+}
+
+.theme-color-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 8px 6px;
+  border-radius: 10px;
+  background-color: var(--bg-panel-inner);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  font-family: var(--font-brand);
+  font-size: 12px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+}
+
+.theme-color-btn:hover {
+  background-color: var(--bg-panel-inner-hover);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.theme-color-btn.is-selected {
+  background-color: var(--bg-panel-hover);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.theme-color-dot {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  box-sizing: border-box;
+}
+
+.theme-color-dot-maroon { background: #c23b3b; }
+.theme-color-dot-cyan { background: #00e5ff; }
+.theme-color-dot-amber { background: #ffaa00; }
+.theme-color-dot-custom { background: var(--custom-theme-color, #c23b3b); }
+
+.custom-theme-color-editor {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--bg-panel-inner);
+}
+
+.custom-theme-color-label {
+  color: var(--text-muted);
+  font-family: var(--font-brand);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.custom-theme-color-inputs {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.custom-theme-color-inputs input[type="color"] {
+  width: 42px;
+  height: 34px;
+  padding: 3px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
+  background: var(--bg-panel);
+  cursor: pointer;
+}
+
+.custom-theme-color-inputs input[type="text"] {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.custom-theme-color-inputs input:focus {
+  outline: none;
   border-color: var(--color-primary);
 }
 

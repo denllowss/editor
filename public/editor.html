@@ -4,14 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Denji Motion - Editor</title>
-  <link rel="icon" type="image/svg+xml" href="assets/icon.svg">
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg?v=logo-center">
   
   <script>
-    /* Mode tema pra-render: cegah kedip (selaras setAppTheme di js/main.js) */
-    try { if (window.localStorage && (localStorage.getItem('denjimotion_theme') || localStorage.getItem('fishtool_theme')) === 'light') document.documentElement.setAttribute('data-theme', 'light'); } catch (_) {}
+    /* Tema pra-render: cegah kedip untuk mode dan warna (selaras main.js). */
+    try {
+      if (window.localStorage && (localStorage.getItem('denjimotion_theme') || localStorage.getItem('fishtool_theme')) === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+      const initialColorTheme = localStorage.getItem('denjimotion_color_theme') || localStorage.getItem('fishtool_color_theme');
+      if (initialColorTheme === 'cyber-cyan' || initialColorTheme === 'amber-terminal') {
+        document.documentElement.setAttribute('data-color-theme', initialColorTheme);
+      }
+      const initialCustomColor = localStorage.getItem('denjimotion_custom_color') || localStorage.getItem('fishtool_custom_color') || initialColorTheme;
+      if (initialColorTheme === 'custom' && /^#(?:[0-9a-f]{3}){1,2}$/i.test(initialCustomColor || '')) {
+        document.documentElement.setAttribute('data-color-theme', 'custom');
+        document.documentElement.style.setProperty('--custom-theme-color', initialCustomColor);
+      }
+    } catch (_) {}
   </script>
   <!-- CSS: Theme (Colors & Variables, Cal Sans Font), Editor Layout, and Modular Modal / Popover / Drawer / Switch -->
-  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/theme.css?v=0.5.15-theme">
   <link rel="stylesheet" href="css/editor.css">
   <link rel="stylesheet" href="css/modal.css">
   <link rel="stylesheet" href="css/popover.css">
@@ -299,7 +312,7 @@
 
             <!-- 7. Fish Icon (Denji Motion Lazy-Loaded Popover) -->
             <button type="button" class="ctrl-btn ctrl-btn-fish" id="editor-btn-denjimotion-trigger" title="Denji Motion Panel" aria-label="Denji Motion Panel">
-              <img src="assets/icon.svg" alt="Denji Motion" width="22" height="22">
+              <img src="assets/icon.svg?v=logo-center" alt="Denji Motion" width="22" height="22">
             </button>
           </div>
         </section>
@@ -4224,7 +4237,7 @@
   <script src="effects/circle.js"></script>
   <script src="effects/motion_blur.js"></script>
   <script src="js/color-picker.js"></script>
-  <script src="js/denjimotion-engine.js?v=6"></script>
+  <script src="js/denjimotion-engine.js?v=7"></script>
   <script src="js/denjimotion-adapter.js?v=4"></script>
   <script src="js/fish-audio-engine.js"></script>
   <script src="js/frame-extractor.js"></script>
@@ -4243,4 +4256,6 @@
   <script src="js/denjimotion-generators3d.js"></script>
   <script src="js/denjimotion-controller.js"></script>
 </body>
+</html>
+body>
 </html>
