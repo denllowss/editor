@@ -16,6 +16,8 @@ const editorHtml = fs.readFileSync(path.join(PUBLIC, 'editor.html'), 'utf8');
 const themeCss = fs.readFileSync(path.join(PUBLIC, 'css', 'theme.css'), 'utf8');
 const dashCss = fs.readFileSync(path.join(PUBLIC, 'css', 'dashboard.css'), 'utf8');
 const mainCode = fs.readFileSync(path.join(PUBLIC, 'js', 'main.js'), 'utf8');
+const adapterCode = fs.readFileSync(path.join(PUBLIC, 'js', 'denjimotion-adapter.js'), 'utf8');
+const panelSettingsCode = fs.readFileSync(path.join(PUBLIC, 'Extension', 'js', 'modules', 'settings.js'), 'utf8');
 
 let passed = 0;
 let failed = 0;
@@ -107,6 +109,17 @@ console.log('\n[4] Logika tema main.js');
   ok(mainCode.includes("removeAttribute('data-color-theme')"), 'Maroon menghapus atribut warna');
   ok(/setAttribute\('data-theme', 'light'\)/.test(mainCode), 'terapkan atribut light');
   ok(/removeAttribute\('data-theme'\)/.test(mainCode), 'dark = atribut dicabut (bawaan)');
+}
+
+// ----------------------------------------------------------
+console.log('\n[5] Denji Motion panel mengikuti tema host');
+{
+  ok(adapterCode.includes("localStorage.getItem('denjimotion_theme')"), 'adapter membaca mode tema host');
+  ok(adapterCode.includes("localStorage.getItem('denjimotion_color_theme')"), 'adapter membaca warna tema host');
+  ok(adapterCode.includes('data-parent-theme'), 'adapter meneruskan mode ke panel');
+  ok(adapterCode.includes('--bg-canvas') && adapterCode.includes('--color-primary'),
+    'adapter memetakan token GUI ke token panel');
+  ok(panelSettingsCode.includes('data-parent-theme'), 'settings panel mempertahankan mode host');
 }
 
 console.log(`\nHasil: ${passed} lulus, ${failed} gagal\n`);

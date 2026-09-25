@@ -77,7 +77,12 @@ SettingsModule.prototype.applySettings = function (skipTabRestore) {
         this.restoreLastTab();
     }
 
-    var theme = this.settings.theme || 'dark';
+    // When this panel is embedded in Denji Motion Studio, the host theme is
+    // authoritative. Standalone extension mode keeps its own saved setting.
+    var hostTheme = document.documentElement.getAttribute('data-parent-theme');
+    var theme = (hostTheme === 'light' || hostTheme === 'dark')
+        ? hostTheme
+        : (this.settings.theme || 'dark');
     var style = this.settings.uiStyle || 'capsule';
     var anim = this.settings.animEnabled !== false;
     var snap = this.settings.snapScroll === true;

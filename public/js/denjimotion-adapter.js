@@ -1712,13 +1712,13 @@ window.DenjiMotionAdapter = (function () {
         .style-material-you .tab-btn.active,
         .style-simple .tab-btn.active {
           background-color: var(--accent, #c23b3b) !important;
-          color: #000000 !important;
+          color: var(--accent-fg, #000000) !important;
         }
         .tab-btn.active .tab-label,
         .tab-btn.active .material-icons,
         .style-material-you .tab-btn.active .tab-label,
         .style-material-you .tab-btn.active .material-icons {
-          color: #000000 !important;
+          color: var(--accent-fg, #000000) !important;
           background: transparent !important;
         }
         .card {
@@ -1779,7 +1779,7 @@ window.DenjiMotionAdapter = (function () {
         .style-simple .tool-btn:hover,
         .style-material-you .tool-btn:hover {
           background-color: var(--accent, #c23b3b) !important;
-          color: #000000 !important;
+          color: var(--accent-fg, #000000) !important;
           border-color: var(--accent, #c23b3b) !important;
         }
         .tool-btn:hover .tool-label,
@@ -1788,20 +1788,20 @@ window.DenjiMotionAdapter = (function () {
         .tool-btn:hover div > span,
         .style-simple .tool-btn:hover *,
         .style-material-you .tool-btn:hover * {
-          color: #000000 !important;
+          color: var(--accent-fg, #000000) !important;
         }
         .tool-btn--active,
         .style-simple .tool-btn--active,
         .style-material-you .tool-btn--active {
           background-color: var(--accent, #c23b3b) !important;
-          color: #000000 !important;
+          color: var(--accent-fg, #000000) !important;
           border-color: var(--accent, #c23b3b) !important;
         }
         .tool-btn--active .tool-label,
         .tool-btn--active .material-icons,
         .tool-btn--active span,
         .tool-btn--active div > span {
-          color: #000000 !important;
+          color: var(--accent-fg, #000000) !important;
         }
         /* SHKE enabled on web (Node.js port) */
         .anchor-cell {
@@ -1840,7 +1840,7 @@ window.DenjiMotionAdapter = (function () {
         .custom-select-option:hover,
         .custom-select-option.selected {
           background-color: var(--accent, #c23b3b) !important;
-          color: #000000 !important;
+          color: var(--accent-fg, #000000) !important;
         }
         button, input, select, textarea {
           color: var(--accent, #c23b3b) !important;
@@ -1887,7 +1887,7 @@ window.DenjiMotionAdapter = (function () {
         }
         .custom-modal-footer .primary-btn {
           background: var(--accent, #c23b3b) !important;
-          color: #000000 !important;
+          color: var(--accent-fg, #000000) !important;
           border: 1px solid var(--accent, #c23b3b) !important;
         }
         .custom-modal-footer .secondary-btn {
@@ -1901,7 +1901,9 @@ window.DenjiMotionAdapter = (function () {
       cachedTemplate = doc;
     }
 
-    // Hydrate latest saved settings into the document before returning HTML
+    // Hydrate the embedded panel from the host Denji Motion theme. The
+    // extension still works standalone, but when it is inside the editor the
+    // dashboard/editor theme is the single source of truth.
     let currentTheme = 'dark';
     let currentStyle = 'simple';
     let currentAnim = true;
@@ -1911,16 +1913,95 @@ window.DenjiMotionAdapter = (function () {
         const raw = db.getSyncSettings();
         const parsed = JSON.parse(raw);
         if (parsed && parsed.config) {
-          if (parsed.config.theme) currentTheme = parsed.config.theme;
           if (parsed.config.uiStyle) currentStyle = parsed.config.uiStyle;
           if (parsed.config.animEnabled !== undefined) currentAnim = parsed.config.animEnabled;
         }
       }
     } catch (e) {}
 
+    try {
+      const storedMode = window.localStorage
+        ? (localStorage.getItem('denjimotion_theme') || localStorage.getItem('fishtool_theme'))
+        : null;
+      currentTheme = storedMode === 'light' ? 'light' : 'dark';
+    } catch (e) {
+      currentTheme = 'dark';
+    }
+
+    let parentColorTheme = 'maroon';
+    let parentCustomColor = '#c23b3b';
+    try {
+      const storedColor = window.localStorage
+        ? (localStorage.getItem('denjimotion_color_theme') || localStorage.getItem('fishtool_color_theme'))
+        : null;
+      const storedCustom = window.localStorage
+        ? (localStorage.getItem('denjimotion_custom_color') || localStorage.getItem('fishtool_custom_color'))
+        : null;
+      if (storedColor === 'cyber-cyan' || storedColor === 'amber-terminal' || storedColor === 'custom') {
+        parentColorTheme = storedColor;
+      }
+      const candidate = String(storedCustom || (storedColor === 'custom' ? storedColor : '')).replace(/^#/, '');
+      if (/^[0-9a-f]{3}$/i.test(candidate)) {
+        parentCustomColor = '#' + candidate.split('').map(ch => ch + ch).join('').toLowerCase();
+      } else if (/^[0-9a-f]{6}$/i.test(candidate)) {
+        parentCustomColor = '#' + candidate.toLowerCase();
+      }
+    } catch (e) {}
+
+    const paletteHex = {
+      maroon: '#c23b3b',
+      'cyber-cyan': '#00e5ff',
+      'amber-terminal': '#ffaa00',
+      custom: parentCustomColor
+    };
+    const accentHex = paletteHex[parentColorTheme] || '#c23b3b';
+    const accentRgb = [
+      parseInt(accentHex.slice(1, 3), 16),
+      parseInt(accentHex.slice(3, 5), 16),
+      parseInt(accentHex.slice(5, 7), 16)
+    ];
+    const accentFg = (accentRgb[0] * 0.299 + accentRgb[1] * 0.587 + accentRgb[2] * 0.114) > 160
+      ? '#000000'
+      : '#ffffff';
+    const parentRoot = (typeof document !== 'undefined') ? document.documentElement : null;
+    const parentStyles = parentRoot && typeof getComputedStyle === 'function'
+      ? getComputedStyle(parentRoot)
+      : null;
+    const readParentToken = (name, fallback) => {
+      const value = parentStyles ? parentStyles.getPropertyValue(name).trim() : '';
+      return value || fallback;
+    };
+    const panelThemeVars = {
+      '--bg': readParentToken('--bg-canvas', '#0f0b0b'),
+      '--surface': readParentToken('--bg-panel', '#201313'),
+      '--surface2': readParentToken('--bg-panel-inner', '#170f0f'),
+      '--border': readParentToken('--border-panel', '#332121'),
+      '--border2': readParentToken('--border-subtle', 'rgba(194, 59, 59, 0.22)'),
+      '--accent': readParentToken('--color-primary', '#c23b3b'),
+      '--accent-h': readParentToken('--color-primary-hover', '#e05a5a'),
+      '--accent-rgb': accentRgb.join(', '),
+      '--accent-fg': accentFg,
+      '--danger': readParentToken('--color-danger', '#ef4444'),
+      '--success': readParentToken('--color-primary-hover', '#22c55e'),
+      '--text': readParentToken('--text-primary', '#c23b3b'),
+      '--text-dim': readParentToken('--text-muted', '#b39a9a'),
+      '--text-mut': readParentToken('--text-dim', '#6e4e4e')
+    };
+
     const docClone = cachedTemplate.cloneNode(true);
     docClone.documentElement.setAttribute('data-theme', currentTheme);
+    docClone.documentElement.setAttribute('data-parent-theme', currentTheme);
+    docClone.documentElement.setAttribute('data-color-theme', parentColorTheme);
     docClone.documentElement.setAttribute('data-anim', currentAnim ? 'on' : 'off');
+
+    // Map the host's theme tokens to the panel's token names after the
+    // extension stylesheet so every panel surface/control follows the GUI.
+    const parentThemeStyle = docClone.createElement('style');
+    parentThemeStyle.setAttribute('data-parent-theme-bridge', 'true');
+    parentThemeStyle.textContent = ':root {\n  color-scheme: ' + currentTheme + ' !important;\n' + Object.entries(panelThemeVars)
+      .map(([name, value]) => `  ${name}: ${value} !important;`)
+      .join('\n') + '\n}';
+    docClone.head.appendChild(parentThemeStyle);
     if (docClone.body) {
       docClone.body.classList.remove('style-material-you', 'style-simple');
       if (currentStyle === 'material') docClone.body.classList.add('style-material-you');
